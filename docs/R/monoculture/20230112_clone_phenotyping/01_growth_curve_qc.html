@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Shane Hogle">
+<meta name="dcterms.date" content="2024-10-08">
+
+<title>hambiYSKpleiotropy data analysis - Formatting growth curves</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="../../../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../../../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.html">3. Clones monoculture growth</a></li><li class="breadcrumb-item"><a href="../../../R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.html">i) Inspect and format growth curves</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../../">hambiYSKpleiotropy data analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">1. Community growth - Bacteria and ciliate densities</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../R/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Process and plot densities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">2. Community growth - amplicon composition</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../R/communities/amplicon/20240318_BTK_illumina_v3/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) 20240318_BTK_illumina_v3 / Data wrangling and QC</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../R/communities/amplicon/01_composition_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Analysis of community composition</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../R/communities/amplicon/02_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Machine learning the home environment</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">3. Clones monoculture growth</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">i) Inspect and format growth curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../R/monoculture/20230112_clone_phenotyping/02_growth_rate_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Estimate growth rates</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../R/monoculture/20230112_clone_phenotyping/03_auc_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) AUC and growth rate plots</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">2</span> Setup</a>
+  <ul class="collapse">
+  <li><a href="#load-required-packages" id="toc-load-required-packages" class="nav-link" data-scroll-target="#load-required-packages"><span class="header-section-number">2.1</span> Load required packages</a></li>
+  <li><a href="#global-variables" id="toc-global-variables" class="nav-link" data-scroll-target="#global-variables"><span class="header-section-number">2.2</span> Global variables</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions"><span class="header-section-number">2.3</span> Functions</a></li>
+  </ul></li>
+  <li><a href="#read-and-format-tables" id="toc-read-and-format-tables" class="nav-link" data-scroll-target="#read-and-format-tables"><span class="header-section-number">3</span> Read and format tables</a>
+  <ul class="collapse">
+  <li><a href="#raw-growth-curves" id="toc-raw-growth-curves" class="nav-link" data-scroll-target="#raw-growth-curves"><span class="header-section-number">3.1</span> Raw growth curves</a></li>
+  </ul></li>
+  <li><a href="#format-growth-curves" id="toc-format-growth-curves" class="nav-link" data-scroll-target="#format-growth-curves"><span class="header-section-number">4</span> Format growth curves</a>
+  <ul class="collapse">
+  <li><a href="#thinning" id="toc-thinning" class="nav-link" data-scroll-target="#thinning"><span class="header-section-number">4.1</span> Thinning</a></li>
+  <li><a href="#smoothing" id="toc-smoothing" class="nav-link" data-scroll-target="#smoothing"><span class="header-section-number">4.2</span> Smoothing</a></li>
+  </ul></li>
+  <li><a href="#inspect-growth-curves" id="toc-inspect-growth-curves" class="nav-link" data-scroll-target="#inspect-growth-curves"><span class="header-section-number">5</span> Inspect growth curves</a>
+  <ul class="collapse">
+  <li><a href="#bact-conditions" id="toc-bact-conditions" class="nav-link" data-scroll-target="#bact-conditions"><span class="header-section-number">5.1</span> Bact conditions</a>
+  <ul class="collapse">
+  <li><a href="#plate-1" id="toc-plate-1" class="nav-link" data-scroll-target="#plate-1"><span class="header-section-number">5.1.1</span> Plate 1</a></li>
+  <li><a href="#plate-2" id="toc-plate-2" class="nav-link" data-scroll-target="#plate-2"><span class="header-section-number">5.1.2</span> Plate 2</a></li>
+  <li><a href="#plate-3" id="toc-plate-3" class="nav-link" data-scroll-target="#plate-3"><span class="header-section-number">5.1.3</span> Plate 3</a></li>
+  <li><a href="#plate-4" id="toc-plate-4" class="nav-link" data-scroll-target="#plate-4"><span class="header-section-number">5.1.4</span> Plate 4</a></li>
+  <li><a href="#plate-5" id="toc-plate-5" class="nav-link" data-scroll-target="#plate-5"><span class="header-section-number">5.1.5</span> Plate 5</a></li>
+  <li><a href="#plate-6" id="toc-plate-6" class="nav-link" data-scroll-target="#plate-6"><span class="header-section-number">5.1.6</span> Plate 6</a></li>
+  <li><a href="#plate-7" id="toc-plate-7" class="nav-link" data-scroll-target="#plate-7"><span class="header-section-number">5.1.7</span> Plate 7</a></li>
+  <li><a href="#plate-8" id="toc-plate-8" class="nav-link" data-scroll-target="#plate-8"><span class="header-section-number">5.1.8</span> Plate 8</a></li>
+  </ul></li>
+  <li><a href="#predator-conditions" id="toc-predator-conditions" class="nav-link" data-scroll-target="#predator-conditions"><span class="header-section-number">5.2</span> Predator conditions</a>
+  <ul class="collapse">
+  <li><a href="#plate-1-1" id="toc-plate-1-1" class="nav-link" data-scroll-target="#plate-1-1"><span class="header-section-number">5.2.1</span> Plate 1</a></li>
+  <li><a href="#plate-2-1" id="toc-plate-2-1" class="nav-link" data-scroll-target="#plate-2-1"><span class="header-section-number">5.2.2</span> Plate 2</a></li>
+  <li><a href="#plate-3-1" id="toc-plate-3-1" class="nav-link" data-scroll-target="#plate-3-1"><span class="header-section-number">5.2.3</span> Plate 3</a></li>
+  <li><a href="#plate-4-1" id="toc-plate-4-1" class="nav-link" data-scroll-target="#plate-4-1"><span class="header-section-number">5.2.4</span> Plate 4</a></li>
+  <li><a href="#plate-5-1" id="toc-plate-5-1" class="nav-link" data-scroll-target="#plate-5-1"><span class="header-section-number">5.2.5</span> Plate 5</a></li>
+  <li><a href="#plate-6-1" id="toc-plate-6-1" class="nav-link" data-scroll-target="#plate-6-1"><span class="header-section-number">5.2.6</span> Plate 6</a></li>
+  <li><a href="#plate-7-1" id="toc-plate-7-1" class="nav-link" data-scroll-target="#plate-7-1"><span class="header-section-number">5.2.7</span> Plate 7</a></li>
+  <li><a href="#plate-8-1" id="toc-plate-8-1" class="nav-link" data-scroll-target="#plate-8-1"><span class="header-section-number">5.2.8</span> Plate 8</a></li>
+  </ul></li>
+  <li><a href="#streptomycin-conditions" id="toc-streptomycin-conditions" class="nav-link" data-scroll-target="#streptomycin-conditions"><span class="header-section-number">5.3</span> Streptomycin conditions</a>
+  <ul class="collapse">
+  <li><a href="#plate-1-2" id="toc-plate-1-2" class="nav-link" data-scroll-target="#plate-1-2"><span class="header-section-number">5.3.1</span> Plate 1</a></li>
+  <li><a href="#plate-2-2" id="toc-plate-2-2" class="nav-link" data-scroll-target="#plate-2-2"><span class="header-section-number">5.3.2</span> Plate 2</a></li>
+  <li><a href="#plate-3-2" id="toc-plate-3-2" class="nav-link" data-scroll-target="#plate-3-2"><span class="header-section-number">5.3.3</span> Plate 3</a></li>
+  <li><a href="#plate-4-2" id="toc-plate-4-2" class="nav-link" data-scroll-target="#plate-4-2"><span class="header-section-number">5.3.4</span> Plate 4</a></li>
+  <li><a href="#plate-5-2" id="toc-plate-5-2" class="nav-link" data-scroll-target="#plate-5-2"><span class="header-section-number">5.3.5</span> Plate 5</a></li>
+  <li><a href="#plate-6-2" id="toc-plate-6-2" class="nav-link" data-scroll-target="#plate-6-2"><span class="header-section-number">5.3.6</span> Plate 6</a></li>
+  <li><a href="#plate-7-2" id="toc-plate-7-2" class="nav-link" data-scroll-target="#plate-7-2"><span class="header-section-number">5.3.7</span> Plate 7</a></li>
+  <li><a href="#plate-8-2" id="toc-plate-8-2" class="nav-link" data-scroll-target="#plate-8-2"><span class="header-section-number">5.3.8</span> Plate 8</a></li>
+  </ul></li>
+  <li><a href="#predator-streptomycin-conditions" id="toc-predator-streptomycin-conditions" class="nav-link" data-scroll-target="#predator-streptomycin-conditions"><span class="header-section-number">5.4</span> Predator + Streptomycin conditions</a>
+  <ul class="collapse">
+  <li><a href="#plate-1-3" id="toc-plate-1-3" class="nav-link" data-scroll-target="#plate-1-3"><span class="header-section-number">5.4.1</span> Plate 1</a></li>
+  <li><a href="#plate-2-3" id="toc-plate-2-3" class="nav-link" data-scroll-target="#plate-2-3"><span class="header-section-number">5.4.2</span> Plate 2</a></li>
+  <li><a href="#plate-3-3" id="toc-plate-3-3" class="nav-link" data-scroll-target="#plate-3-3"><span class="header-section-number">5.4.3</span> Plate 3</a></li>
+  <li><a href="#plate-4-3" id="toc-plate-4-3" class="nav-link" data-scroll-target="#plate-4-3"><span class="header-section-number">5.4.4</span> Plate 4</a></li>
+  <li><a href="#plate-5-3" id="toc-plate-5-3" class="nav-link" data-scroll-target="#plate-5-3"><span class="header-section-number">5.4.5</span> Plate 5</a></li>
+  <li><a href="#plate-6-3" id="toc-plate-6-3" class="nav-link" data-scroll-target="#plate-6-3"><span class="header-section-number">5.4.6</span> Plate 6</a></li>
+  <li><a href="#plate-7-3" id="toc-plate-7-3" class="nav-link" data-scroll-target="#plate-7-3"><span class="header-section-number">5.4.7</span> Plate 7</a></li>
+  <li><a href="#plate-8-3" id="toc-plate-8-3" class="nav-link" data-scroll-target="#plate-8-3"><span class="header-section-number">5.4.8</span> Plate 8</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.html">3. Clones monoculture growth</a></li><li class="breadcrumb-item"><a href="../../../R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.html">i) Inspect and format growth curves</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Formatting growth curves</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Shane Hogle </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 8, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>After XX transfers of the experiment 32 clones were randomly picked from each replicate/home environemnt/measurement environmentn on selective plates. These clones were grown in all the different YSK conditions (including in the presence of the Ciliate) for 48 hours on the log-phase 600 plate reader. From this data we can estimate the growth rate and the carrying capacity of each species in the different conditions.</p>
+<p>In this notebook we will read the output from the log phase plate reader and format it for later plotting and analysis.</p>
+</section>
+<section id="setup" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Setup</h1>
+<section id="load-required-packages" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="load-required-packages"><span class="header-section-number">2.1</span> Load required packages</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(here)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>here() starts at /home/shane/Documents/projects/experiments/hambiYSKpleiotropy01</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="fu">library</span>(stringi)</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="fu">library</span>(fs)</span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"utils_generic.R"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="global-variables" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="global-variables"><span class="header-section-number">2.2</span> Global variables</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>data_raw <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"_data_raw"</span>, <span class="st">"monocultures"</span>, <span class="st">"20230112_clone_phenotyping"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2"></a>data <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"monocultures"</span>, <span class="st">"20230112_clone_phenotyping"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co"># make processed data directory if it doesn't exist</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="functions" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="functions"><span class="header-section-number">2.3</span> Functions</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>plotplate <span class="ot">&lt;-</span> <span class="cf">function</span>(df, dfxy, <span class="at">unsmoothed=</span><span class="cn">TRUE</span>, <span class="at">predicted=</span><span class="cn">FALSE</span>, plate, rows, cols, page){</span>
+<span id="cb8-2"><a href="#cb8-2"></a>  dffilt <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(df, plate <span class="sc">==</span> {{ plate }})</span>
+<span id="cb8-3"><a href="#cb8-3"></a>  xyfilt <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(dfxy)){ <span class="fu">left_join</span>(dfxy, <span class="fu">distinct</span>(dffilt, id, well, plate), <span class="at">by =</span> <span class="fu">join_by</span>(id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-4"><a href="#cb8-4"></a>      <span class="fu">drop_na</span>()}</span>
+<span id="cb8-5"><a href="#cb8-5"></a>  </span>
+<span id="cb8-6"><a href="#cb8-6"></a>  <span class="fu">ggplot</span>(dffilt, <span class="fu">aes</span>(<span class="at">x =</span> hours)) <span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="fu">list</span>(</span>
+<span id="cb8-8"><a href="#cb8-8"></a>      <span class="cf">if</span> (unsmoothed) {ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>OD600), <span class="at">color =</span> <span class="st">"orange"</span>, <span class="at">lty =</span> <span class="dv">1</span>)},</span>
+<span id="cb8-9"><a href="#cb8-9"></a>      <span class="cf">if</span> (predicted) {ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>predicted), <span class="at">color =</span> <span class="st">"orange"</span>)}, </span>
+<span id="cb8-10"><a href="#cb8-10"></a>      <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(dfxy)) {ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">data =</span> xyfilt, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="dv">2</span>)},</span>
+<span id="cb8-11"><a href="#cb8-11"></a>      ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>OD600_smooth_avg), <span class="at">color =</span> <span class="st">"blue"</span>, <span class="at">lty=</span><span class="dv">2</span>), </span>
+<span id="cb8-12"><a href="#cb8-12"></a>      ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hours"</span>, <span class="at">y =</span> <span class="st">"OD600"</span>), </span>
+<span id="cb8-13"><a href="#cb8-13"></a>      ggplot2<span class="sc">::</span><span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">48</span>, <span class="dv">12</span>), <span class="at">labels =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">48</span>, <span class="dv">12</span>)), </span>
+<span id="cb8-14"><a href="#cb8-14"></a>      ggforce<span class="sc">::</span><span class="fu">facet_wrap_paginate</span>(<span class="sc">~</span> well, <span class="at">nrow =</span> rows, <span class="at">ncol =</span> cols, <span class="at">page =</span> page), <span class="co">#scales = "free_y"</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a>      ggplot2<span class="sc">::</span><span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>))</span>
+<span id="cb8-16"><a href="#cb8-16"></a>    )</span>
+<span id="cb8-17"><a href="#cb8-17"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="read-and-format-tables" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Read and format tables</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># set up directory structure</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>samppaths <span class="ot">&lt;-</span> fs<span class="sc">::</span><span class="fu">dir_ls</span>(</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="at">path =</span> here<span class="sc">::</span><span class="fu">here</span>(data_raw, <span class="st">"logphase600"</span>),</span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="at">all =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="at">recurse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb9-6"><a href="#cb9-6"></a>  <span class="at">type =</span> <span class="st">"file"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7"></a>  <span class="at">glob =</span> <span class="st">"*.csv"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8"></a>  <span class="at">regexp =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-9"><a href="#cb9-9"></a>  <span class="at">invert =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-10"><a href="#cb9-10"></a>  <span class="at">fail =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="raw-growth-curves" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="raw-growth-curves"><span class="header-section-number">3.1</span> Raw growth curves</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>gcurves_slurped <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_delim</span>(samppaths, </span>
+<span id="cb10-2"><a href="#cb10-2"></a>                          <span class="at">comment =</span> <span class="st">"#"</span>, </span>
+<span id="cb10-3"><a href="#cb10-3"></a>                          <span class="at">delim =</span> <span class="st">";"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4"></a>                          <span class="at">escape_double =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb10-5"><a href="#cb10-5"></a>                          <span class="at">trim_ws =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb10-6"><a href="#cb10-6"></a>                          <span class="at">id =</span> <span class="st">"file_name"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 9248 Columns: 98
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ";"
+dbl  (96): A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, B1, B2, B3, B4...
+time  (1): Time
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>gcurves_slurped_fmt <span class="ot">&lt;-</span> gcurves_slurped <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">plate =</span> <span class="fu">str_extract</span>(file_name, <span class="st">"A</span><span class="sc">\\</span><span class="st">d_</span><span class="sc">\\</span><span class="st">d"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>file_name) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-4"><a href="#cb12-4"></a>  dplyr<span class="sc">::</span><span class="fu">relocate</span>(plate) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-5"><a href="#cb12-5"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">hours =</span> lubridate<span class="sc">::</span><span class="fu">time_length</span>(lubridate<span class="sc">::</span><span class="fu">hms</span>(Time), <span class="at">unit =</span> <span class="st">"hours"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-6"><a href="#cb12-6"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">seconds =</span> lubridate<span class="sc">::</span><span class="fu">time_length</span>(lubridate<span class="sc">::</span><span class="fu">hms</span>(Time), <span class="at">unit =</span> <span class="st">"seconds"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-7"><a href="#cb12-7"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Time) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-8"><a href="#cb12-8"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>plate, <span class="sc">-</span>hours, <span class="sc">-</span>seconds), <span class="at">names_to =</span> <span class="st">"well"</span>, <span class="at">values_to =</span> <span class="st">"OD600"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-9"><a href="#cb12-9"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">well =</span> <span class="fu">factor</span>(well, <span class="at">levels =</span> <span class="fu">paste</span>(<span class="fu">rep</span>(LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>], <span class="at">each =</span> <span class="dv">12</span>), <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">sep =</span> <span class="st">""</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="format-growth-curves" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Format growth curves</h1>
+<p>One thing I’ve realized is that many methods for inferring growth rates struggle when the density of observations is too high (e.g., one measurement every 5 minutes). In reality I’ve found that taking one measurement every 15 minutes is sufficient. Here we thin it out so that measurements are in 20 minute intervals. This seems to improve the fitting procedure a lot without much of a cost.</p>
+<p>The rounding step is necessary because the bioscreen actually doesn’t output consistent intervals. Sometimes it is 00:30:06 and other times it is 00:30:05. This becomes a problem later on when trying to combine multiple runs at once</p>
+<section id="thinning" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="thinning"><span class="header-section-number">4.1</span> Thinning</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>round_any <span class="ot">&lt;-</span> <span class="cf">function</span>(x, accuracy, <span class="at">f=</span>round){</span>
+<span id="cb13-2"><a href="#cb13-2"></a>  <span class="fu">f</span>(x<span class="sc">/</span> accuracy) <span class="sc">*</span> accuracy</span>
+<span id="cb13-3"><a href="#cb13-3"></a>}</span>
+<span id="cb13-4"><a href="#cb13-4"></a></span>
+<span id="cb13-5"><a href="#cb13-5"></a>gcurves_thin <span class="ot">&lt;-</span> gcurves_slurped_fmt <span class="sc">%&gt;%</span> </span>
+<span id="cb13-6"><a href="#cb13-6"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">seconds =</span> <span class="fu">round_any</span>(seconds, <span class="dv">100</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-7"><a href="#cb13-7"></a>  <span class="co"># 1200 is 20 minutes so by ensuring modulo = 0 we include only time points</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a>  <span class="co"># 0, 20, 40, 60 minutes and so on...</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(seconds <span class="sc">%%</span> <span class="dv">1200</span> <span class="sc">==</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="smoothing" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="smoothing"><span class="header-section-number">4.2</span> Smoothing</h2>
+<p>For the growth curves we may need to do some smoothing to reduce the “jaggedness” of the curves a bit because these were run before the optimized logphase600 protocol was in place (better breatheasy seals plus new sealing tool). e use the <code>slider</code> package with a 5 point rolling mean for each focal observation we take the mean including the focal point and two points before and after.</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/77240913/effective-ways-to-remove-outliers-in-a-timeseries/77325412#77325412">See here</a> for a useful thread:</li>
+<li><a href="https://stackoverflow.com/a/77282605">This answer</a> seems most promising</li>
+<li><a href="https://stackoverflow.com/a/77264172">Potentially also promising</a></li>
+</ul>
+<p>Here we will smooth out some of the higher frequency noise in the curves. First we wil smooth using a moving median approach then smooth that using a moving average approach. We will also try a min then mean smoothing approach. Some of the curves are really wacky with lots of erratic peaks. Taking a moving minimum will try and make sure we exclude the big peaks, but it will also probably distort the curves to some extent</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>gcurves_thin_sm <span class="ot">&lt;-</span> gcurves_thin <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(plate, well) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">OD600_smooth_md =</span> slider<span class="sc">::</span><span class="fu">slide_dbl</span>(OD600, median, <span class="at">.before =</span> <span class="dv">2</span>, <span class="at">.after =</span> <span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-4"><a href="#cb14-4"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">OD600_smooth_avg =</span> slider<span class="sc">::</span><span class="fu">slide_dbl</span>(OD600, mean, <span class="at">.before =</span> <span class="dv">2</span>, <span class="at">.after =</span> <span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-5"><a href="#cb14-5"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">OD600_smooth_md_avg =</span> slider<span class="sc">::</span><span class="fu">slide_dbl</span>(OD600_smooth_md, mean, <span class="at">.before =</span> <span class="dv">2</span>, <span class="at">.after =</span> <span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-6"><a href="#cb14-6"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb14-7"><a href="#cb14-7"></a></span>
+<span id="cb14-8"><a href="#cb14-8"></a>readr<span class="sc">::</span><span class="fu">write_tsv</span>(gcurves_thin_sm, here<span class="sc">::</span><span class="fu">here</span>(data, <span class="st">"gcurves_smoothed_thinned.tsv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="inspect-growth-curves" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Inspect growth curves</h1>
+<p>The subscripts at the ends of the plate contain informations:</p>
+<ol type="1">
+<li>The <code>_1</code> subscript is the “bact” condition with no additional treatment</li>
+<li>The <code>_2</code> subscript is the “bact_pred” condition which is a ciliate predator treatment</li>
+<li>The <code>_3</code> subscript is the “bact_strep” condition which has streptomycin</li>
+<li>The <code>_4</code> subscript is the “bact_pred_strep” condition which has both streptomycin and ciliates present</li>
+</ol>
+<p>The same well always contains the same clone such that well “A1” on plate A1 will be the same clone phenotyped just as itself, with a predator, with streptomycin, and with both a predator and streptomycin</p>
+<section id="bact-conditions" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="bact-conditions"><span class="header-section-number">5.1</span> Bact conditions</h2>
+<section id="plate-1" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="plate-1"><span class="header-section-number">5.1.1</span> Plate 1</h3>
+<div id="fig-01" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 1</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-2" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="plate-2"><span class="header-section-number">5.1.2</span> Plate 2</h3>
+<div id="fig-02" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 2</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-3" class="level3" data-number="5.1.3">
+<h3 data-number="5.1.3" class="anchored" data-anchor-id="plate-3"><span class="header-section-number">5.1.3</span> Plate 3</h3>
+<div id="fig-03" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 3</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-4" class="level3" data-number="5.1.4">
+<h3 data-number="5.1.4" class="anchored" data-anchor-id="plate-4"><span class="header-section-number">5.1.4</span> Plate 4</h3>
+<div id="fig-04" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 4</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-5" class="level3" data-number="5.1.5">
+<h3 data-number="5.1.5" class="anchored" data-anchor-id="plate-5"><span class="header-section-number">5.1.5</span> Plate 5</h3>
+<div id="fig-05" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 5</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-6" class="level3" data-number="5.1.6">
+<h3 data-number="5.1.6" class="anchored" data-anchor-id="plate-6"><span class="header-section-number">5.1.6</span> Plate 6</h3>
+<div id="fig-06" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 6</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-7" class="level3" data-number="5.1.7">
+<h3 data-number="5.1.7" class="anchored" data-anchor-id="plate-7"><span class="header-section-number">5.1.7</span> Plate 7</h3>
+<div id="fig-07" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-07-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-07-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 7</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-8" class="level3" data-number="5.1.8">
+<h3 data-number="5.1.8" class="anchored" data-anchor-id="plate-8"><span class="header-section-number">5.1.8</span> Plate 8</h3>
+<div id="fig-08" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-08-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-08-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 8</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="predator-conditions" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="predator-conditions"><span class="header-section-number">5.2</span> Predator conditions</h2>
+<section id="plate-1-1" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="plate-1-1"><span class="header-section-number">5.2.1</span> Plate 1</h3>
+<div id="fig-09" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-09-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-09-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Growth curves for the <strong>ciliate</strong> conditions on <strong>Plate 1</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-2-1" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="plate-2-1"><span class="header-section-number">5.2.2</span> Plate 2</h3>
+<div id="fig-10" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Growth curves for the <strong>ciliate</strong> conditions on <strong>Plate 2</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-3-1" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="plate-3-1"><span class="header-section-number">5.2.3</span> Plate 3</h3>
+<div id="fig-11" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Growth curves for the <strong>ciliate</strong> conditions on <strong>Plate 3</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-4-1" class="level3" data-number="5.2.4">
+<h3 data-number="5.2.4" class="anchored" data-anchor-id="plate-4-1"><span class="header-section-number">5.2.4</span> Plate 4</h3>
+<div id="fig-12" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Growth curves for the <strong>ciliate</strong> conditions on <strong>Plate 4</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-5-1" class="level3" data-number="5.2.5">
+<h3 data-number="5.2.5" class="anchored" data-anchor-id="plate-5-1"><span class="header-section-number">5.2.5</span> Plate 5</h3>
+<div id="fig-13" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Growth curves for <strong>ciliate</strong> conditions on <strong>Plate 5</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-6-1" class="level3" data-number="5.2.6">
+<h3 data-number="5.2.6" class="anchored" data-anchor-id="plate-6-1"><span class="header-section-number">5.2.6</span> Plate 6</h3>
+<div id="fig-14" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: Growth curves for <strong>ciliate</strong> conditions on <strong>Plate 6</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-7-1" class="level3" data-number="5.2.7">
+<h3 data-number="5.2.7" class="anchored" data-anchor-id="plate-7-1"><span class="header-section-number">5.2.7</span> Plate 7</h3>
+<div id="fig-15" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: Growth curves for <strong>ciliate</strong> conditions on <strong>Plate 7</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-8-1" class="level3" data-number="5.2.8">
+<h3 data-number="5.2.8" class="anchored" data-anchor-id="plate-8-1"><span class="header-section-number">5.2.8</span> Plate 8</h3>
+<div id="fig-16" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: Growth curves for <strong>ciliate</strong> conditions on <strong>Plate 8</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="streptomycin-conditions" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="streptomycin-conditions"><span class="header-section-number">5.3</span> Streptomycin conditions</h2>
+<section id="plate-1-2" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="plate-1-2"><span class="header-section-number">5.3.1</span> Plate 1</h3>
+<div id="fig-17" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-17-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-17-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 1</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-2-2" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="plate-2-2"><span class="header-section-number">5.3.2</span> Plate 2</h3>
+<div id="fig-18" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-18-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-18-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 2</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-3-2" class="level3" data-number="5.3.3">
+<h3 data-number="5.3.3" class="anchored" data-anchor-id="plate-3-2"><span class="header-section-number">5.3.3</span> Plate 3</h3>
+<div id="fig-19" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-19-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-19-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 3</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-4-2" class="level3" data-number="5.3.4">
+<h3 data-number="5.3.4" class="anchored" data-anchor-id="plate-4-2"><span class="header-section-number">5.3.4</span> Plate 4</h3>
+<div id="fig-20" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 4</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-5-2" class="level3" data-number="5.3.5">
+<h3 data-number="5.3.5" class="anchored" data-anchor-id="plate-5-2"><span class="header-section-number">5.3.5</span> Plate 5</h3>
+<div id="fig-21" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-21-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-21-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 5</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-6-2" class="level3" data-number="5.3.6">
+<h3 data-number="5.3.6" class="anchored" data-anchor-id="plate-6-2"><span class="header-section-number">5.3.6</span> Plate 6</h3>
+<div id="fig-22" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-22-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-22-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 6</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-7-2" class="level3" data-number="5.3.7">
+<h3 data-number="5.3.7" class="anchored" data-anchor-id="plate-7-2"><span class="header-section-number">5.3.7</span> Plate 7</h3>
+<div id="fig-23" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-23-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-23-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 7</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-8-2" class="level3" data-number="5.3.8">
+<h3 data-number="5.3.8" class="anchored" data-anchor-id="plate-8-2"><span class="header-section-number">5.3.8</span> Plate 8</h3>
+<div id="fig-24" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-24-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-24-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 8</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="predator-streptomycin-conditions" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="predator-streptomycin-conditions"><span class="header-section-number">5.4</span> Predator + Streptomycin conditions</h2>
+<section id="plate-1-3" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="plate-1-3"><span class="header-section-number">5.4.1</span> Plate 1</h3>
+<div id="fig-25" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-25-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-25-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;25: Growth curves for the <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 1</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-2-3" class="level3" data-number="5.4.2">
+<h3 data-number="5.4.2" class="anchored" data-anchor-id="plate-2-3"><span class="header-section-number">5.4.2</span> Plate 2</h3>
+<div id="fig-26" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-26-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-26-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;26: Growth curves for the <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 2</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-3-3" class="level3" data-number="5.4.3">
+<h3 data-number="5.4.3" class="anchored" data-anchor-id="plate-3-3"><span class="header-section-number">5.4.3</span> Plate 3</h3>
+<div id="fig-27" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-27-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-27-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;27: Growth curves for the <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 3</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-4-3" class="level3" data-number="5.4.4">
+<h3 data-number="5.4.4" class="anchored" data-anchor-id="plate-4-3"><span class="header-section-number">5.4.4</span> Plate 4</h3>
+<div id="fig-28" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-28-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-28-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28: Growth curves for the <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 4</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-5-3" class="level3" data-number="5.4.5">
+<h3 data-number="5.4.5" class="anchored" data-anchor-id="plate-5-3"><span class="header-section-number">5.4.5</span> Plate 5</h3>
+<div id="fig-29" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-29-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-29-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;29: Growth curves for <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 5</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-6-3" class="level3" data-number="5.4.6">
+<h3 data-number="5.4.6" class="anchored" data-anchor-id="plate-6-3"><span class="header-section-number">5.4.6</span> Plate 6</h3>
+<div id="fig-30" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-30-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-30-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;30: Growth curves for <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 6</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-7-3" class="level3" data-number="5.4.7">
+<h3 data-number="5.4.7" class="anchored" data-anchor-id="plate-7-3"><span class="header-section-number">5.4.7</span> Plate 7</h3>
+<div id="fig-31" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-31-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-31-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;31: Growth curves for <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 7</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-8-3" class="level3" data-number="5.4.8">
+<h3 data-number="5.4.8" class="anchored" data-anchor-id="plate-8-3"><span class="header-section-number">5.4.8</span> Plate 8</h3>
+<div id="fig-32" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-32-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_growth_curve_qc_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-32-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;32: Growth curves for <strong>Ciliate + Streptomycin</strong> conditions on <strong>Plate 8</strong>. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+</figcaption>
+</figure>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

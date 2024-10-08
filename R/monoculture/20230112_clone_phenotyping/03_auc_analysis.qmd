@@ -1,0 +1,261 @@
+---
+title: "Analysis of Area Under the Curve (AUC)"
+author: "Shane Hogle"
+date: today
+---
+
+# Setup
+
+## Load required packages
+
+```{r}
+library(here)
+library(tidyverse)
+library(stringr)
+library(stringi)
+library(lubridate)
+library(fs)
+library(DescTools)
+source(here::here("R", "utils_generic.R"))
+```
+
+## Global variables
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+data_raw <- here::here("_data_raw", "monocultures", "20230112_clone_phenotyping")
+data <- here::here("data", "monocultures", "20230112_clone_phenotyping")
+
+# make processed data directory if it doesn't exist
+fs::dir_create(data)
+```
+
+## Functions
+
+```{r}
+plotplate <- function(df, dfxy, unsmoothed=TRUE, predicted=FALSE, plate, rows, cols, page){
+  dffilt <- dplyr::filter(df, plate == {{ plate }})
+  xyfilt <- if (!is.null(dfxy)){ left_join(dfxy, distinct(dffilt, id, well, plate), by = join_by(id)) %>% 
+      drop_na()}
+  
+  ggplot(dffilt, aes(x = hours)) +
+    list(
+      ggplot2::geom_line(aes(y=OD600_smooth_avg), color = "blue"), 
+      if (unsmoothed) {ggplot2::geom_line(aes(y=OD600), color = "orange", lty = 2)},
+      if (predicted) {ggplot2::geom_line(aes(y=predicted), color = "orange")}, 
+      if (!is.null(dfxy)) {ggplot2::geom_point(data = xyfilt, aes(x = x, y = y), color = "red", size = 2)},
+      ggplot2::labs(x = "Hours", y = "OD600"), 
+      ggplot2::scale_x_continuous(breaks = seq(0, 48, 12), labels = seq(0, 48, 12)), 
+      ggforce::facet_wrap_paginate(~ well, nrow = rows, ncol = cols, page = page), #scales = "free_y"
+      ggplot2::theme(axis.text = element_text(size = 9))
+    )
+}
+```
+
+# Read data
+
+## Metadata
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+mddf <- read_tsv(
+  here::here(data_raw, "metadata.tsv"),
+  col_types = list(
+    plate = col_character(),
+    well = col_character(),
+    clone_id = col_double(),
+    experiment_treatment = col_character(),
+    LTCSE_treatment = col_character(),
+    replicate = col_character(),
+    lagtime = col_time(format = "%T"),
+    max_growth_death_rate = col_double(),
+    time_to_stationary = col_time(format = "%T")
+  )
+) %>%
+  mutate(
+    measure_env_short = case_when(
+      measure_env == "bact" ~ "Meas: B",
+      measure_env == "bact_pred" ~ "Meas: BP",
+      measure_env == "bact_strep" ~ "Meas: BS",
+      measure_env == "bact_pred_strep" ~ "Meas: BPS"
+    )
+  ) %>%
+  mutate(
+    home_env_short = case_when(
+      evolution_env == "anc" ~ "Home: Anc",
+      evolution_env == "bact" ~ "Home: B",
+      evolution_env == "bact_pred" ~ "Home: BP",
+      evolution_env == "bact_strep" ~ "Home: BS",
+      evolution_env == "bact_pred_strep" ~ "Home: BPS"
+    )
+  ) %>%
+  mutate(
+    measure_env_short = factor(
+      measure_env_short,
+      levels = c("Meas: B", "Meas: BP", "Meas: BS", "Meas: BPS")
+    ),
+    home_env_short = factor(
+      home_env_short,
+      levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS")
+    ),
+    replicate = factor(replicate),
+    clone_id = factor(clone_id)
+  )
+```
+
+## Previously smoothed growth curves
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+gcurves_thin_sm <- readr::read_tsv(here::here(data, "gcurves_smoothed_thinned.tsv"))
+```
+
+## Blacklist
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+blacklist <- read_tsv(here::here(data, "blacklist.tsv"))
+```
+
+## Previous growth rates
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+grates <- readr::read_tsv(here::here(data, "gcurve_spline_results.tsv")) %>% 
+  anti_join(blacklist)
+```
+
+# Formatting
+
+Anti join black list to growth curves to remove the bad growth curves
+
+```{r}
+gcurves_thin_sm_filt <- anti_join(gcurves_thin_sm, blacklist, by = join_by(plate, well))
+```
+
+## Calculate AUC
+
+Calculates AUC using `DescTools` package
+
+```{r}
+many_auc_res <- gcurves_thin_sm_filt %>% 
+  dplyr::summarize(auc = DescTools::AUC(hours, OD600_smooth_avg),
+            max_od = max(OD600_smooth_avg),
+            min_od = min(OD600_smooth_avg),
+            .by = c(plate, well))
+```
+
+## Combine Growth rates and AUC and metadata
+
+```{r}
+auc_gr_md <- left_join(many_auc_res, mddf, by = join_by(plate, well)) %>% 
+  left_join(grates, by = join_by(plate, well))
+```
+
+## Z score
+
+```{r}
+auc_gr_md_subset <- auc_gr_md %>%
+  dplyr::select(
+    auc,
+    mumax,
+    measure_env,
+    evolution_env,
+    measure_env_short,
+    home_env_short,
+    replicate,
+    clone_id
+  )
+
+auc_gr_md_subset_summary <- auc_gr_md_subset %>%
+  filter(measure_env == evolution_env) %>%
+  summarize(
+    auc_mn = mean(auc),
+    auc_sd = sd(auc),
+    mu_mn = mean(mumax),
+    mu_sd = sd(mumax),
+    .by = c(measure_env)
+  )
+
+auc_gr_md_subset_summary_z <- left_join(auc_gr_md_subset, auc_gr_md_subset_summary, by = join_by(measure_env)) %>%
+  mutate(z_mu = (mumax - mu_mn), #/ mu_sd
+         z_auc = (auc - auc_mn)) %>% #/auc_sd
+  pivot_longer(cols = starts_with("z"),
+               names_to = "metric",
+               values_to = "z")
+```
+
+
+## Plot
+
+```{r}
+cloneplot <- function(df, metric, ylab){
+  df %>% 
+    filter(metric == {{ metric }}) %>% 
+    ggplot2::ggplot() +
+    ggplot2::geom_hline(yintercept = 0) +
+    ggplot2::geom_boxplot(aes(y = z, x = home_env_short), color = "red", outliers = FALSE, position = position_dodge(width = 0.5)) +
+    ggplot2::geom_jitter(aes(y = z, x = home_env_short, color = replicate), width = 0.25, height = 0, alpha = 0.25) +
+    ggplot2::labs(x = "Home environment", y = ylab, fill="") + 
+    ggplot2::facet_grid(measure_env_short ~ ., scales = "free_y") +
+    ggplot2::theme_bw()
+}
+
+pclone_auc <- cloneplot(auc_gr_md_subset_summary_z, "z_auc", "Meaurement env mean centered AUC")
+pclone_mu <- cloneplot(auc_gr_md_subset_summary_z, "z_mu", "Meaurement env mean centered μ")
+```
+
+::: {#fig-01}
+```{r}
+#| fig.width: 7
+#| fig.height: 8
+#| echo: false
+#| warning: false
+pclone_auc
+```
+Mean centered AUC (area under the growth curve) for 32 randomly picked clones from each replicate (A-F) of each home YSK environment and measurement condition pair. Points are individual measurements (colored by replicate) while boxplots represent the mean and 1-3 quartiles with whiskers representing 1.5 $\times$ the interquartile range. Heavy black line is the Measurement Environment mean.
+:::
+
+
+::: {#fig-01}
+```{r}
+#| fig.width: 7
+#| fig.height: 8
+#| echo: false
+#| warning: false
+pclone_mu
+```
+Mean centered maximum specific growth rate (μ max) for 32 randomly picked clones from each replicate (A-F) of each home YSK environment and measurement condition pair. Points are individual measurements (colored by replicate) while boxplots represent the mean and 1-3 quartiles with whiskers representing 1.5 $\times$ the interquartile range. Heavy black line is the Measurement Environment mean.
+:::
+
+
+```{r}
+ggplot2::ggsave(
+  here::here("figs", "monoculture_clone_phenotyping_auc.svg"),
+  pclone_auc,
+  width = 7,
+  height = 8,
+  units = "in",
+  device = "svg"
+)
+
+ggplot2::ggsave(
+  here::here("figs", "monoculture_clone_phenotyping_auc.png"),
+  pclone_auc,
+  width = 7,
+  height = 8,
+  units = "in",
+  device = "png"
+)
+```
+

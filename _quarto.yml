@@ -1,0 +1,61 @@
+project:
+  type: website
+  resources:
+    - "css/"
+    - "js/"
+    - "*.html"
+  output-dir: docs
+
+website:
+  title: "hambiYSKpleiotropy data analysis"
+  sidebar:
+    style: "docked"
+    background: light
+    search: true
+    contents:
+      - section: "1. Community growth - Bacteria and ciliate densities"
+        contents:
+          - text: "i) Process and plot densities"
+            file: R/communities/cell_density/01_analysis.qmd
+      - section: "2. Community growth - amplicon composition"
+        contents:
+          - text: "i) 20240318_BTK_illumina_v3 / Data wrangling and QC"
+            file: R/communities/amplicon/20240318_BTK_illumina_v3/01_format_rbec_tab.qmd
+          - text: "ii) Analysis of community composition"
+            file: R/communities/amplicon/01_composition_analysis.qmd
+          - text: "iii) Machine learning the home environment"
+            file: R/communities/amplicon//02_machine_learn_home_env.qmd
+      - section: "3. Clones monoculture growth"
+        contents:
+          - text: "i) Inspect and format growth curves"
+            file: R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.qmd
+          - text: "ii) Estimate growth rates"
+            file: R/monoculture/20230112_clone_phenotyping/02_growth_rate_analysis.qmd
+          - text: "iii) AUC and growth rate plots"
+            file: R/monoculture/20230112_clone_phenotyping/03_auc_analysis.qmd
+
+format:
+  html:
+    theme:
+      - cosmo
+      - mystyle.scss
+    # include table of contents
+    toc: true
+    # when printing dataframes use rmarkdown::paged_table())
+    df-print: paged
+    # set default dimensions for figures
+    fig-width: 8
+    fig-height: 6
+    # tidy format R code upon render
+    tidy: true
+    # include line numbers in code blocks
+    code-line-numbers: true
+    # The code-link option enables hyper-linking of functions within code blocks to their online documentation:
+    #code-link: true
+    number-sections: true
+  
+# auto: re-render only when source changes   
+execute:
+  freeze: false 
+  
+editor: source

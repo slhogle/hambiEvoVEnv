@@ -1,0 +1,145 @@
+Plate information 
+Plate;Repeat;Barcode;Chamber temperature at start;Chamber temperature at end;Ambient temperature at start;Ambient temperature at end;Meas;ScanX;ScanY;Measinfo;Kinetics;Measurement date;
+1;1;="";31,5;31,5;28,6;28,6;Meas A;0;0;De=1st Ex=Btm Em=N/A;1;30.6.2022 11:12:08;
+
+Background information
+Plate;Label;Result;Signal;Flashes/Time;Meastime;MeasInfo;
+1;Meas A;0;299958;88;00:00:00,000;De=1st Ex=Btm Em=N/A;
+
+Results for Meas A -  (A)
+;01;02;03;04;05;06;07;08;09;10;11;12;
+A;0,1080;0,0990;0,1180;0,1020;0,1030;0,0700;0,0810;0,0950;0,0990;0,0500;0,0390;0,0400;
+B;0,1060;0,0950;0,1120;0,0910;0,1030;0,0510;0,0560;0,0620;0,0580;0,0630;0,0390;0,0400;
+C;0,1060;0,1020;0,1140;0,1050;0,1040;0,0540;0,0580;0,0650;0,0520;0,0450;0,0390;0,0400;
+D;0,1070;0,1100;0,1050;0,1220;0,1020;0,0660;0,0560;0,0580;0,1350;0,0540;0,0390;0,0390;
+E;0,1040;0,1070;0,1090;0,1000;0,0990;0,0820;0,0590;0,0670;0,0640;0,0500;0,0390;0,0400;
+F;0,1070;0,0950;0,1040;0,0990;0,0960;0,0580;0,0590;0,0530;0,1710;0,0910;0,0390;0,0390;
+G;0,0400;0,0390;0,0400;0,0400;0,0390;0,0390;0,0390;0,0400;0,0400;0,0400;0,0390;0,0400;
+H;0,0390;0,0390;0,0390;0,0390;0,0390;0,0390;0,0390;0,0390;0,0390;0,0390;0,0390;0,0390;
+
+
+Basic assay information 
+Assay ID: ;;;;7824
+Assay Started: ;;;;30.6.2022 11:11:20
+Assay Finished: ;;;;30.6.2022 11:12:20
+Assay Exported: ;;;;30.6.2022 11:12:46
+Assay Started By: ;;;;N/A
+Protocol ID: ;;;;100237
+Protocol Name: ;;;;Hiltunen_OD600Bacteria
+Serial#: ;;;;="-202"
+
+
+
+Protocol information
+Protocol:
+Protocol name;;;;Hiltunen_OD600Bacteria
+Number of assay repeats;;;;1
+Start assay repeat each;;;;N/A
+Number of plate repeats;;;;1
+Start plate repeat each;;;;N/A
+Mode of measurement;;;;By Rows
+Rotated plate;;;;No
+Soft move;;;;No
+Protocol notes;;;; 
+
+Plate type:
+Name of the plate type;;;;96 OptiPlate
+Number of rows;;;;8
+Number of columns;;;;12
+Number of the wells in the plate;;;;96
+Height of the plate;;;;14,6 mm
+Diameter of the well;;;;7,13 mm
+Volume of the well;;;;100 µl
+
+Coordinates of corners:
+96 OptiPlate
+14,38 mm x------------------------------------------------------ x 113,38 mm
+11,24 mm                                                           11,24 mm
+
+14,39 mm x------------------------------------------------------ x 113,38 mm
+74,24 mm                                                           74,24 mm
+
+Platemap:
+Plate;;;;1
+
+;01;02;03;04;05;06;07;08;09;10;11;12;
+A;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+B;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+C;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+D;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+E;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+F;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+G;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+H;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- ;- 
+
+ - - Undefined
+
+Calculations:
+No calculations.
+
+Auto export parameters:
+Export format;;;;Plate5
+Picture;;;;No
+Add plate number to the file name;;;;Yes
+Each plate to separate file;;;;No
+Field separator to use;;;;System
+File name format;;;;C:\Users\Enspire\Desktop\HiltunenLab\AmandaEXP 04-2022\5_siirrostus_30.6.2022_T3-T4.csv
+Exported data;;;;MeasA:Result
+
+Operations:
+Plate 1
+  Measurement
+    Meas;;;;A
+    Tech;;;;Absorbance
+
+Measurements:
+Meas ;;;;A
+Exc. filter;;;;N/A
+Excitation wavelength;;;;600 nm
+Measurement height;;;;7,5 mm
+Number of flashes;;;;100
+Number of flashes integrated;;;;44
+Flash power;;;;100 %
+Excitation light;;;;100%
+Reference excitation light;;;;100%
+Reference AD gain;;;;1
+Reference signal;;;;61835
+Last edited;;;;22.1.2020 9:32:46
+Last edited by;;;;EnSpire
+Factory preset;;;;No
+
+Filters:
+Monochromator cutoff 230;;;;140
+Filter polarization;;;;None
+Description;;;;X230co Longpass=230nm, Tmin=90%
+Used with
+Last edited;;;;1.1.2011
+Last edited by;;;;Installation
+Factory preset;;;;Yes
+
+Monochromator cutoff 360;;;;141
+Filter polarization;;;;None
+Description;;;;X360co Longpass=360nm, Tmin=90%
+Used with
+Last edited;;;;1.1.2011
+Last edited by;;;;Installation
+Factory preset;;;;Yes
+
+Monochromator cutoff 585;;;;142
+Filter polarization;;;;None
+Description;;;;X585co Longpass=585nm, Tmin=75%
+Used with
+Last edited;;;;1.1.2011
+Last edited by;;;;Installation
+Factory preset;;;;Yes
+
+Instrument:
+Serial number;;;;-202
+Nickname;;;;EnSpire
+
+
+
+
+
+
+Exported with EnSpire Workstation version 4.10.3005.1440

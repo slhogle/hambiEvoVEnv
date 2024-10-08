@@ -1,0 +1,572 @@
+---
+title: "Formatting growth curves"
+author: "Shane Hogle"
+date: today
+---
+
+# Introduction
+
+After XX transfers of the experiment 32 clones were randomly picked from each replicate/home environemnt/measurement environmentn on selective plates. These clones were grown in all the different YSK conditions (including in the presence of the Ciliate) for 48 hours on the log-phase 600 plate reader. From this data we can estimate the growth rate and the carrying capacity of each species in the different conditions.
+
+In this notebook we will read the output from the log phase plate reader and format it for later plotting and analysis.
+
+# Setup
+
+## Load required packages
+
+```{r}
+library(here)
+library(tidyverse)
+library(stringr)
+library(stringi)
+library(lubridate)
+library(fs)
+source(here::here("R", "utils_generic.R"))
+```
+
+## Global variables
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+data_raw <- here::here("_data_raw", "monocultures", "20230112_clone_phenotyping")
+data <- here::here("data", "monocultures", "20230112_clone_phenotyping")
+
+# make processed data directory if it doesn't exist
+fs::dir_create(data)
+```
+
+## Functions
+
+```{r}
+plotplate <- function(df, dfxy, unsmoothed=TRUE, predicted=FALSE, plate, rows, cols, page){
+  dffilt <- dplyr::filter(df, plate == {{ plate }})
+  xyfilt <- if (!is.null(dfxy)){ left_join(dfxy, distinct(dffilt, id, well, plate), by = join_by(id)) %>% 
+      drop_na()}
+  
+  ggplot(dffilt, aes(x = hours)) +
+    list(
+      if (unsmoothed) {ggplot2::geom_line(aes(y=OD600), color = "orange", lty = 1)},
+      if (predicted) {ggplot2::geom_line(aes(y=predicted), color = "orange")}, 
+      if (!is.null(dfxy)) {ggplot2::geom_point(data = xyfilt, aes(x = x, y = y), color = "red", size = 2)},
+      ggplot2::geom_line(aes(y=OD600_smooth_avg), color = "blue", lty=2), 
+      ggplot2::labs(x = "Hours", y = "OD600"), 
+      ggplot2::scale_x_continuous(breaks = seq(0, 48, 12), labels = seq(0, 48, 12)), 
+      ggforce::facet_wrap_paginate(~ well, nrow = rows, ncol = cols, page = page), #scales = "free_y"
+      ggplot2::theme(axis.text = element_text(size = 9))
+    )
+}
+```
+# Read and format tables 
+
+```{r}
+# set up directory structure
+samppaths <- fs::dir_ls(
+  path = here::here(data_raw, "logphase600"),
+  all = FALSE,
+  recurse = TRUE,
+  type = "file",
+  glob = "*.csv",
+  regexp = NULL,
+  invert = FALSE,
+  fail = TRUE
+)
+```
+
+## Raw growth curves
+
+```{r}
+gcurves_slurped <- readr::read_delim(samppaths, 
+                          comment = "#", 
+                          delim = ";",
+                          escape_double = FALSE,
+                          trim_ws = TRUE, 
+                          id = "file_name") 
+
+gcurves_slurped_fmt <- gcurves_slurped %>% 
+  dplyr::mutate(plate = str_extract(file_name, "A\\d_\\d")) %>% 
+  dplyr::select(-file_name) %>% 
+  dplyr::relocate(plate) %>% 
+  dplyr::mutate(hours = lubridate::time_length(lubridate::hms(Time), unit = "hours")) %>% 
+  dplyr::mutate(seconds = lubridate::time_length(lubridate::hms(Time), unit = "seconds")) %>% 
+  dplyr::select(-Time) %>% 
+  tidyr::pivot_longer(c(-plate, -hours, -seconds), names_to = "well", values_to = "OD600") %>% 
+  dplyr::mutate(well = factor(well, levels = paste(rep(LETTERS[1:8], each = 12), 1:12, sep = "")))
+```
+
+# Format growth curves
+
+One thing I've realized is that many methods for inferring growth rates struggle when the density of observations is too high (e.g., one measurement every 5 minutes). In reality I've found that taking one measurement every 15 minutes is sufficient. Here we thin it out so that measurements are in 20 minute intervals. This seems to improve the fitting procedure a lot without much of a cost.
+
+The rounding step is necessary because the bioscreen actually doesn't output consistent intervals. Sometimes it is 00:30:06 and other times it is 00:30:05. This becomes a problem later on when trying to combine multiple runs at once
+
+## Thinning
+```{r}
+round_any <- function(x, accuracy, f=round){
+  f(x/ accuracy) * accuracy
+}
+
+gcurves_thin <- gcurves_slurped_fmt %>% 
+  dplyr::mutate(seconds = round_any(seconds, 100)) %>% 
+  # 1200 is 20 minutes so by ensuring modulo = 0 we include only time points
+  # 0, 20, 40, 60 minutes and so on...
+  dplyr::filter(seconds %% 1200 == 0)
+```
+
+
+## Smoothing
+For the growth curves we may need to do some smoothing  to reduce the "jaggedness" of the curves a bit because these were run before the optimized logphase600 protocol was in place (better breatheasy seals plus new sealing tool). e use the `slider` package with a 5 point rolling mean for each focal observation we take the mean including the focal point and two points before and after.
+
+- [See here](https://stackoverflow.com/questions/77240913/effective-ways-to-remove-outliers-in-a-timeseries/77325412#77325412) for a useful thread: 
+- [This answer](https://stackoverflow.com/a/77282605) seems most promising
+- [Potentially also promising](https://stackoverflow.com/a/77264172)
+
+Here we will smooth out some of the higher frequency noise in the curves. First we wil smooth using a moving median approach then smooth that using a moving average approach. We will also try a min then mean smoothing approach. Some of the curves are really wacky with lots of erratic peaks. Taking a moving minimum will try and make sure we exclude the big peaks, but it will also probably distort the curves to some extent
+
+```{r}
+gcurves_thin_sm <- gcurves_thin %>% 
+  dplyr::group_by(plate, well) %>% 
+  dplyr::mutate(OD600_smooth_md = slider::slide_dbl(OD600, median, .before = 2, .after = 2)) %>% 
+  dplyr::mutate(OD600_smooth_avg = slider::slide_dbl(OD600, mean, .before = 2, .after = 2)) %>% 
+  dplyr::mutate(OD600_smooth_md_avg = slider::slide_dbl(OD600_smooth_md, mean, .before = 2, .after = 2)) %>% 
+  ungroup()
+
+readr::write_tsv(gcurves_thin_sm, here::here(data, "gcurves_smoothed_thinned.tsv"))
+```
+
+
+# Inspect growth curves
+
+The subscripts at the ends of the plate contain informations:
+
+1. The `_1` subscript is the "bact" condition with no additional treatment
+2. The `_2` subscript is the "bact_pred" condition which is a ciliate predator treatment
+3. The `_3` subscript is the "bact_strep" condition which has streptomycin
+4. The `_4` subscript is the "bact_pred_strep" condition which has both streptomycin and ciliates present
+
+The same well always contains the same clone such that well "A1" on plate A1 will be the same clone phenotyped just as itself, with a predator, with streptomycin, and with both a predator and streptomycin
+
+## Bact conditions
+
+### Plate 1
+
+::: {#fig-01}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A1_1", rows=8, cols=12, page=1)
+```
+Growth curves for the **bacteria only** conditions on **Plate 1**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 2
+
+::: {#fig-02}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A2_1", rows=8, cols=12, page=1)
+```
+Growth curves for the **bacteria only** conditions on **Plate 2**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 3
+
+::: {#fig-03}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A3_1", rows=8, cols=12, page=1)
+```
+Growth curves for the **bacteria only** conditions on **Plate 3**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 4
+
+::: {#fig-04}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A4_1", rows=8, cols=12, page=1)
+```
+Growth curves for the **bacteria only** conditions on **Plate 4**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 5
+
+::: {#fig-05}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A5_1", rows=8, cols=12, page=1)
+```
+Growth curves for **bacteria only** conditions on **Plate 5**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 6
+
+::: {#fig-06}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A6_1", rows=8, cols=12, page=1)
+```
+Growth curves for **bacteria only** conditions on **Plate 6**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 7
+
+::: {#fig-07}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A7_1", rows=8, cols=12, page=1)
+```
+Growth curves for **bacteria only** conditions on **Plate 7**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 8
+
+::: {#fig-08}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A8_1", rows=8, cols=12, page=1)
+```
+Growth curves for **bacteria only** conditions on **Plate 8**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+## Predator conditions
+
+### Plate 1
+
+::: {#fig-09}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A1_2", rows=8, cols=12, page=1)
+```
+Growth curves for the **ciliate** conditions on **Plate 1**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 2
+
+::: {#fig-10}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A2_2", rows=8, cols=12, page=1)
+```
+Growth curves for the **ciliate** conditions on **Plate 2**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 3
+
+::: {#fig-11}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A3_2", rows=8, cols=12, page=1)
+```
+Growth curves for the **ciliate** conditions on **Plate 3**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 4
+
+::: {#fig-12}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A4_2", rows=8, cols=12, page=1)
+```
+Growth curves for the **ciliate** conditions on **Plate 4**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 5
+
+::: {#fig-13}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A5_2", rows=8, cols=12, page=1)
+```
+Growth curves for **ciliate** conditions on **Plate 5**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 6
+
+::: {#fig-14}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A6_2", rows=8, cols=12, page=1)
+```
+Growth curves for **ciliate** conditions on **Plate 6**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 7
+
+::: {#fig-15}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A7_2", rows=8, cols=12, page=1)
+```
+Growth curves for **ciliate** conditions on **Plate 7**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 8
+
+::: {#fig-16}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A8_2", rows=8, cols=12, page=1)
+```
+Growth curves for **ciliate** conditions on **Plate 8**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+## Streptomycin conditions
+
+### Plate 1
+
+::: {#fig-17}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A1_3", rows=8, cols=12, page=1)
+```
+Growth curves for the **Streptomycin** conditions on **Plate 1**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 2
+
+::: {#fig-18}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A2_3", rows=8, cols=12, page=1)
+```
+Growth curves for the **Streptomycin** conditions on **Plate 2**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 3
+
+::: {#fig-19}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A3_3", rows=8, cols=12, page=1)
+```
+Growth curves for the **Streptomycin** conditions on **Plate 3**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 4
+
+::: {#fig-20}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A4_3", rows=8, cols=12, page=1)
+```
+Growth curves for the **Streptomycin** conditions on **Plate 4**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 5
+
+::: {#fig-21}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A5_3", rows=8, cols=12, page=1)
+```
+Growth curves for **Streptomycin** conditions on **Plate 5**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 6
+
+::: {#fig-22}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A6_3", rows=8, cols=12, page=1)
+```
+Growth curves for **Streptomycin** conditions on **Plate 6**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 7
+
+::: {#fig-23}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A7_3", rows=8, cols=12, page=1)
+```
+Growth curves for **Streptomycin** conditions on **Plate 7**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 8
+
+::: {#fig-24}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A8_3", rows=8, cols=12, page=1)
+```
+Growth curves for **Streptomycin** conditions on **Plate 8**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+## Predator + Streptomycin conditions
+
+### Plate 1
+
+::: {#fig-25}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A1_4", rows=8, cols=12, page=1)
+```
+Growth curves for the **Ciliate + Streptomycin** conditions on **Plate 1**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 2
+
+::: {#fig-26}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A2_4", rows=8, cols=12, page=1)
+```
+Growth curves for the **Ciliate + Streptomycin** conditions on **Plate 2**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 3
+
+::: {#fig-27}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A3_4", rows=8, cols=12, page=1)
+```
+Growth curves for the **Ciliate + Streptomycin** conditions on **Plate 3**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 4
+
+::: {#fig-28}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A4_4", rows=8, cols=12, page=1)
+```
+Growth curves for the **Ciliate + Streptomycin** conditions on **Plate 4**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 5
+
+::: {#fig-29}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A5_4", rows=8, cols=12, page=1)
+```
+Growth curves for **Ciliate + Streptomycin** conditions on **Plate 5**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 6
+
+::: {#fig-30}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A6_4", rows=8, cols=12, page=1)
+```
+Growth curves for **Ciliate + Streptomycin** conditions on **Plate 6**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 7
+
+::: {#fig-31}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A7_4", rows=8, cols=12, page=1)
+```
+Growth curves for **Ciliate + Streptomycin** conditions on **Plate 7**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
+
+### Plate 8
+
+::: {#fig-32}
+```{r}
+#| fig.width: 12
+#| fig.height: 8
+#| echo: false
+#| warning: false
+plotplate(gcurves_thin_sm, dfxy=NULL, unsmoothed=TRUE, predicted=FALSE, plate="A8_4", rows=8, cols=12, page=1)
+```
+Growth curves for **Ciliate + Streptomycin** conditions on **Plate 8**. Orange solid line is raw data, blue line is 5-point rolling mean smooth.
+:::
