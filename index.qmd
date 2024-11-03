@@ -1,57 +1,84 @@
 ---
-title: "Data anlalysis for the project hambiYSKpleiotropy"
-author: "Shane Hogle"
+title: "Data analysis for the project hambiEvoVEnv"
 date: today
+author:
+  - name: Shane L Hogle
+    orcid: 0000-0003-2595-3863
+    affiliation: 
+      - name: University of Turku
+        city: Turku
+        state: Finland
+        url: https://www.utu.fi/en
+  - name: Niina Smolander
+    affiliation: 
+      - name: University of Turku
+        city: Turku
+        state: Finland
+        url: https://www.utu.fi/en
+#abstract: > 
+#  The abstract text can go here 
+#  and also here ...
+keywords:
+  - Microbiology
+  - Ecology
+  - Evolution
+  - Antimicrobial resistance (AMR)
+license: "CC BY"
+copyright: 
+  holder: Shane L Hogle
+  year: 2024
+# citation: 
+#   container-title: BioRxiv
+#   volume: 
+#   issue: 
+#   doi: 
+funding: "The author received no specific funding for this work."
+bibliography: references.bib
 ---
 
 ## Manuscript:
 
-"TBD"
+◇ Corresponding author
 
-[Preprint available from bioRxiv]()
+### Published record
+
+**A shared history shapes community response to the environment.**\
+Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL^◇^. *XYZ* (2024/5) [doi:]()
+
+### Preprint
+
+**A shared history shapes community response to the environment.**\
+Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL^◇^. *BioRxiv* (2024/5) [doi:]()
 
 ## Introduction
 
-This is project contains data from the HAMBI species Long-term Community Selection Experiment (YSK) that Amanda Silvenoinen used in her first PhD thesis experiment. Now Niina Smolander has taken over this project under my supervision.
-
-## The long-term community evolution experiment (YSK)
-
-The YSK experiment has been growing 24 HAMBI species in a community over a long-term period under four treatments:
-
-1.  `bact` is the HAMBI community without any additional environmnetal stress - i.e. the control
-2.  `bact_strep` is the HAMBI community with streptomycin (what concentration?)
-3.  `bact_pred` is the HAMBI community grown with *Tetrahymena thermophila* ciliate predator
-4.  `bact_pred_strep` is the HAMBI community grown with both the predator and the streptomycin.
-
-In YSK 6 biological replicates were established for each of the four conditions above. These 4 $\times$ 6 microcosms have been serially transferred (every 7 days) for now almost 150 transfers (2 years 11 months) allowing species to sort and evolution to occur.
+We consider the material and information legacies embedded within a synthetic microbial community that has been serially propagated for over 400 days. We ask whether ecological and evolutionary patterns exhibited by a microbial community in its long-term home environment are retained in a novel environment. Recent work has shown that when entire microbial communities are mixed or transplanted, they retain some degree of cohesion in function and composition [@rillig2015]. What causes communities to behave cohesively rather than collapsing into their constituents when subjected to abiotic or biotic pressures? When might we expect a cohesive community response instead of the aggregate responses of individual species?
 
 ## Experiment overview
 
-After ?? weeks of regular transfers of YSK, Amanda transplanted the 6 $\times$ microcosms per environment into each of the other environments resulting in a full factorial treatment design. She also included a treatment where a naive/ancestral HAMBI community was exposed to YSK conditions. She serially transferred this transplant experiment every 7 days into fresh media (same conditions as YSK) for a total of 12 weeks/transfers (84 days). Considering a weekly dilution factor of 1/10 in the serial transfer series, then $\mathrm{log_2(10)} \approx 3.3$ generations will have elapsed resulting in an evolutionary scale of $3.3 \times 12 \approx 40$ elapsed generations during the transplant experiment.
+![Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.](figs/strep_only/exp_design.png)
 
-## Measurements and data types
+We first serially propagated a bacterial community, starting from clones of 23 soil and aquatic species [@hogle2024], for 406 days in two different conditions: a low-carbon, complex growth medium with and without the antibiotic streptomycin. We refer to these as “evolved” communities. We isolated 32 clones from each evovlved microcosm and phenotyped them both home environments to determine mean community fitness in each environment. We then reciprocally transplanted each of these evolved communities into the other’s home environment, with a clonal ancestor community serving as a reference. We allowed the experimental communities to grow for a further 84 days, measuring community composition at three different points and sequencing community genomes from the end of the experiment, which allowed us to track the fate of mutations from the evolved communities in their new environments.
 
-- Community DNA was sampled at all transfers.
-- 16S rRNA amplicon sequencing was performed at transfers 0, 4 (28 days), 8 (56 days), and 12 (84 days)
-- Community genome (metagenome) sequencing was performed at transfers **XYZ**
-- Ciliate cell density and bacterial optical density ($\mathrm{OD_{600}}$) were measured at every weekly transfer
-- After **X** transfers, 32 clones were isolated from each replicate of the transplant microcosms. High-resolution growth curves were obtained for the clones (obtained using the log-phase 600) 
-  
-## Code
+### Measurements and data types
 
-[![DOI](https://zenodo.org/badge/411568623.svg)](https://zenodo.org/badge/latestdoi/411568623) Data and code here is provided under GPL3. Feel free to use or remix as you see fit.
+-   32 clones were isolated from each replicate microcosm of the community evolution pre-experiment. High-resolution growth curves were obtained for the clones (obtained using the log-phase 600)
+-   Bacterial optical density ($\mathrm{OD_{600}}$) were measured at every weekly transfer
+-   Community DNA was sampled at all transfers.
+-   16S rRNA amplicon sequencing was performed at transfers 0, 4 (28 days), 8 (56 days), and 12 (84 days)
+-   Community genome (metagenome) sequencing was performed at transfer 12 of the transplantation experiment and of the evolution treatments starting materials
 
-### Project structure
-1.  `/R` contains R scripts
-2.  `/data` contains data that has been processed in some way for later use
-3.  `/_data_raw` contains unprocessed data scraped from compute cluster
-4.  `/figs` contains figures generated from R scripts
+## Analysis overview
+
+These notebooks allow the full reproduction of the data analysis from the sequencing data and clone phenotyping data. They include analyses of mean community fitness (from clone phenotypcing, for ploting species composition, for performing ordination on community composition, and machine learning to predict community history from the present community composition.
 
 ## Availability
 
-The rendered project site is available at <https://hambidoubleevohi-slhogl-14191cd40bf1aa9a3beb400287f1505ccad06ec.utugit.fi/>. The website has been produced using [Quarto notebooks](https://quarto.org/).
+Data and code in this GitHub repository (<https://github.com/slhogle/hambiEvoVEnv>) is provided under [GNU AGPL3](https://www.gnu.org/licenses/agpl-3.0.html). The rendered project site is available at <https://slhogle.github.io/hambiEvoVEnv/>, which has been produced using [Quarto notebooks](https://quarto.org/). The content on the rendered site is released under the [CC BY 4.0.](https://creativecommons.org/licenses/by/4.0/) This repository hosts all code and data for this project including the code necessary to fully recreate the rendered webpage.
 
-This GitLab repository (<https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy>) hosts the code and data for this project. The rendered webpage can be fully recreated using the code at <https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy>. 
+An archived release of the code here is available from Zenodo:
+
+Raw sequencing data using in the project is available from NCBI Bioproject [ ]().
 
 ## Reproducibility
 
@@ -60,4 +87,49 @@ The project uses [`renv`](https://rstudio.github.io/renv/index.html) to create r
 ``` r
 install.packages("renv")
 renv::restore()
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+#| error: false
+#| warning: false
+# Not included in rendered output
+# Setup project structure
+library(here)
+library(fs)
+
+# define directory paths and overall structure
+# the _data_raw directory is never touched or modified! All downstream work 
+# and intermediate results should be put in the data directory
+
+# note that we have split up the structure by whether or not we are focusing only
+# on streptomycin experiments or on streptomycin plus predator
+
+## Only streptomycin analyses
+fs::dir_create(here::here("data", "strep_only", "communities", "amplicon_sp_counts"), recurse = TRUE)
+fs::dir_create(here::here("data", "strep_only", "communities", "cell_density"), recurse = TRUE)
+fs::dir_create(here::here("data", "strep_only", "communities", "machine_learning_pipelines"), recurse = TRUE)
+fs::dir_create(here::here("data", "strep_only", "monocultures", "clone_phenotyping"), recurse = TRUE)
+
+fs::dir_create(here::here("R", "strep_only", "communities", "amplicon_sp_counts"), recurse = TRUE)
+fs::dir_create(here::here("R", "strep_only", "communities", "cell_density"), recurse = TRUE)
+fs::dir_create(here::here("R", "strep_only", "communities", "machine_learning_pipelines"), recurse = TRUE)
+fs::dir_create(here::here("R", "strep_only", "monocultures", "clone_phenotyping"), recurse = TRUE)
+
+fs::dir_create(here::here("figs", "strep_only"), recurse = TRUE)
+
+## strep and predator analyses
+fs::dir_create(here::here("data", "strep_predator", "communities", "amplicon_sp_counts"), recurse = TRUE)
+fs::dir_create(here::here("data", "strep_predator", "communities", "cell_density"), recurse = TRUE)
+fs::dir_create(here::here("data", "strep_predator", "communities", "machine_learning_pipelines"), recurse = TRUE)
+fs::dir_create(here::here("data", "strep_predator", "monocultures", "clone_phenotyping"), recurse = TRUE)
+
+fs::dir_create(here::here("R", "strep_predator", "communities", "amplicon_sp_counts"), recurse = TRUE)
+fs::dir_create(here::here("R", "strep_predator", "communities", "cell_density"), recurse = TRUE)
+fs::dir_create(here::here("R", "strep_predator", "communities", "machine_learning_pipelines"), recurse = TRUE)
+fs::dir_create(here::here("R", "strep_predator", "monocultures", "clone_phenotyping"), recurse = TRUE)
+
+fs::dir_create(here::here("figs", "strep_predator"), recurse = TRUE)
 ```

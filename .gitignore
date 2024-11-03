@@ -4,6 +4,8 @@ _notrack/
 *.ai
 gcurves_smoothed_thinned.tsv
 spline_fits
+brmmod
+brmmod0
 
 # quarto freeze
 #_freeze/

@@ -1,0 +1,359 @@
+---
+title: "Analysis of growth summary data"
+subtitle: "From the STR clones workflow"
+author: "Shane Hogle"
+date: today
+abstract: "Plots AUC for different experimental measurement/home combinations. In this part of the experiment 32 clones were randomly isolated from endpoint the long-term evolution pre-experiment (background or streptomycin). Then each clone was grown either in 20% R2A with or without streptomycin for 48 hours in the log-phase microbial growth reader. In this way streptomycin sensitivity was measured for every clone from every evolutionary history of the pre-experiment. Here we are trying to ask whether the community-averaged streptomycin sensitivity differed between the evolutionary treatments. I am not sure yet why this question is relavant..."
+---
+
+# Setup
+
+Load required packages
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+library(here)
+library(tidyverse)
+library(stringr)
+library(fs)
+library(ggforce)
+library(patchwork)
+library(easystats)
+library(brms)
+source(here::here("R", "utils_generic.R"))
+
+data_raw <- here::here("_data_raw", "monocultures", "20230112_clone_phenotyping")
+```
+
+# Read data
+
+Experiment information (e.g., which wells correspond to which clones from which condition)
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+mddf <- read_tsv(
+  here::here(data_raw, "metadata.tsv"),
+  col_types = list(
+    plate = col_character(),
+    well = col_character(),
+    clone_id = col_double(),
+    experiment_treatment = col_character(),
+    LTCSE_treatment = col_character(),
+    replicate = col_character(),
+    lagtime = col_time(format = "%T"),
+    max_growth_death_rate = col_double(),
+    time_to_stationary = col_time(format = "%T")
+  )
+) %>%
+  filter(measure_env %in% c("bact", "bact_strep")) %>% 
+  filter(evolution_env %in% c("anc", "bact", "bact_strep")) %>% 
+  mutate(
+    measure_env_short = case_when(
+      measure_env == "bact" ~ "Meas: B",
+      measure_env == "bact_strep" ~ "Meas: BS"
+    )
+  ) %>%
+  mutate(
+    home_env_short = case_when(
+      evolution_env == "anc" ~ "Home: Anc",
+      evolution_env == "bact" ~ "Home: B",
+      evolution_env == "bact_strep" ~ "Home: BS"
+    )
+  ) %>%
+  mutate(
+    measure_env_short = factor(
+      measure_env_short,
+      levels = c("Meas: B", "Meas: BS")
+    ),
+    home_env_short = factor(
+      home_env_short,
+      levels = c("Home: Anc", "Home: B", "Home: BS")
+    ),
+    replicate = factor(replicate),
+    clone_id = factor(clone_id)
+  )
+```
+
+Blacklist (i.e., samples that have been manually inspected and should be excluded due to strange features)
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+blacklist <- read_tsv(here::here(data_cl, "blacklist.tsv"))
+```
+
+Growth summary data 
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+auc_grates <- readr::read_tsv(here::here(data_cl, "auc_mumax_results.tsv"))
+```
+
+# Formatting
+
+Anti join black list to growth curves to remove the bad growth curves and join to experiment metadata
+
+```{r}
+auc_gr_md <- inner_join(auc_grates, mddf, by = join_by(plate, well)) %>%
+  anti_join(blacklist, by = join_by(plate, well))
+```
+
+Subset, pivot, and calculate difference between bacteria only and bacteria + streptomycin. In the variables it is called fitness although that is kind of a misnomer. What it actually measures is the excess growth of each clone without streptomycin relative to growth of that same clone with streptomycin.
+
+# Compare AUC
+
+## Plot raw data
+
+::: {#fig-01}
+```{r}
+#| fig.width: 7
+#| fig.height: 4
+p01 <- ggplot2::ggplot(auc_gr_md, aes(x = interaction(measure_env, evolution_env), y = auc)) +
+  ggplot2::geom_point(position=position_jitter(width=0.35), size=3, alpha = 0.35, stroke = 0) +
+  ggplot2::labs(x = "Measure env:Evol hist", y = "Area under growth curve (AUC, unitless)") +
+  ggplot2::theme_bw()
+
+p01
+```
+Area under the growth curve for 32 randomly isolated clones from six replicates of each evolutionary history (background/`bact`, streptomcyin/`bact_strep`) grown either with or without streptomycin (`bact` or `bact_strep`, respectively). The horizontal axis shows the interaction of evolutionary history and measurement environment (e.g., the first column shows background evolved bacteria grown without streptomycin).
+:::
+
+A couple features to note... The difference in AUC with or without streptomycin appears small for streptomycin evolved clones (`bact_strep:bact` vs `bact_strep:bact_strep`). Clones from the streptomycin evolved community do not obviously appear to have suffered some kind of cost of resistance when growing without streptomycin. However, the differences in AUC with/without streptomycin are quite large for clones isolated from the background-evolved communities (`bact:bact` vs `bact:bact_strep`). Thus, many streptomycin sensitive clones appear to have been isolated from background community. 
+
+## LMM fit
+
+This models auc as a function of evolution history the measurement condition and the interaction between the two. We used replicate with clone_id nested within replicate as random effects (clones were measured more than once). We are using `brms` here so the traditional frequentist p-value doesn't apply. Instead we think about the proportion of the posterior that has a consistent direction (e.g., over/under 0).
+
+```{r}
+#| eval: false
+set.seed(37814)
+brmmod <- brms::brm(auc ~ evolution_env*measure_env + (1|replicate/clone_id), data = auc_gr_md)
+```
+
+```{r}
+#| include: false
+#| eval: false
+write_rds(brmmod, here::here(data_cl, "brmmod"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| eval: true
+brmmod <- read_rds(here::here(data_cl, "brmmod"))
+```
+
+
+### Posterior predictive check 
+
+doesn't suggest anything amiss
+
+::: {#fig-02}
+```{r}
+#| fig.width: 7
+#| fig.height: 4
+#| echo: false
+#| warning: false
+brms::pp_check(brmmod, type = "dens_overlay", ndraws = 50) +
+  ggplot2::labs(x = "AUC")
+```
+Density overlay posterior predictive check from 50 posterior draws. Vertical = density distribution of posterior (yrep) compared to observed data (y), horizontal = AUC values
+:::
+
+### Convergence check
+
+All chains appear to have converged
+
+::: {#fig-03}
+```{r}
+#| fig.width: 7
+#| fig.height: 9
+#| echo: false
+#| warning: false
+plot(brmmod, nvariables = 7, plot = T)
+```
+Left: histogram of estimated model parameters. Right: traces of MCMC chains
+:::
+
+
+### Model parameters
+
+```{r}
+parameters::model_parameters(brmmod)
+```
+
+### Model Contrasts
+
+```{r}
+modelbased::estimate_contrasts(brmmod, contrast = c("evolution_env", "measure_env"))
+```
+
+What the contrast analysis shows is what was apparent from looking at @fig-01. Basically, clones from the streptomycin evolved communities don't have significant growth differences with or without streptomycin, while clones from the background evolved communities do. This is pretty unsurprising I think.
+
+# Compare strep sensitivity of resistant clones
+
+In @fig-01 it is clear that there are many clones from the background evolutionary history with poor growth in the streptomycin conditions (i.e., high streptomycin sensitivity). Since each clone was phenotyped in both measurement environments we can calculate a streptomycin 'growth sensitivity' as
+
+$$
+S_{i,j} = A_{i,j} - A_{i,j}^{STR}
+$$
+Where $S_{i,j}$ is the sensitivity of clone $i$ from microcosm $j$ to streptomycin, $A_{i,j}$ is the AUC for clone $i$ from microcosm $j$ growth *without* streptomycin and $A_{i,j}^{STR}$ is the AUC for clone $i$ from microcosm $j$ growth *with* streptomycin.
+
+When $S_{i,j} \gt 0$ then the clone has more growth in the absence of streptomycin. If there is a clear growth differences between streptomycin and no-streptomycin conditions we should expect $S_{i,j} \gt 0$. Alternatively, if a clone grows equally well with or without streptomycin then we could expect $S_{i,j} \approx 0$.
+
+```{r}
+auc_gr_md_subset <- auc_gr_md %>%
+  dplyr::select(
+    auc,
+    measure_env,
+    evolution_env,
+    replicate,
+    clone_id
+  ) %>% 
+  pivot_wider(id_cols = c("evolution_env", "replicate", "clone_id"), 
+              names_from = measure_env, values_from = auc) %>% 
+  mutate(fitness = bact - bact_strep) %>% 
+  mutate(flag = if_else(fitness < 5, TRUE, FALSE))
+```
+
+Here we plot sensitivity for the two community evolutionary histories. Most clones from the streptomycin evolved community have an excess growth $\approx 0$ (@fig-01). This indicates that the overwhelming majority of isolated clones were streptomycin resistant and growth under both conditions was similar. Many clones from the background evolved community have *high* growth excesses (values > 10, @fig-01). This indicates that many streptomycin sensitive clones were isolated from the background evolved community. However, there are also many clones with growth excess $\approx 0$ which indicates that innately streptomycin resistant clones were also isolated from the background evolved community.
+
+## Plot strep sensitivity
+
+```{r}
+pexg <- tidyr::drop_na(auc_gr_md_subset) %>% 
+  ggplot2::ggplot(aes(x = evolution_env, y = fitness)) +
+  ggplot2::geom_boxplot(data = filter(auc_gr_md_subset, fitness < 5), outliers = FALSE) +
+  ggplot2::geom_point(position=position_jitter(width=0.35), size=3, alpha = 0.35, stroke = 0) +
+  ggplot2::labs(x = "Home environment", y = "STR sensitivity") +
+  ggforce::facet_zoom(y = flag == TRUE) +
+  ggplot2::theme_bw()
+```
+
+::: {#fig-04}
+```{r}
+#| fig.width: 7
+#| fig.height: 4
+#| echo: false
+#| warning: false
+pexg
+```
+Community streptomycin sensitivity from different evolutionary histories of the pre-experiment.
+:::
+
+## Sensitivity of intrinisically resistant clones
+
+Note that above we observed clones from both evolution treatments that were intrinsically resistant to streptomycin. One question is whether the resistant clones from the background evolved community have a higher streptomycin sensitivity compared to resistant clones from the streptomycin evolved community. I would predict that clones from the background community that were already quite streptomycin resistant have a higher ($S$) sensitivity than those from the streptomycin evolved community because clones from the strep community would have had time to adapt/evolve to streptomycin. 
+
+We can test this prediction using a linear model for ($S$) sensitivity as a function of the evolution environment. First we filter to only include intrinsically resistant clones (operationally defined as those with sensitivity less than 5). Then we fit the model but with zero intercept so that we compare each group to 0 instead of using one group as the intercept.
+
+```{r}
+auc_gr_md_subset_filt <- auc_gr_md_subset %>% 
+  filter(flag == T) %>% 
+  mutate(evolution_env = factor(evolution_env, levels = c("bact", "bact_strep")))
+```
+
+### LMM Fit
+
+```{r}
+#| eval: false
+set.seed(8435)
+brmmod0 <- brms::brm(fitness ~ 0 + evolution_env + (1|replicate), data = auc_gr_md_subset_filt)
+```
+
+```{r}
+#| eval: false
+#| include: false
+write_rds(brmmod0, here::here(data_cl, "brmmod0"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| eval: true
+brmmod0 <- read_rds(here::here(data_cl, "brmmod0"))
+```
+
+### Posterior predictive check 
+
+doesn't suggest anything amiss
+
+::: {#fig-05}
+```{r}
+#| fig.width: 7
+#| fig.height: 4
+#| echo: false
+#| warning: false
+brms::pp_check(brmmod0, type = "dens_overlay", ndraws = 50)
+```
+Density overlay posterior predictive check from 50 posterior draws. Vertical = density distribution of posterior (yrep) compared to observed data (y), horizontal = AUC values
+:::
+
+### Convergence check
+
+All chains appear to have converged
+
+::: {#fig-06}
+```{r}
+#| fig.width: 7
+#| fig.height: 7
+#| echo: false
+#| warning: false
+plot(brmmod0, nvariables = 7, plot = T)
+```
+Left: histogram of estimated model parameters. Right: traces of MCMC chains
+:::
+
+### Model parameters
+
+```{r}
+parameters::model_parameters(brmmod0)
+```
+
+So the results from the zero intercept model show that resistant clones from the background evolutionary history have a median Streptomycin sensitivity of 0.43 with a probability of direction (pd) of 95.5% while clones from the streptomycin evolutionary history communities have a mean sensitivity of -0.06 with a pd of about 62%. Sensitivity from the streptomycin history is statistically indistinguishable from zero, which makes sense and is consistent with what we saw in @fig-04. 
+
+However, it seems that resistant clones from the background community have a small but significantly higher sensitivity to streptomycin. Overall I don't think this is too surprising that naturally resistant clones isolated from the evolution conditions with streptomycin are less sensitive to stretomycin than those that were evolving without it. 
+
+
+# Final combined plot of AUC and S
+
+::: {#fig-07}
+```{r}
+#| fig.width: 7
+#| fig.height: 7
+#| echo: false
+#| warning: false
+pf <- p01 / pexg + plot_annotation(tag_levels = "A")
+pf
+```
+A) Area under the growth curve for 32 randomly isolated clones from six replicates of each evolutionary history (background/`bact`, streptomcyin/`bact_strep`) grown either with or without streptomycin (`bact` or `bact_strep`, respectively). The horizontal axis shows the interaction of measurement environment with evolutionary history (e.g., the first column shows the no-streptomycin measurement for background evolved bacteria). Community streptomycin sensitivity from different evolutionary histories of the pre-experiment. For each clone phenotyped with or without streptomcyin the streptomycin sensitivity is defined as $S_{i,j} = A_{i,j} - A_{i,j}^{STR}$ where $S_{i,j}$ is the sensitivity of clone $i$ from microcosm $j$ to streptomycin, $A_{i,j}$ is the AUC for clone $i$ from microcosm $j$ growth *without* streptomycin and $A_{i,j}^{STR}$ is the AUC for clone $i$ from microcosm $j$ growth *with* streptomycin.
+:::
+
+## Export
+```{r}
+ggplot2::ggsave(
+  here::here(figs, "monoculture_clone_phenotyping_auc.svg"),
+  pf,
+  width = 7,
+  height = 7,
+  units = "in",
+  device = "svg"
+)
+
+ggplot2::ggsave(
+  here::here(figs, "monoculture_clone_phenotyping_auc.png"),
+  pf,
+  width = 7,
+  height = 7,
+  units = "in",
+  device = "png"
+)
+```
+

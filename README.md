@@ -1,30 +1,31 @@
-# hambiYSKpleiotropy
+# hambiEvoVEnv
 
-[Click here to view rendered notebooks of the analysis.](https://hambidoubleevohi-slhogl-14191cd40bf1aa9a3beb400287f1505ccad06ec.utugit.fi/)
+[Click here to view rendered notebooks of the analysis.](https://slhogle.github.io/hambiEvoVEnv/)
 
 ## Manuscript:
 
-"TBD"
+◇ Corresponding author
 
-[Preprint available from bioRxiv]()
+### Published record
 
-## Data
+**A shared history shapes community response to the environment.**\
+Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. *XYZ* (2024/5) [doi:]()
 
-Data and code here is provided under GPL3. Feel free to use or remix as you see fit.
+### Preprint
 
-[![DOI](https://zenodo.org/badge/411568623.svg)](https://zenodo.org/badge/latestdoi/411568623)
-
-### Project structure
-1.  `/R` contains R scripts
-2.  `/data` contains data that has been processed in some way for later use
-3.  `/_data_raw` contains unprocessed data scraped from compute cluster
-4.  `/figs` contains figures generated from R scripts
+**A shared history shapes community response to the environment.**\
+Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. *BioRxiv* (2024/5) [doi:]()
 
 ## Availability
 
-The rendered project site is available at <https://hambidoubleevohi-slhogl-14191cd40bf1aa9a3beb400287f1505ccad06ec.utugit.fi/>. The website has been produced using [Quarto notebooks](https://quarto.org/).
+Data and code in this GitHub repository (<https://github.com/slhogle/hambiEvoVEnv>) is provided under [GNU AGPL3](https://www.gnu.org/licenses/agpl-3.0.html).
+The rendered project site is available at <https://slhogle.github.io/hambiEvoVEnv/>, which has been produced using [Quarto notebooks](https://quarto.org/). 
+The content on the rendered site is released under the [CC BY 4.0.](https://creativecommons.org/licenses/by/4.0/)
+This repository hosts all code and data for this project including the code necessary to fully recreate the rendered webpage.
 
-This GitLab repository (<https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy>) hosts the code and data for this project. The rendered webpage can be fully recreated using the code at <https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy>. 
+An archived release of the code here is available from Zenodo: 
+
+Raw sequencing data using in the project is available from NCBI Bioproject []().
 
 ## Reproducibility
 

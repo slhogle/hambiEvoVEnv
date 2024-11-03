@@ -1,0 +1,429 @@
+---
+title: "Predator and STR Community species composition workflow ii) analysis of community composition"
+author: "Shane Hogle"
+date: today
+link-citations: true
+---
+
+# Setup
+
+Loads required libraries and sets global variables
+
+```{r}
+#| output: false
+library(tidyverse)
+library(here)
+library(fs)
+library(scales)
+library(ggh4x)
+library(Rtsne)
+library(patchwork)
+library(philentropy)
+source(here::here("R", "utils_generic.R"))
+```
+
+# Read data
+
+Read species abundance data (16S v3 amplicon counts) and do some light formatting of metadata 
+
+```{r}
+#| output: false
+#| warning: false
+sptable <- readr::read_tsv(here::here(data_stp_sp, "species_counts_md.tsv")) %>% 
+  dplyr::mutate(transfer = day/7)
+
+counts_f <- sptable %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::mutate(f=count_correct/sum(count_correct)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(measure_env_short = dplyr::case_when(measure_env == "bact" ~ "Meas: B",
+                                       measure_env == "bact_pred" ~ "Meas: BP",
+                                       measure_env == "bact_strep" ~ "Meas: BS",
+                                       measure_env == "bact_pred_strep" ~ "Meas: BPS")) %>% 
+  dplyr::mutate(home_env_short = dplyr::case_when(evolution_env == "anc" ~ "Home: Anc",
+                                    evolution_env == "bact" ~ "Home: B",
+                                    evolution_env == "bact_pred" ~ "Home: BP",
+                                    evolution_env == "bact_strep" ~ "Home: BS",
+                                    evolution_env == "bact_pred_strep" ~ "Home: BPS")) %>% 
+  dplyr::mutate(measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BP", "Meas: BS", "Meas: BPS")),
+         home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+# Formatting
+
+Some light formatting to subset data into distint tibbles for later plotting
+
+```{r}
+#| output: false
+#| warning: false
+# these are communities of a (supposedly) known composition. Can be used with metacal
+pos_ctrl_samples <- counts_f %>% 
+  dplyr::filter(str_detect(sample, "pos_ctrl"))
+
+# these are samples taken directly from YSK and represent the composition of the communities used to start the experiment
+t0_samples <- counts_f %>% 
+  dplyr::filter(!str_detect(sample, "pos_ctrl")) %>% 
+  dplyr::filter(day == 0)
+
+# only samples from the experiment
+counts_f_experiment <- dplyr::anti_join(counts_f, pos_ctrl_samples) %>% 
+  dplyr::anti_join(., t0_samples) %>% 
+  dplyr::mutate(measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BP", "Meas: BS", "Meas: BPS")),
+         home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+# Visualize Community composition
+
+Using ggplot2 to plot bar plots of species composition from the experiment and the intial material used to seed the experiment
+
+```{r}
+# custom barplot theme
+mybartheme <- function(...){
+  ggplot2::theme(
+    panel.spacing = unit(0.5,"line"),
+    strip.placement = 'outside',
+    strip.background = element_blank(),
+    panel.grid = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    #axis.text.x = element_blank(),
+    axis.line.x = element_line(color = "black"),
+    axis.line.y = element_line(color = "black"),
+    legend.title = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    legend.position = "bottom",
+    ...)
+}
+
+# Base function for making the subplots
+basebar <- function(.data, x = x, xlab = xlab, xgrid = NULL){
+  ggplot2::ggplot(.data) +
+  ggplot2::geom_bar(aes(y = f, x = {{ x }}, fill = strainID), color="black", linewidth=0.25, stat="identity") +
+  ggplot2::labs(x = xlab, y="% abundance", fill="") + 
+  ggplot2::scale_fill_manual(values = hambi_colors) + 
+  ggplot2::scale_y_continuous(limits = c(0,1.01), expand = c(0, 0), labels = percent) +
+  ggplot2::scale_x_discrete(guide = ggh4x::guide_axis_nested()) +
+  ggplot2::theme_bw() +
+  mybartheme()
+}
+
+A <- t0_samples %>% 
+  dplyr::filter(evolution_env == "anc") %>% 
+  basebar(x = replicate, xlab = "Replicate") +
+  ggplot2::facet_grid( ~ home_env_short)
+
+B <- t0_samples %>% 
+  dplyr::filter(evolution_env != "anc") %>% 
+  basebar(x = replicate, xlab = "Replicate") +
+  ggplot2::facet_grid( ~ home_env_short)
+
+C <- counts_f_experiment %>% 
+  dplyr::filter(evolution_env == "anc") %>% 
+  basebar(x = interaction(replicate, transfer), xlab = "Replicate | Growth Cycle") +
+  ggplot2::facet_grid(measure_env_short ~ home_env_short)
+
+D <- counts_f_experiment %>% 
+  dplyr::filter(evolution_env != "anc") %>% 
+  basebar(x = interaction(replicate, transfer), xlab = "Replicate | Growth Cycle") +
+  ggplot2::facet_grid(measure_env_short ~ home_env_short)
+```
+
+Makes a final patchwork object and saves the results as raster and vector
+
+```{r}
+#| warning: false
+layout <- "
+ABBBB
+CDDDD
+"
+
+pbar <- A + B + C + D  +
+  patchwork::plot_layout(guides = 'collect', heights = c(0.2, 0.9), 
+              design = layout) +
+  patchwork::plot_annotation(tag_levels = 'A') &
+  ggplot2::theme(legend.position='bottom')
+
+ggplot2::ggsave(
+  here::here(figs_stp, "community_composition_bar_plot.svg"),
+  pbar,
+  width = 8,
+  height = 10,
+  units = "in",
+  device = "svg"
+)
+
+ggplot2::ggsave(
+  here::here(figs_stp, "community_composition_bar_plot.png"),
+  pbar,
+  width = 8,
+  height = 10,
+  units = "in",
+  device = "png"
+)
+```
+
+::: {#fig-01}
+```{r}
+#| fig.width: 8
+#| fig.height: 10
+#| echo: false
+#| warning: false
+pbar
+```
+
+Relative abundance (Y axis, percent) of species from replicate microcosms (X axis, A-F). **A)** Community composition of the ancestral/clonal replicates inocula used to start experiments in C. **B)** Composition of the long-term community evolution experiment (YSK, week X) communities from each selection condition. These communities were used to inoculate the transplantation experiment in part D. **C)** Composition of the ancestral/clonal replicate communities after 4, 8, and 12 transfers in each measurement environment (grid rows). **D)** Composition of the YSK communities (grid columns, "home" environment) subjected to all possible measurement conditions (grid rows). B = bacteria grown without amendment, BS = streptomycin treatment, BP = *Tetrahymena thermophila* treatment, BPS = combined *Tetrahymena thermophila* and streptomycin treatment.
+:::
+
+# tSNE dimension reduction of community composition
+
+Some preliminary inspections of the number of samples with zeros. This is needed for zcompositions
+
+```{r}
+counts_f_experiment %>% 
+  dplyr::group_by(strainID) %>% 
+  dplyr::summarize(n_samples = n(),
+            n_gt0 = sum(count > 0),
+            p_gt0 = n_gt0 / n_samples) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::arrange(n_gt0)
+```
+
+Here we will use the [centered log-ratio transformation](https://en.wikipedia.org/wiki/Compositional_data#Center_log_ratio_transform) for the species abundances. The centered log-ratio can be interpreted as the log-fold change of species i relative to the average microbe in a sample. The formula for the transformation is:
+
+$$
+\text{clr}(\mathbf x)= \left(log
+\frac{x_i}{g(\mathbf x)} \right)_{i=1,...,D} \qquad \text{with} \quad
+g(\mathbf x) = \left(\prod_{i=1}^Dx_i\right)^{1/D} =
+\exp\left(\frac{1}{D}\sum_{i=1}^D \log x_i\right)\text{,}
+$$ {#eq-clr}
+
+We will use the implementation of centered log-ratio transform in the `compositions` package
+
+```{r}
+set.seed(234781)
+
+# exclude these species because they have too many zeros
+lowstrainsv <- c(
+  "HAMBI_0097",
+  "HAMBI_2792"
+)
+
+# make a species count matrix
+mymat <- counts_f_experiment %>% 
+  dplyr::filter(!(strainID %in% lowstrainsv)) %>% 
+  dplyr::select(sample, strainID, count) %>% 
+  dplyr::mutate(count = count + 1) %>% 
+  # important to arrange by sample as this makes some later joins easier
+  dplyr::arrange(sample) %>% 
+  tidyr::pivot_wider(names_from = "strainID", values_from = "count") %>% 
+  tibble::column_to_rownames(var = "sample") %>% 
+  data.frame()
+
+# calculate clr
+balclr <- compositions::clr(mymat)
+
+# tsne
+mymat_tsne <- Rtsne::Rtsne(as.matrix(balclr), perplexity = 30, dims = 2)
+```
+
+Define a plotting function to plot the tSNE output
+
+```{r}
+ptsne <- function(tsne_obj, variable, colors){
+  data.frame(tsne_obj$Y) %>% 
+  cbind(dplyr::distinct(dplyr::select(counts_f_experiment, sample, replicate, transfer, measure_env_short, home_env_short))) %>% 
+  ggplot2::ggplot() +
+  ggplot2::geom_point(aes(x= X2, y = X1, color = {{ variable }}), alpha = 0.8) +
+  ggplot2::scale_y_continuous(breaks = c(10, 0, -10)) +
+  ggplot2::coord_fixed() + 
+  ggplot2::labs(x = "tSNE dimension 1", 
+       y = "tSNE dimension 2", 
+       shape = "Transfer") +
+  ggplot2::scale_color_manual(values = colors) +
+  ggplot2::facet_grid(~transfer, labeller = label_both) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    strip.placement = 'outside',
+    strip.background = element_blank(),
+  ) 
+}
+```
+
+Call the plotting function, make the patchwork layout, and save in raster and vector format
+
+```{r}
+pm <- ptsne(mymat_tsne, measure_env_short, c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c")) +
+  ggplot2::labs(color = "Measure\nenvironment")
+ph <- ptsne(mymat_tsne, home_env_short, c("#fdbf6f", "#a6cee3", "#1f78b4", "#b2df8a", "#33a02c")) +
+  ggplot2::labs(color = "Home\nenvironment")
+
+pt <- pm + ph +
+  patchwork::plot_layout(guides = 'collect', nrow = 2) +
+  patchwork::plot_annotation(tag_levels = 'A')
+
+ggplot2::ggsave(
+  here::here(figs_stp, "community_composition_bar_tsne.svg"),
+  pt,
+  width = 8,
+  height = 6,
+  units = "in",
+  device = "svg"
+)
+
+ggplot2::ggsave(
+  here::here(figs_stp, "community_composition_tsne.png"),
+  pt,
+  width = 8,
+  height = 6,
+  units = "in",
+  device = "png"
+)
+```
+
+::: {#fig-02}
+```{r}
+#| fig.width: 8
+#| fig.height: 6
+#| echo: false
+#| warning: false
+pt
+```
+
+Dimensional reduction of bacterial community composition using t-SNE. Each point represents a replicate microcosm sampled at serial transfers 4, 8, and 12 (grid columns). In **A)** point colors depict the experimental measurement condition from the transplantation experiment. In **B)** point colors depict the evolutionary history of the inoculating communities ("home environment").
+:::
+
+# Distances between communities
+
+The Jensen–Shannon divergence (JSD) is a symmetrized and smoothed version of the [Kullback–Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence "Kullback–Leibler divergence"). It is defined as:
+
+$$
+D_{\text{JS}}(P \parallel Q) = \frac{1}{2} D_{\text{KL}}(P \parallel M) + \frac{1}{2} D_{\text{KL}}(Q \parallel M)
+$$ {#eq-JSD}
+
+$$
+M = \frac{1}{2}(P + Q)
+$$ {#eq-avg_dist}
+
+Here, ($D_{\text{KL}}$) denotes the Kullback-Leibler divergence which is defined as:
+
+$$
+D_{KL}(P \parallel Q) = \sum_{x \in \mathcal{X}} P(x) \log \frac{P(x)}{Q(x)}
+$$ {#eq-KLD}
+
+```{r}
+# create a matrix of species frequencies
+prob_mat <- counts_f_experiment %>% 
+  dplyr::select(sample, strainID, f) %>% 
+  tidyr::pivot_wider(names_from = strainID, values_from = f) %>% 
+  tibble::column_to_rownames(var = "sample") %>% 
+  as.matrix()
+
+# calculate JSD between all pairs using philentropy::JSD
+jsd_mat <- philentropy::JSD(prob_mat)
+
+# get nonredundant pairings
+ind <- which(upper.tri(jsd_mat, diag = TRUE), arr.ind = TRUE)
+nn <- list(rownames(prob_mat), rownames(prob_mat))
+jsddf <- data.frame(sample.x = nn[[1]][ind[, 1]],
+           sample.y = nn[[2]][ind[, 2]],
+           jsd = jsd_mat[ind])
+
+# metadata for joining
+md <- dplyr::distinct(counts_f_experiment, sample, replicate, transfer, measure_env_short, home_env_short)
+
+# convert to long format
+jsddf_long_md <- jsddf %>% 
+  dplyr::left_join(md, by = join_by(sample.x==sample)) %>% 
+  dplyr::left_join(md, by = join_by(sample.y==sample))
+```
+
+Filter JSD pairs to only those that are relative to ancestral community in each measurement environment. Also calculate mean and boostrapped 95CI using HMisc
+
+```{r}
+
+jsddf_long_md_filt <- jsddf_long_md %>% 
+  dplyr::filter(measure_env_short.x == measure_env_short.y) %>% 
+  dplyr::filter(home_env_short.x != home_env_short.y & transfer.x == transfer.y & home_env_short.x == "Home: Anc") %>% 
+  dplyr::summarize(ggplot2::mean_cl_boot(jsd), .by=c(transfer.y, home_env_short.y, measure_env_short.y)) %>% 
+  dplyr::mutate(home_env_short.y = factor(home_env_short.y))
+```
+
+Hmmm.... not sure what exactly this is telling, but I am calculating the within home/measurement divergence as some kind of variability baseline.
+
+```{r}
+intrarepvar <- jsddf_long_md %>% 
+  dplyr::filter(measure_env_short.x == measure_env_short.y & home_env_short.x == home_env_short.y & transfer.x == transfer.y) %>% 
+  dplyr::summarize(ggplot2::mean_cl_boot(jsd), .by=c(transfer.y, home_env_short.y, measure_env_short.y)) %>% 
+  dplyr::filter(home_env_short.y != "Home: Anc") %>% 
+  dplyr::mutate(home_env_short.y = factor(home_env_short.y))
+```
+
+Make plot of JSD to ancestral communities in each condition and save in raster/vector format
+
+```{r}
+mycols <- c("Home: B" = "#a6cee3", "Home: BP" = "#1f78b4", "Home: BS" = "#b2df8a", "Home: BPS" = "#33a02c")
+
+pjsd <- ggplot2::ggplot() +
+  ggplot2::geom_ribbon(data = intrarepvar, 
+              aes(x = transfer.y, ymin = ymin, ymax=ymax, fill = home_env_short.y), alpha=0.25) + 
+  ggplot2::geom_line(data = intrarepvar, 
+            aes(x = transfer.y, y=y, color = home_env_short.y), alpha=0.5, lty=2) + 
+  ggplot2::geom_point(data = jsddf_long_md_filt, aes(x = transfer.y, y = y, group = home_env_short.y, color = home_env_short.y)) +
+  ggplot2::geom_linerange(data = jsddf_long_md_filt, 
+                 aes(x = transfer.y, ymin = ymin, ymax = ymax, color = home_env_short.y)) + 
+  ggplot2::geom_line(data= jsddf_long_md_filt, 
+            aes(x = transfer.y, y = y, group = home_env_short.y, color = home_env_short.y)) + 
+  ggplot2::facet_grid(measure_env_short.y ~ home_env_short.y) + #, scales = "free_y"
+  ggplot2::labs(x = "Growth Cycles", y = "Jensen-Shannon Divergence relative to ancestor", color = "Home\nEnvironment", fill = "Home\nEnvironment") +
+  #ggplot2::scale_y_sqrt() +
+  ggplot2::scale_x_continuous(breaks = c(4, 8, 12), limits = c(3.5, 12.5)) +
+  ggplot2::scale_color_manual(values=mycols) +
+  ggplot2::scale_fill_manual(values=mycols) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    #panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    strip.placement = 'outside',
+    strip.background = element_blank(),
+  )
+
+ggplot2::ggsave(
+  here::here(figs_stp, "community_jsd_to_anc.svg"),
+  pjsd,
+  width = 8,
+  height = 6,
+  units = "in",
+  device = "svg"
+)
+
+ggplot2::ggsave(
+  here::here(figs_stp, "community_jsd_to_anc.png"),
+  pjsd,
+  width = 8,
+  height = 6,
+  units = "in",
+  device = "png"
+)
+```
+
+::: {#fig-03}
+```{r}
+#| fig.width: 8
+#| fig.height: 6
+#| echo: false
+#| warning: false
+pjsd
+```
+Mean $\pm$ 95% CI of the pairwise Jensen-Shannon Divergence between the ancestral/clonal community composition (@fig-01 C) and the community composition in YSK Home environments (Home, grid columns) for each measurement environment (Meas, grid rows) in the transplantation experiment (see also @fig-01 D). Mean divergences are nested within Growth Cycles (horizontal axis) where one growth cycle is 7 days. Dashed lines indicate mean and ribbons indicate 95% CI for the mean within-condition Jensen-Shannon Divergence and is meant as an indicator of replicate variability within each Home/Measurement treatment combination.
+:::

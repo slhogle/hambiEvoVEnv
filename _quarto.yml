@@ -7,38 +7,62 @@ project:
   output-dir: docs
 
 website:
-  title: "hambiYSKpleiotropy data analysis"
+  title: "hambiYSKpleiotropy"
   sidebar:
     style: "docked"
     background: light
     search: true
     contents:
-      - section: "1. Community growth - Bacteria and ciliate densities"
+      - section: "1. Community densities workflow (STR)"
         contents:
           - text: "i) Process and plot densities"
-            file: R/communities/cell_density/01_analysis.qmd
-      - section: "2. Community growth - amplicon composition"
+            file: R/strep_only/communities/cell_density/01_analysis.qmd
+      
+      - section: "2. Community composition workflow (STR)"
         contents:
-          - text: "i) 20240318_BTK_illumina_v3 / Data wrangling and QC"
-            file: R/communities/amplicon/20240318_BTK_illumina_v3/01_format_rbec_tab.qmd
-          - text: "ii) Analysis of community composition"
-            file: R/communities/amplicon/01_composition_analysis.qmd
+          - text: "i) Amplicon data wrangling"
+            file: R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.qmd
+          - text: "ii) Community composition"
+            file: R/strep_only/communities/amplicon_sp_counts/02_composition_analysis.qmd
           - text: "iii) Machine learning the home environment"
-            file: R/communities/amplicon//02_machine_learn_home_env.qmd
-      - section: "3. Clones monoculture growth"
+            file: R/strep_only/communities/machine_learning_pipelines/01_machine_learn_home_env.qmd
+
+      - section: "3. Clones workflow (STR)"
         contents:
-          - text: "i) Inspect and format growth curves"
-            file: R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.qmd
-          - text: "ii) Estimate growth rates"
-            file: R/monoculture/20230112_clone_phenotyping/02_growth_rate_analysis.qmd
-          - text: "iii) AUC and growth rate plots"
-            file: R/monoculture/20230112_clone_phenotyping/03_auc_analysis.qmd
+          - text: "i) Inspect/Smooth curves"
+            file: R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.qmd
+          - text: "ii) Summarize curves"
+            file: R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.qmd
+          - text: "iii) Analysis and plot"
+            file: R/strep_only/monocultures/clone_phenotyping/03_growth_summary_analysis.qmd
+
+      - section: "1A. Community densities workflow (Predator and STR)"
+        contents:
+          - text: "i) Process and plot densities"
+            file: R/strep_predator/communities/cell_density/01_analysis.qmd
+
+      - section: "2A. Community composition workflow (Predator and STR)"
+        contents:
+          - text: "i) Amplicon data wrangling"
+            file: R/strep_predator/communities/amplicon_sp_counts/01_format_rbec_tab.qmd
+          - text: "ii) Community composition"
+            file: R/strep_predator/communities/amplicon_sp_counts/02_composition_analysis.qmd
+          - text: "iii) Machine learning the home environment"
+            file: R/strep_predator/communities/machine_learning_pipelines/01_machine_learn_home_env.qmd
+
+      - section: "3A. Clones workflow (Predator and STR)"
+        contents:
+          - text: "i) Inspect/Smooth curves"
+            file: R/strep_predator/monocultures/clone_phenotyping/01_growth_curve_qc.qmd
+          - text: "ii) Summarize curves"
+            file: R/strep_predator/monocultures/clone_phenotyping/02_growthrate_auc.qmd
+          - text: "iii) Analysis and plot"
+            file: R/strep_predator/monocultures/clone_phenotyping/03_growth_summary_analysis.qmd
 
 format:
   html:
     theme:
       - cosmo
-      - mystyle.scss
     # include table of contents
     toc: true
     # when printing dataframes use rmarkdown::paged_table())
@@ -47,12 +71,15 @@ format:
     fig-width: 8
     fig-height: 6
     # tidy format R code upon render
-    tidy: true
+    tidy: false
     # include line numbers in code blocks
     code-line-numbers: true
     # The code-link option enables hyper-linking of functions within code blocks to their online documentation:
     #code-link: true
     number-sections: true
+    code-fold: show
+    code-summary: "Show/hide code"
+    code-tools: true
   
 # auto: re-render only when source changes   
 execute:

@@ -6,10 +6,12 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Shane Hogle">
-<meta name="dcterms.date" content="2024-10-08">
+<meta name="author" content="Shane L Hogle">
+<meta name="author" content="Niina Smolander">
+<meta name="dcterms.date" content="2024-11-03">
+<meta name="keywords" content="Microbiology, Ecology, Evolution, Antimicrobial resistance (AMR)">
 
-<title>hambiYSKpleiotropy data analysis - Data anlalysis for the project hambiYSKpleiotropy</title>
+<title>hambiYSKpleiotropy - Data analysis for the project hambiEvoVEnv</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -56,7 +58,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -102,6 +124,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -145,7 +169,7 @@ window.Quarto = {
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">
-      hambiYSKpleiotropy data analysis
+      hambiYSKpleiotropy
       </li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
@@ -161,7 +185,7 @@ window.Quarto = {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">hambiYSKpleiotropy data analysis</a> 
+      <a href="./">hambiYSKpleiotropy</a> 
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -174,7 +198,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">1. Community growth - Bacteria and ciliate densities</span></a>
+ <span class="menu-text">1. Community densities workflow (STR)</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -182,7 +206,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
+  <a href="./R/strep_only/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">i) Process and plot densities</span></a>
   </div>
 </li>
@@ -191,7 +215,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
- <span class="menu-text">2. Community growth - amplicon composition</span></a>
+ <span class="menu-text">2. Community composition workflow (STR)</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -199,19 +223,19 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/communities/amplicon/20240318_BTK_illumina_v3/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) 20240318_BTK_illumina_v3 / Data wrangling and QC</span></a>
+  <a href="./R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Amplicon data wrangling</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/communities/amplicon/01_composition_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">ii) Analysis of community composition</span></a>
+  <a href="./R/strep_only/communities/amplicon_sp_counts/02_composition_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Community composition</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/communities/amplicon/02_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
+  <a href="./R/strep_only/communities/machine_learning_pipelines/01_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">iii) Machine learning the home environment</span></a>
   </div>
 </li>
@@ -220,7 +244,7 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
- <span class="menu-text">3. Clones monoculture growth</span></a>
+ <span class="menu-text">3. Clones workflow (STR)</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -228,20 +252,95 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/monoculture/20230112_clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) Inspect and format growth curves</span></a>
+  <a href="./R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Inspect/Smooth curves</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/monoculture/20230112_clone_phenotyping/02_growth_rate_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">ii) Estimate growth rates</span></a>
+  <a href="./R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Summarize curves</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/monoculture/20230112_clone_phenotyping/03_auc_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">iii) AUC and growth rate plots</span></a>
+  <a href="./R/strep_only/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Analysis and plot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">1A. Community densities workflow (Predator and STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_predator/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Process and plot densities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">2A. Community composition workflow (Predator and STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_predator/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Amplicon data wrangling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_predator/communities/amplicon_sp_counts/02_composition_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Community composition</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_predator/communities/machine_learning_pipelines/01_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Machine learning the home environment</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+ <span class="menu-text">3A. Clones workflow (Predator and STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_predator/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Inspect/Smooth curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_predator/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Summarize curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_predator/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Analysis and plot</span></a>
   </div>
 </li>
       </ul>
@@ -256,17 +355,19 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#manuscript" id="toc-manuscript" class="nav-link active" data-scroll-target="#manuscript"><span class="header-section-number">1</span> Manuscript:</a></li>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">2</span> Introduction</a></li>
-  <li><a href="#the-long-term-community-evolution-experiment-ysk" id="toc-the-long-term-community-evolution-experiment-ysk" class="nav-link" data-scroll-target="#the-long-term-community-evolution-experiment-ysk"><span class="header-section-number">3</span> The long-term community evolution experiment (YSK)</a></li>
-  <li><a href="#experiment-overview" id="toc-experiment-overview" class="nav-link" data-scroll-target="#experiment-overview"><span class="header-section-number">4</span> Experiment overview</a></li>
-  <li><a href="#measurements-and-data-types" id="toc-measurements-and-data-types" class="nav-link" data-scroll-target="#measurements-and-data-types"><span class="header-section-number">5</span> Measurements and data types</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">6</span> Code</a>
+  <li><a href="#manuscript" id="toc-manuscript" class="nav-link active" data-scroll-target="#manuscript"><span class="header-section-number">1</span> Manuscript:</a>
   <ul class="collapse">
-  <li><a href="#project-structure" id="toc-project-structure" class="nav-link" data-scroll-target="#project-structure"><span class="header-section-number">6.1</span> Project structure</a></li>
+  <li><a href="#published-record" id="toc-published-record" class="nav-link" data-scroll-target="#published-record"><span class="header-section-number">1.1</span> Published record</a></li>
+  <li><a href="#preprint" id="toc-preprint" class="nav-link" data-scroll-target="#preprint"><span class="header-section-number">1.2</span> Preprint</a></li>
   </ul></li>
-  <li><a href="#availability" id="toc-availability" class="nav-link" data-scroll-target="#availability"><span class="header-section-number">7</span> Availability</a></li>
-  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility"><span class="header-section-number">8</span> Reproducibility</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">2</span> Introduction</a></li>
+  <li><a href="#experiment-overview" id="toc-experiment-overview" class="nav-link" data-scroll-target="#experiment-overview"><span class="header-section-number">3</span> Experiment overview</a>
+  <ul class="collapse">
+  <li><a href="#measurements-and-data-types" id="toc-measurements-and-data-types" class="nav-link" data-scroll-target="#measurements-and-data-types"><span class="header-section-number">3.1</span> Measurements and data types</a></li>
+  </ul></li>
+  <li><a href="#analysis-overview" id="toc-analysis-overview" class="nav-link" data-scroll-target="#analysis-overview"><span class="header-section-number">4</span> Analysis overview</a></li>
+  <li><a href="#availability" id="toc-availability" class="nav-link" data-scroll-target="#availability"><span class="header-section-number">5</span> Availability</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility"><span class="header-section-number">6</span> Reproducibility</a></li>
   </ul>
 </nav>
     </div>
@@ -275,24 +376,43 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Data anlalysis for the project hambiYSKpleiotropy</h1>
+<div class="quarto-title-block"><div><h1 class="title">Data analysis for the project hambiEvoVEnv</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Shane L Hogle <a href="https://orcid.org/0000-0003-2595-3863" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.utu.fi/en">
+            University of Turku
+            </a>
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Niina Smolander </p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.utu.fi/en">
+            University of Turku
+            </a>
+          </p>
+      </div>
+  </div>
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Shane Hogle </p>
-          </div>
-  </div>
-    
+      
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 8, 2024</p>
+      <p class="date">November 3, 2024</p>
     </div>
   </div>
   
@@ -300,72 +420,84 @@ window.Quarto = {
   </div>
   
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Microbiology, Ecology, Evolution, Antimicrobial resistance (AMR)</p>
+  </div>
+</div>
 
 </header>
 
 
 <section id="manuscript" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="manuscript"><span class="header-section-number">1</span> Manuscript:</h2>
-<p>“TBD”</p>
-<p><a href="">Preprint available from bioRxiv</a></p>
+<p>◇ Corresponding author</p>
+<section id="published-record" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="published-record"><span class="header-section-number">1.1</span> Published record</h3>
+<p><strong>A shared history shapes community response to the environment.</strong><br>
+Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. <em>XYZ</em> (2024/5) <a href="">doi:</a></p>
+</section>
+<section id="preprint" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="preprint"><span class="header-section-number">1.2</span> Preprint</h3>
+<p><strong>A shared history shapes community response to the environment.</strong><br>
+Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. <em>BioRxiv</em> (2024/5) <a href="">doi:</a></p>
+</section>
 </section>
 <section id="introduction" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">2</span> Introduction</h2>
-<p>This is project contains data from the HAMBI species Long-term Community Selection Experiment (YSK) that Amanda Silvenoinen used in her first PhD thesis experiment. Now Niina Smolander has taken over this project under my supervision.</p>
+<p>We consider the material and information legacies embedded within a synthetic microbial community that has been serially propagated for over 400 days. We ask whether ecological and evolutionary patterns exhibited by a microbial community in its long-term home environment are retained in a novel environment. Recent work has shown that when entire microbial communities are mixed or transplanted, they retain some degree of cohesion in function and composition <span class="citation" data-cites="rillig2015">(<a href="#ref-rillig2015" role="doc-biblioref">Rillig et al. 2015</a>)</span>. What causes communities to behave cohesively rather than collapsing into their constituents when subjected to abiotic or biotic pressures? When might we expect a cohesive community response instead of the aggregate responses of individual species?</p>
 </section>
-<section id="the-long-term-community-evolution-experiment-ysk" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="the-long-term-community-evolution-experiment-ysk"><span class="header-section-number">3</span> The long-term community evolution experiment (YSK)</h2>
-<p>The YSK experiment has been growing 24 HAMBI species in a community over a long-term period under four treatments:</p>
-<ol type="1">
-<li><code>bact</code> is the HAMBI community without any additional environmnetal stress - i.e.&nbsp;the control</li>
-<li><code>bact_strep</code> is the HAMBI community with streptomycin (what concentration?)</li>
-<li><code>bact_pred</code> is the HAMBI community grown with <em>Tetrahymena thermophila</em> ciliate predator</li>
-<li><code>bact_pred_strep</code> is the HAMBI community grown with both the predator and the streptomycin.</li>
-</ol>
-<p>In YSK 6 biological replicates were established for each of the four conditions above. These 4 <span class="math inline">\(\times\)</span> 6 microcosms have been serially transferred (every 7 days) for now almost 150 transfers (2 years 11 months) allowing species to sort and evolution to occur.</p>
-</section>
-<section id="experiment-overview" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="experiment-overview"><span class="header-section-number">4</span> Experiment overview</h2>
-<p>After ?? weeks of regular transfers of YSK, Amanda transplanted the 6 <span class="math inline">\(\times\)</span> microcosms per environment into each of the other environments resulting in a full factorial treatment design. She also included a treatment where a naive/ancestral HAMBI community was exposed to YSK conditions. She serially transferred this transplant experiment every 7 days into fresh media (same conditions as YSK) for a total of 12 weeks/transfers (84 days). Considering a weekly dilution factor of 1/10 in the serial transfer series, then <span class="math inline">\(\mathrm{log_2(10)} \approx 3.3\)</span> generations will have elapsed resulting in an evolutionary scale of <span class="math inline">\(3.3 \times 12 \approx 40\)</span> elapsed generations during the transplant experiment.</p>
-</section>
-<section id="measurements-and-data-types" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="measurements-and-data-types"><span class="header-section-number">5</span> Measurements and data types</h2>
+<section id="experiment-overview" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="experiment-overview"><span class="header-section-number">3</span> Experiment overview</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figs/strep_only/exp_design.png" class="img-fluid figure-img"></p>
+<figcaption>Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.</figcaption>
+</figure>
+</div>
+<p>We first serially propagated a bacterial community, starting from clones of 23 soil and aquatic species <span class="citation" data-cites="hogle2024">(<a href="#ref-hogle2024" role="doc-biblioref">Hogle, Tamminen, and Hiltunen 2024</a>)</span>, for 406 days in two different conditions: a low-carbon, complex growth medium with and without the antibiotic streptomycin. We refer to these as “evolved” communities. We isolated 32 clones from each evovlved microcosm and phenotyped them both home environments to determine mean community fitness in each environment. We then reciprocally transplanted each of these evolved communities into the other’s home environment, with a clonal ancestor community serving as a reference. We allowed the experimental communities to grow for a further 84 days, measuring community composition at three different points and sequencing community genomes from the end of the experiment, which allowed us to track the fate of mutations from the evolved communities in their new environments.</p>
+<section id="measurements-and-data-types" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="measurements-and-data-types"><span class="header-section-number">3.1</span> Measurements and data types</h3>
 <ul>
+<li>32 clones were isolated from each replicate microcosm of the community evolution pre-experiment. High-resolution growth curves were obtained for the clones (obtained using the log-phase 600)</li>
+<li>Bacterial optical density (<span class="math inline">\(\mathrm{OD_{600}}\)</span>) were measured at every weekly transfer</li>
 <li>Community DNA was sampled at all transfers.</li>
 <li>16S rRNA amplicon sequencing was performed at transfers 0, 4 (28 days), 8 (56 days), and 12 (84 days)</li>
-<li>Community genome (metagenome) sequencing was performed at transfers <strong>XYZ</strong></li>
-<li>Ciliate cell density and bacterial optical density (<span class="math inline">\(\mathrm{OD_{600}}\)</span>) were measured at every weekly transfer</li>
-<li>After <strong>X</strong> transfers, 32 clones were isolated from each replicate of the transplant microcosms. High-resolution growth curves were obtained for the clones (obtained using the log-phase 600)</li>
+<li>Community genome (metagenome) sequencing was performed at transfer 12 of the transplantation experiment and of the evolution treatments starting materials</li>
 </ul>
 </section>
-<section id="code" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="code"><span class="header-section-number">6</span> Code</h2>
-<p><a href="https://zenodo.org/badge/latestdoi/411568623"><img src="https://zenodo.org/badge/411568623.svg" class="img-fluid" alt="DOI"></a> Data and code here is provided under GPL3. Feel free to use or remix as you see fit.</p>
-<section id="project-structure" class="level3" data-number="6.1">
-<h3 data-number="6.1" class="anchored" data-anchor-id="project-structure"><span class="header-section-number">6.1</span> Project structure</h3>
-<ol type="1">
-<li><code>/R</code> contains R scripts</li>
-<li><code>/data</code> contains data that has been processed in some way for later use</li>
-<li><code>/_data_raw</code> contains unprocessed data scraped from compute cluster</li>
-<li><code>/figs</code> contains figures generated from R scripts</li>
-</ol>
 </section>
+<section id="analysis-overview" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="analysis-overview"><span class="header-section-number">4</span> Analysis overview</h2>
+<p>These notebooks allow the full reproduction of the data analysis from the sequencing data and clone phenotyping data. They include analyses of mean community fitness (from clone phenotypcing, for ploting species composition, for performing ordination on community composition, and machine learning to predict community history from the present community composition.</p>
 </section>
-<section id="availability" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="availability"><span class="header-section-number">7</span> Availability</h2>
-<p>The rendered project site is available at <a href="https://hambidoubleevohi-slhogl-14191cd40bf1aa9a3beb400287f1505ccad06ec.utugit.fi/" class="uri">https://hambidoubleevohi-slhogl-14191cd40bf1aa9a3beb400287f1505ccad06ec.utugit.fi/</a>. The website has been produced using <a href="https://quarto.org/">Quarto notebooks</a>.</p>
-<p>This GitLab repository (<a href="https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy" class="uri">https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy</a>) hosts the code and data for this project. The rendered webpage can be fully recreated using the code at <a href="https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy" class="uri">https://gitlab.utu.fi/slhogl/hambiYSKpleiotropy</a>.</p>
+<section id="availability" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="availability"><span class="header-section-number">5</span> Availability</h2>
+<p>Data and code in this GitHub repository (<a href="https://github.com/slhogle/hambiEvoVEnv" class="uri">https://github.com/slhogle/hambiEvoVEnv</a>) is provided under <a href="https://www.gnu.org/licenses/agpl-3.0.html">GNU AGPL3</a>. The rendered project site is available at <a href="https://slhogle.github.io/hambiEvoVEnv/" class="uri">https://slhogle.github.io/hambiEvoVEnv/</a>, which has been produced using <a href="https://quarto.org/">Quarto notebooks</a>. The content on the rendered site is released under the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0.</a> This repository hosts all code and data for this project including the code necessary to fully recreate the rendered webpage.</p>
+<p>An archived release of the code here is available from Zenodo:</p>
+<p>Raw sequencing data using in the project is available from NCBI Bioproject <a href=""></a>.</p>
 </section>
-<section id="reproducibility" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="reproducibility"><span class="header-section-number">8</span> Reproducibility</h2>
+<section id="reproducibility" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="reproducibility"><span class="header-section-number">6</span> Reproducibility</h2>
 <p>The project uses <a href="https://rstudio.github.io/renv/index.html"><code>renv</code></a> to create reproducible environment to execute the code in this project. <a href="https://rstudio.github.io/renv/articles/renv.html#collaboration">See here</a> for a brief overview on collaboration and reproduction of the entire project. To get up and running you can do:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">install.packages</span>(<span class="st">"renv"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2"></a>renv<span class="sc">::</span><span class="fu">restore</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+<!-- -->
+
+
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-hogle2024" class="csl-entry" role="listitem">
+Hogle, Shane L., Manu Tamminen, and Teppo Hiltunen. 2024. <span>“Complete Genome Sequences of 30 Bacterial Species from a Synthetic Community.”</span> Edited by Elinne Becket. <em>Microbiology Resource Announcements</em> 13 (6). <a href="https://doi.org/10.1128/mra.00111-24">https://doi.org/10.1128/mra.00111-24</a>.
+</div>
+<div id="ref-rillig2015" class="csl-entry" role="listitem">
+Rillig, Matthias C., Janis Antonovics, Tancredi Caruso, Anika Lehmann, Jeff R. Powell, Stavros D. Veresoglou, and Erik Verbruggen. 2015. <span>“Interchange of Entire Communities: Microbial Community Coalescence.”</span> <em>Trends in Ecology &amp; Evolution</em> 30 (8): 470–76. <a href="https://doi.org/10.1016/j.tree.2015.06.004">https://doi.org/10.1016/j.tree.2015.06.004</a>.
+</div>
+</div></section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -445,6 +577,57 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -774,7 +957,144 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script>
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="an">title:</span><span class="co"> "Data analysis for the project hambiEvoVEnv"</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="an">author:</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="co">  - name: Shane L Hogle</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="co">    orcid: 0000-0003-2595-3863</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="co">    affiliation: </span></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="co">      - name: University of Turku</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="co">        city: Turku</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="co">        state: Finland</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="co">        url: https://www.utu.fi/en</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a><span class="co">  - name: Niina Smolander</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="co">    affiliation: </span></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="co">      - name: University of Turku</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="co">        city: Turku</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="co">        state: Finland</span></span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="co">        url: https://www.utu.fi/en</span></span>
+<span id="cb2-18"><a href="#cb2-18"></a><span class="co">#abstract: &gt; </span></span>
+<span id="cb2-19"><a href="#cb2-19"></a><span class="co">#  The abstract text can go here </span></span>
+<span id="cb2-20"><a href="#cb2-20"></a><span class="co">#  and also here ...</span></span>
+<span id="cb2-21"><a href="#cb2-21"></a><span class="an">keywords:</span></span>
+<span id="cb2-22"><a href="#cb2-22"></a><span class="co">  - Microbiology</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a><span class="co">  - Ecology</span></span>
+<span id="cb2-24"><a href="#cb2-24"></a><span class="co">  - Evolution</span></span>
+<span id="cb2-25"><a href="#cb2-25"></a><span class="co">  - Antimicrobial resistance (AMR)</span></span>
+<span id="cb2-26"><a href="#cb2-26"></a><span class="an">license:</span><span class="co"> "CC BY"</span></span>
+<span id="cb2-27"><a href="#cb2-27"></a><span class="an">copyright:</span><span class="co"> </span></span>
+<span id="cb2-28"><a href="#cb2-28"></a><span class="co">  holder: Shane L Hogle</span></span>
+<span id="cb2-29"><a href="#cb2-29"></a><span class="co">  year: 2024</span></span>
+<span id="cb2-30"><a href="#cb2-30"></a><span class="co"># citation: </span></span>
+<span id="cb2-31"><a href="#cb2-31"></a><span class="co">#   container-title: BioRxiv</span></span>
+<span id="cb2-32"><a href="#cb2-32"></a><span class="co">#   volume: </span></span>
+<span id="cb2-33"><a href="#cb2-33"></a><span class="co">#   issue: </span></span>
+<span id="cb2-34"><a href="#cb2-34"></a><span class="co">#   doi: </span></span>
+<span id="cb2-35"><a href="#cb2-35"></a><span class="an">funding:</span><span class="co"> "The author received no specific funding for this work."</span></span>
+<span id="cb2-36"><a href="#cb2-36"></a><span class="an">bibliography:</span><span class="co"> references.bib</span></span>
+<span id="cb2-37"><a href="#cb2-37"></a><span class="co">---</span></span>
+<span id="cb2-38"><a href="#cb2-38"></a></span>
+<span id="cb2-39"><a href="#cb2-39"></a><span class="fu">## Manuscript:</span></span>
+<span id="cb2-40"><a href="#cb2-40"></a></span>
+<span id="cb2-41"><a href="#cb2-41"></a>◇ Corresponding author</span>
+<span id="cb2-42"><a href="#cb2-42"></a></span>
+<span id="cb2-43"><a href="#cb2-43"></a><span class="fu">### Published record</span></span>
+<span id="cb2-44"><a href="#cb2-44"></a></span>
+<span id="cb2-45"><a href="#cb2-45"></a>**A shared history shapes community response to the environment.**\</span>
+<span id="cb2-46"><a href="#cb2-46"></a>Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL^◇^. *XYZ* (2024/5) <span class="co">[</span><span class="ot">doi:</span><span class="co">]()</span></span>
+<span id="cb2-47"><a href="#cb2-47"></a></span>
+<span id="cb2-48"><a href="#cb2-48"></a><span class="fu">### Preprint</span></span>
+<span id="cb2-49"><a href="#cb2-49"></a></span>
+<span id="cb2-50"><a href="#cb2-50"></a>**A shared history shapes community response to the environment.**\</span>
+<span id="cb2-51"><a href="#cb2-51"></a>Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL^◇^. *BioRxiv* (2024/5) <span class="co">[</span><span class="ot">doi:</span><span class="co">]()</span></span>
+<span id="cb2-52"><a href="#cb2-52"></a></span>
+<span id="cb2-53"><a href="#cb2-53"></a><span class="fu">## Introduction</span></span>
+<span id="cb2-54"><a href="#cb2-54"></a></span>
+<span id="cb2-55"><a href="#cb2-55"></a>We consider the material and information legacies embedded within a synthetic microbial community that has been serially propagated for over 400 days. We ask whether ecological and evolutionary patterns exhibited by a microbial community in its long-term home environment are retained in a novel environment. Recent work has shown that when entire microbial communities are mixed or transplanted, they retain some degree of cohesion in function and composition <span class="co">[</span><span class="ot">@rillig2015</span><span class="co">]</span>. What causes communities to behave cohesively rather than collapsing into their constituents when subjected to abiotic or biotic pressures? When might we expect a cohesive community response instead of the aggregate responses of individual species?</span>
+<span id="cb2-56"><a href="#cb2-56"></a></span>
+<span id="cb2-57"><a href="#cb2-57"></a><span class="fu">## Experiment overview</span></span>
+<span id="cb2-58"><a href="#cb2-58"></a></span>
+<span id="cb2-59"><a href="#cb2-59"></a><span class="al">![Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.](figs/strep_only/exp_design.png)</span></span>
+<span id="cb2-60"><a href="#cb2-60"></a></span>
+<span id="cb2-61"><a href="#cb2-61"></a>We first serially propagated a bacterial community, starting from clones of 23 soil and aquatic species <span class="co">[</span><span class="ot">@hogle2024</span><span class="co">]</span>, for 406 days in two different conditions: a low-carbon, complex growth medium with and without the antibiotic streptomycin. We refer to these as “evolved” communities. We isolated 32 clones from each evovlved microcosm and phenotyped them both home environments to determine mean community fitness in each environment. We then reciprocally transplanted each of these evolved communities into the other’s home environment, with a clonal ancestor community serving as a reference. We allowed the experimental communities to grow for a further 84 days, measuring community composition at three different points and sequencing community genomes from the end of the experiment, which allowed us to track the fate of mutations from the evolved communities in their new environments.</span>
+<span id="cb2-62"><a href="#cb2-62"></a></span>
+<span id="cb2-63"><a href="#cb2-63"></a><span class="fu">### Measurements and data types</span></span>
+<span id="cb2-64"><a href="#cb2-64"></a></span>
+<span id="cb2-65"><a href="#cb2-65"></a><span class="ss">-   </span>32 clones were isolated from each replicate microcosm of the community evolution pre-experiment. High-resolution growth curves were obtained for the clones (obtained using the log-phase 600)</span>
+<span id="cb2-66"><a href="#cb2-66"></a><span class="ss">-   </span>Bacterial optical density ($\mathrm{OD_{600}}$) were measured at every weekly transfer</span>
+<span id="cb2-67"><a href="#cb2-67"></a><span class="ss">-   </span>Community DNA was sampled at all transfers.</span>
+<span id="cb2-68"><a href="#cb2-68"></a><span class="ss">-   </span>16S rRNA amplicon sequencing was performed at transfers 0, 4 (28 days), 8 (56 days), and 12 (84 days)</span>
+<span id="cb2-69"><a href="#cb2-69"></a><span class="ss">-   </span>Community genome (metagenome) sequencing was performed at transfer 12 of the transplantation experiment and of the evolution treatments starting materials</span>
+<span id="cb2-70"><a href="#cb2-70"></a></span>
+<span id="cb2-71"><a href="#cb2-71"></a><span class="fu">## Analysis overview</span></span>
+<span id="cb2-72"><a href="#cb2-72"></a></span>
+<span id="cb2-73"><a href="#cb2-73"></a>These notebooks allow the full reproduction of the data analysis from the sequencing data and clone phenotyping data. They include analyses of mean community fitness (from clone phenotypcing, for ploting species composition, for performing ordination on community composition, and machine learning to predict community history from the present community composition.</span>
+<span id="cb2-74"><a href="#cb2-74"></a></span>
+<span id="cb2-75"><a href="#cb2-75"></a><span class="fu">## Availability</span></span>
+<span id="cb2-76"><a href="#cb2-76"></a></span>
+<span id="cb2-77"><a href="#cb2-77"></a>Data and code in this GitHub repository (<span class="ot">&lt;https://github.com/slhogle/hambiEvoVEnv&gt;</span>) is provided under <span class="co">[</span><span class="ot">GNU AGPL3</span><span class="co">](https://www.gnu.org/licenses/agpl-3.0.html)</span>. The rendered project site is available at <span class="ot">&lt;https://slhogle.github.io/hambiEvoVEnv/&gt;</span>, which has been produced using <span class="co">[</span><span class="ot">Quarto notebooks</span><span class="co">](https://quarto.org/)</span>. The content on the rendered site is released under the <span class="co">[</span><span class="ot">CC BY 4.0.</span><span class="co">](https://creativecommons.org/licenses/by/4.0/)</span> This repository hosts all code and data for this project including the code necessary to fully recreate the rendered webpage.</span>
+<span id="cb2-78"><a href="#cb2-78"></a></span>
+<span id="cb2-79"><a href="#cb2-79"></a>An archived release of the code here is available from Zenodo:</span>
+<span id="cb2-80"><a href="#cb2-80"></a></span>
+<span id="cb2-81"><a href="#cb2-81"></a>Raw sequencing data using in the project is available from NCBI Bioproject <span class="co">[ ]()</span>.</span>
+<span id="cb2-82"><a href="#cb2-82"></a></span>
+<span id="cb2-83"><a href="#cb2-83"></a><span class="fu">## Reproducibility</span></span>
+<span id="cb2-84"><a href="#cb2-84"></a></span>
+<span id="cb2-85"><a href="#cb2-85"></a>The project uses <span class="co">[</span><span class="ot">`renv`</span><span class="co">](https://rstudio.github.io/renv/index.html)</span> to create reproducible environment to execute the code in this project. <span class="co">[</span><span class="ot">See here</span><span class="co">](https://rstudio.github.io/renv/articles/renv.html#collaboration)</span> for a brief overview on collaboration and reproduction of the entire project. To get up and running you can do:</span>
+<span id="cb2-86"><a href="#cb2-86"></a></span>
+<span id="cb2-87"><a href="#cb2-87"></a><span class="in">``` r</span></span>
+<span id="cb2-88"><a href="#cb2-88"></a><span class="fu">install.packages</span>(<span class="st">"renv"</span>)</span>
+<span id="cb2-89"><a href="#cb2-89"></a>renv<span class="sc">::</span><span class="fu">restore</span>()</span>
+<span id="cb2-90"><a href="#cb2-90"></a><span class="in">```</span></span>
+<span id="cb2-91"><a href="#cb2-91"></a></span>
+<span id="cb2-94"><a href="#cb2-94"></a><span class="in">```{r}</span></span>
+<span id="cb2-95"><a href="#cb2-95"></a><span class="co">#| eval: true</span></span>
+<span id="cb2-96"><a href="#cb2-96"></a><span class="co">#| echo: false</span></span>
+<span id="cb2-97"><a href="#cb2-97"></a><span class="co">#| output: false</span></span>
+<span id="cb2-98"><a href="#cb2-98"></a><span class="co">#| error: false</span></span>
+<span id="cb2-99"><a href="#cb2-99"></a><span class="co">#| warning: false</span></span>
+<span id="cb2-100"><a href="#cb2-100"></a><span class="co"># Not included in rendered output</span></span>
+<span id="cb2-101"><a href="#cb2-101"></a><span class="co"># Setup project structure</span></span>
+<span id="cb2-102"><a href="#cb2-102"></a><span class="fu">library</span>(here)</span>
+<span id="cb2-103"><a href="#cb2-103"></a><span class="fu">library</span>(fs)</span>
+<span id="cb2-104"><a href="#cb2-104"></a></span>
+<span id="cb2-105"><a href="#cb2-105"></a><span class="co"># define directory paths and overall structure</span></span>
+<span id="cb2-106"><a href="#cb2-106"></a><span class="co"># the _data_raw directory is never touched or modified! All downstream work </span></span>
+<span id="cb2-107"><a href="#cb2-107"></a><span class="co"># and intermediate results should be put in the data directory</span></span>
+<span id="cb2-108"><a href="#cb2-108"></a></span>
+<span id="cb2-109"><a href="#cb2-109"></a><span class="co"># note that we have split up the structure by whether or not we are focusing only</span></span>
+<span id="cb2-110"><a href="#cb2-110"></a><span class="co"># on streptomycin experiments or on streptomycin plus predator</span></span>
+<span id="cb2-111"><a href="#cb2-111"></a></span>
+<span id="cb2-112"><a href="#cb2-112"></a><span class="do">## Only streptomycin analyses</span></span>
+<span id="cb2-113"><a href="#cb2-113"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_only"</span>, <span class="st">"communities"</span>, <span class="st">"amplicon_sp_counts"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-114"><a href="#cb2-114"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_only"</span>, <span class="st">"communities"</span>, <span class="st">"cell_density"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-115"><a href="#cb2-115"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_only"</span>, <span class="st">"communities"</span>, <span class="st">"machine_learning_pipelines"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-116"><a href="#cb2-116"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_only"</span>, <span class="st">"monocultures"</span>, <span class="st">"clone_phenotyping"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-117"><a href="#cb2-117"></a></span>
+<span id="cb2-118"><a href="#cb2-118"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_only"</span>, <span class="st">"communities"</span>, <span class="st">"amplicon_sp_counts"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-119"><a href="#cb2-119"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_only"</span>, <span class="st">"communities"</span>, <span class="st">"cell_density"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-120"><a href="#cb2-120"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_only"</span>, <span class="st">"communities"</span>, <span class="st">"machine_learning_pipelines"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-121"><a href="#cb2-121"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_only"</span>, <span class="st">"monocultures"</span>, <span class="st">"clone_phenotyping"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-122"><a href="#cb2-122"></a></span>
+<span id="cb2-123"><a href="#cb2-123"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"figs"</span>, <span class="st">"strep_only"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-124"><a href="#cb2-124"></a></span>
+<span id="cb2-125"><a href="#cb2-125"></a><span class="do">## strep and predator analyses</span></span>
+<span id="cb2-126"><a href="#cb2-126"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_predator"</span>, <span class="st">"communities"</span>, <span class="st">"amplicon_sp_counts"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-127"><a href="#cb2-127"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_predator"</span>, <span class="st">"communities"</span>, <span class="st">"cell_density"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-128"><a href="#cb2-128"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_predator"</span>, <span class="st">"communities"</span>, <span class="st">"machine_learning_pipelines"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-129"><a href="#cb2-129"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"strep_predator"</span>, <span class="st">"monocultures"</span>, <span class="st">"clone_phenotyping"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-130"><a href="#cb2-130"></a></span>
+<span id="cb2-131"><a href="#cb2-131"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_predator"</span>, <span class="st">"communities"</span>, <span class="st">"amplicon_sp_counts"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-132"><a href="#cb2-132"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_predator"</span>, <span class="st">"communities"</span>, <span class="st">"cell_density"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-133"><a href="#cb2-133"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_predator"</span>, <span class="st">"communities"</span>, <span class="st">"machine_learning_pipelines"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-134"><a href="#cb2-134"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"strep_predator"</span>, <span class="st">"monocultures"</span>, <span class="st">"clone_phenotyping"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-135"><a href="#cb2-135"></a></span>
+<span id="cb2-136"><a href="#cb2-136"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"figs"</span>, <span class="st">"strep_predator"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-137"><a href="#cb2-137"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
 </div> <!-- /content -->
 
 

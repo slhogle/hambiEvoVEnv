@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Shane Hogle">
+<meta name="dcterms.date" content="2024-11-03">
+
+<title>hambiYSKpleiotropy - Estimate Area Under the Curve (AUC) and growth rates</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../">
+<script src="../../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="../../../../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../../../../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../../R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.html">3. Clones workflow (STR)</a></li><li class="breadcrumb-item"><a href="../../../../R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.html">ii) Summarize curves</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../../../">hambiYSKpleiotropy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">1. Community densities workflow (STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Process and plot densities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">2. Community composition workflow (STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Amplicon data wrangling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/02_composition_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Community composition</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/machine_learning_pipelines/01_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Machine learning the home environment</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">3. Clones workflow (STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Inspect/Smooth curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">ii) Summarize curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Analysis and plot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">1A. Community densities workflow (Predator and STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_predator/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Process and plot densities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">2A. Community composition workflow (Predator and STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_predator/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Amplicon data wrangling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_predator/communities/amplicon_sp_counts/02_composition_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Community composition</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_predator/communities/machine_learning_pipelines/01_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Machine learning the home environment</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+ <span class="menu-text">3A. Clones workflow (Predator and STR)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_predator/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">i) Inspect/Smooth curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_predator/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ii) Summarize curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_predator/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">iii) Analysis and plot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="header-section-number">1</span> Setup</a></li>
+  <li><a href="#read-data" id="toc-read-data" class="nav-link" data-scroll-target="#read-data"><span class="header-section-number">2</span> Read data</a></li>
+  <li><a href="#spline-based-estimate-for-growth-rate" id="toc-spline-based-estimate-for-growth-rate" class="nav-link" data-scroll-target="#spline-based-estimate-for-growth-rate"><span class="header-section-number">3</span> Spline based estimate for growth rate</a>
+  <ul class="collapse">
+  <li><a href="#fit" id="toc-fit" class="nav-link" data-scroll-target="#fit"><span class="header-section-number">3.0.1</span> Fit</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"><span class="header-section-number">3.0.2</span> Results</a></li>
+  <li><a href="#predictions" id="toc-predictions" class="nav-link" data-scroll-target="#predictions"><span class="header-section-number">3.0.3</span> Predictions</a></li>
+  </ul></li>
+  <li><a href="#auc-estimate" id="toc-auc-estimate" class="nav-link" data-scroll-target="#auc-estimate"><span class="header-section-number">4</span> AUC estimate</a></li>
+  <li><a href="#combine-and-write-output" id="toc-combine-and-write-output" class="nav-link" data-scroll-target="#combine-and-write-output"><span class="header-section-number">5</span> Combine and write output</a></li>
+  <li><a href="#plot-growth-rate-estimates" id="toc-plot-growth-rate-estimates" class="nav-link" data-scroll-target="#plot-growth-rate-estimates"><span class="header-section-number">6</span> Plot growth rate estimates</a>
+  <ul class="collapse">
+  <li><a href="#bact-conditions" id="toc-bact-conditions" class="nav-link" data-scroll-target="#bact-conditions"><span class="header-section-number">6.1</span> Bact conditions</a>
+  <ul class="collapse">
+  <li><a href="#plate-1" id="toc-plate-1" class="nav-link" data-scroll-target="#plate-1"><span class="header-section-number">6.1.1</span> Plate 1</a></li>
+  <li><a href="#plate-2" id="toc-plate-2" class="nav-link" data-scroll-target="#plate-2"><span class="header-section-number">6.1.2</span> Plate 2</a></li>
+  <li><a href="#plate-3" id="toc-plate-3" class="nav-link" data-scroll-target="#plate-3"><span class="header-section-number">6.1.3</span> Plate 3</a></li>
+  <li><a href="#plate-4" id="toc-plate-4" class="nav-link" data-scroll-target="#plate-4"><span class="header-section-number">6.1.4</span> Plate 4</a></li>
+  <li><a href="#plate-5" id="toc-plate-5" class="nav-link" data-scroll-target="#plate-5"><span class="header-section-number">6.1.5</span> Plate 5</a></li>
+  <li><a href="#plate-6" id="toc-plate-6" class="nav-link" data-scroll-target="#plate-6"><span class="header-section-number">6.1.6</span> Plate 6</a></li>
+  <li><a href="#plate-7" id="toc-plate-7" class="nav-link" data-scroll-target="#plate-7"><span class="header-section-number">6.1.7</span> Plate 7</a></li>
+  <li><a href="#plate-8" id="toc-plate-8" class="nav-link" data-scroll-target="#plate-8"><span class="header-section-number">6.1.8</span> Plate 8</a></li>
+  </ul></li>
+  <li><a href="#streptomycin-conditions" id="toc-streptomycin-conditions" class="nav-link" data-scroll-target="#streptomycin-conditions"><span class="header-section-number">6.2</span> Streptomycin conditions</a>
+  <ul class="collapse">
+  <li><a href="#plate-1-1" id="toc-plate-1-1" class="nav-link" data-scroll-target="#plate-1-1"><span class="header-section-number">6.2.1</span> Plate 1</a></li>
+  <li><a href="#plate-2-1" id="toc-plate-2-1" class="nav-link" data-scroll-target="#plate-2-1"><span class="header-section-number">6.2.2</span> Plate 2</a></li>
+  <li><a href="#plate-3-1" id="toc-plate-3-1" class="nav-link" data-scroll-target="#plate-3-1"><span class="header-section-number">6.2.3</span> Plate 3</a></li>
+  <li><a href="#plate-4-1" id="toc-plate-4-1" class="nav-link" data-scroll-target="#plate-4-1"><span class="header-section-number">6.2.4</span> Plate 4</a></li>
+  <li><a href="#plate-5-1" id="toc-plate-5-1" class="nav-link" data-scroll-target="#plate-5-1"><span class="header-section-number">6.2.5</span> Plate 5</a></li>
+  <li><a href="#plate-6-1" id="toc-plate-6-1" class="nav-link" data-scroll-target="#plate-6-1"><span class="header-section-number">6.2.6</span> Plate 6</a></li>
+  <li><a href="#plate-7-1" id="toc-plate-7-1" class="nav-link" data-scroll-target="#plate-7-1"><span class="header-section-number">6.2.7</span> Plate 7</a></li>
+  <li><a href="#plate-8-1" id="toc-plate-8-1" class="nav-link" data-scroll-target="#plate-8-1"><span class="header-section-number">6.2.8</span> Plate 8</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../../R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.html">3. Clones workflow (STR)</a></li><li class="breadcrumb-item"><a href="../../../../R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.html">ii) Summarize curves</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Estimate Area Under the Curve (AUC) and growth rates</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">From the STR clones workflow</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Shane Hogle </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 3, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    This notebook estimates growth rates by fitting non-parametric splines using the really nice <a href="https://github.com/tpetzoldt/growthrates"><code>growthrates</code></a> package. AUC is esimated using the <a href="https://andrisignorell.github.io/DescTools/"><code>DescTools</code></a> package.
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="setup" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Setup</h1>
+<p>Load required packages</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(stringi)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="fu">library</span>(fs)</span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="fu">library</span>(growthrates)</span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="fu">library</span>(DescTools)</span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"utils_generic.R"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Functions to simplify plotting later</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>plotplate <span class="ot">&lt;-</span> <span class="cf">function</span>(df, dfxy, <span class="at">unsmoothed=</span><span class="cn">TRUE</span>, <span class="at">predicted=</span><span class="cn">FALSE</span>, plate, rows, cols, page){</span>
+<span id="cb2-2"><a href="#cb2-2"></a>  dffilt <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(df, plate <span class="sc">==</span> {{ plate }})</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  xyfilt <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(dfxy)){ <span class="fu">left_join</span>(dfxy, <span class="fu">distinct</span>(dffilt, id, well, plate), <span class="at">by =</span> <span class="fu">join_by</span>(id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-4"><a href="#cb2-4"></a>      <span class="fu">drop_na</span>()}</span>
+<span id="cb2-5"><a href="#cb2-5"></a>  </span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="fu">ggplot</span>(dffilt, <span class="fu">aes</span>(<span class="at">x =</span> hours)) <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="fu">list</span>(</span>
+<span id="cb2-8"><a href="#cb2-8"></a>      ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>OD600_smooth_avg), <span class="at">color =</span> <span class="st">"blue"</span>), </span>
+<span id="cb2-9"><a href="#cb2-9"></a>      <span class="cf">if</span> (unsmoothed) {ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>OD600), <span class="at">color =</span> <span class="st">"orange"</span>, <span class="at">lty =</span> <span class="dv">2</span>)},</span>
+<span id="cb2-10"><a href="#cb2-10"></a>      <span class="cf">if</span> (predicted) {ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>predicted), <span class="at">color =</span> <span class="st">"orange"</span>)}, </span>
+<span id="cb2-11"><a href="#cb2-11"></a>      <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(dfxy)) {ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">data =</span> xyfilt, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="dv">2</span>)},</span>
+<span id="cb2-12"><a href="#cb2-12"></a>      ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hours"</span>, <span class="at">y =</span> <span class="st">"OD600"</span>), </span>
+<span id="cb2-13"><a href="#cb2-13"></a>      ggplot2<span class="sc">::</span><span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">48</span>, <span class="dv">12</span>), <span class="at">labels =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">48</span>, <span class="dv">12</span>)), </span>
+<span id="cb2-14"><a href="#cb2-14"></a>      ggforce<span class="sc">::</span><span class="fu">facet_wrap_paginate</span>(<span class="sc">~</span> well, <span class="at">nrow =</span> rows, <span class="at">ncol =</span> cols, <span class="at">page =</span> page), <span class="co">#scales = "free_y"</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a>      ggplot2<span class="sc">::</span><span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>))</span>
+<span id="cb2-16"><a href="#cb2-16"></a>    )</span>
+<span id="cb2-17"><a href="#cb2-17"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="read-data" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Read data</h1>
+<p>Read previously smoothed growth curves</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>gcurves_thin_sm <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_cl, <span class="st">"gcurves_smoothed_thinned.tsv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="spline-based-estimate-for-growth-rate" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Spline based estimate for growth rate</h1>
+<p>Using the tool <a href="https://cran.r-project.org/web/packages/growthrates/index.html"><code>growthrates</code></a> to estimate mu_max. I have found this works a lot better the gcplyr and is more convenient than using another tool outside of R. Nonparametric estimate growth rates by spline is very fast. Fitting to a model takes more time resources. <a href="https://www.frontiersin.org/journals/ecology-and-evolution/articles/10.3389/fevo.2023.1313500/full">Generally it is best to try multiple approaches and to visualize/check the data to make sure it makes sense.</a></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>gcurves_thin_sm <span class="ot">&lt;-</span> gcurves_thin_sm <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="co"># make uniq id</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">paste0</span>(plate, <span class="st">"|"</span>, well))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Smoothing splines are a quick method to estimate maximum growth. The method is called nonparametric, because the growth rate is directly estimated from the smoothed data without being restricted to a specific model formula.</p>
+<p>From <a href="https://cran.r-project.org/web/packages/growthrates/growthrates.pdf">growthrates documentation:</a></p>
+<blockquote class="blockquote">
+<p>The method was inspired by an algorithm of <a href="https://www.jstatsoft.org/article/view/v033i07">Kahm et al.&nbsp;(2010)</a>, with different settings and assumptions. In the moment, spline fitting is always done with log-transformed data, assuming exponential growth at the time point of the maximum of the first derivative of the spline fit. All the hard work is done by function smooth.spline from package stats, that is highly user configurable. Normally, smoothness is automatically determined via cross-validation. This works well in many cases, whereas manual adjustment is required otherwise, e.g.&nbsp;by setting spar to a fixed value [0, 1] that also disables cross-validation.</p>
+</blockquote>
+<section id="fit" class="level3" data-number="3.0.1">
+<h3 data-number="3.0.1" class="anchored" data-anchor-id="fit"><span class="header-section-number">3.0.1</span> Fit</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">set.seed</span>(<span class="dv">45278</span>)</span>
+<span id="cb5-2"><a href="#cb5-2"></a>many_spline <span class="ot">&lt;-</span> growthrates<span class="sc">::</span><span class="fu">all_splines</span>(OD600_smooth_avg <span class="sc">~</span> hours <span class="sc">|</span> id, <span class="at">data =</span> gcurves_thin_sm, <span class="at">spar =</span> <span class="fl">0.5</span>)</span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a>readr<span class="sc">::</span><span class="fu">write_rds</span>(many_spline, here<span class="sc">::</span><span class="fu">here</span>(data_cl, <span class="st">"spline_fits"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="results" class="level3" data-number="3.0.2">
+<h3 data-number="3.0.2" class="anchored" data-anchor-id="results"><span class="header-section-number">3.0.2</span> Results</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>many_spline_res <span class="ot">&lt;-</span> growthrates<span class="sc">::</span><span class="fu">results</span>(many_spline)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="predictions" class="level3" data-number="3.0.3">
+<h3 data-number="3.0.3" class="anchored" data-anchor-id="predictions"><span class="header-section-number">3.0.3</span> Predictions</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>many_spline_xy <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(many_spline<span class="sc">@</span>fits, \(x) <span class="fu">data.frame</span>(<span class="at">x =</span> x<span class="sc">@</span>xy[<span class="dv">1</span>], <span class="at">y =</span> x<span class="sc">@</span>xy[<span class="dv">2</span>])) <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>  purrr<span class="sc">::</span><span class="fu">list_rbind</span>(<span class="at">names_to =</span> <span class="st">"id"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a>many_spline_fitted <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(many_spline<span class="sc">@</span>fits, \(x) <span class="fu">data.frame</span>(x<span class="sc">@</span><span class="fu">FUN</span>(x<span class="sc">@</span>obs<span class="sc">$</span>time, x<span class="sc">@</span>par))) <span class="sc">%&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>  purrr<span class="sc">::</span><span class="fu">list_rbind</span>(<span class="at">names_to =</span> <span class="st">"id"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">hours =</span> time, <span class="at">predicted =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(gcurves_thin_sm, <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id, hours)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>  <span class="co"># this step makes sure we don't plot fits that go outside the range of the data</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predicted =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(dplyr<span class="sc">::</span><span class="fu">between</span>(</span>
+<span id="cb7-11"><a href="#cb7-11"></a>    predicted, <span class="fu">min</span>(OD600_smooth_avg), <span class="fu">max</span>(OD600_smooth_avg <span class="sc">*</span> <span class="fl">1.5</span>)</span>
+<span id="cb7-12"><a href="#cb7-12"></a>  ), predicted, <span class="cn">NA_real_</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="auc-estimate" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> AUC estimate</h1>
+<p>Calculates AUC using <code>DescTools</code> package. The method empolyed is a simple <a href="https://en.wikipedia.org/wiki/Trapezoidal_rule">trapezoid rule</a>, where the growth curve is formed by connecting all points by a direct line (composite trapezoid rule).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>many_auc_res <span class="ot">&lt;-</span> gcurves_thin_sm <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">auc =</span> DescTools<span class="sc">::</span><span class="fu">AUC</span>(hours, OD600_smooth_avg),</span>
+<span id="cb8-3"><a href="#cb8-3"></a>            <span class="at">max_od =</span> <span class="fu">max</span>(OD600_smooth_avg),</span>
+<span id="cb8-4"><a href="#cb8-4"></a>            <span class="at">min_od =</span> <span class="fu">min</span>(OD600_smooth_avg),</span>
+<span id="cb8-5"><a href="#cb8-5"></a>            <span class="at">.by =</span> <span class="fu">c</span>(plate, well))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="combine-and-write-output" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Combine and write output</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>many_spline_res <span class="sc">%&gt;%</span> </span>
+<span id="cb9-2"><a href="#cb9-2"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(dplyr<span class="sc">::</span><span class="fu">distinct</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(gcurves_thin_sm, id, plate, well)), <span class="at">by =</span> <span class="fu">join_by</span>(id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-3"><a href="#cb9-3"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-4"><a href="#cb9-4"></a>  dplyr<span class="sc">::</span><span class="fu">relocate</span>(y0<span class="sc">:</span>r2, <span class="at">.after=</span><span class="st">"well"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">left_join</span>(many_auc_res, <span class="at">by =</span> <span class="fu">join_by</span>(plate, well)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-6"><a href="#cb9-6"></a>  readr<span class="sc">::</span><span class="fu">write_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_cl, <span class="st">"auc_mumax_results.tsv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plot-growth-rate-estimates" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Plot growth rate estimates</h1>
+<p>Here we will manually inspect the different growth curves. We will compile a list of the worst curves with the strangest features to exclude from downstream analysis (into a blacklist file).</p>
+<p>The subscripts at the ends of the plate contain information:</p>
+<ol type="1">
+<li>The <code>_1</code> subscript is the “bact” condition with no additional treatment</li>
+<li>The <code>_3</code> subscript is the “bact_strep” condition which has streptomycin</li>
+</ol>
+<section id="bact-conditions" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="bact-conditions"><span class="header-section-number">6.1</span> Bact conditions</h2>
+<section id="plate-1" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="plate-1"><span class="header-section-number">6.1.1</span> Plate 1</h3>
+<div id="fig-01" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 1</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-2" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="plate-2"><span class="header-section-number">6.1.2</span> Plate 2</h3>
+<div id="fig-02" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 2</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-3" class="level3" data-number="6.1.3">
+<h3 data-number="6.1.3" class="anchored" data-anchor-id="plate-3"><span class="header-section-number">6.1.3</span> Plate 3</h3>
+<div id="fig-03" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 3</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-4" class="level3" data-number="6.1.4">
+<h3 data-number="6.1.4" class="anchored" data-anchor-id="plate-4"><span class="header-section-number">6.1.4</span> Plate 4</h3>
+<div id="fig-04" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Growth curves for the <strong>bacteria only</strong> conditions on <strong>Plate 4</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-5" class="level3" data-number="6.1.5">
+<h3 data-number="6.1.5" class="anchored" data-anchor-id="plate-5"><span class="header-section-number">6.1.5</span> Plate 5</h3>
+<div id="fig-05" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 5</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-6" class="level3" data-number="6.1.6">
+<h3 data-number="6.1.6" class="anchored" data-anchor-id="plate-6"><span class="header-section-number">6.1.6</span> Plate 6</h3>
+<div id="fig-06" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 6</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-7" class="level3" data-number="6.1.7">
+<h3 data-number="6.1.7" class="anchored" data-anchor-id="plate-7"><span class="header-section-number">6.1.7</span> Plate 7</h3>
+<div id="fig-07" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-07-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-07-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 7</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-8" class="level3" data-number="6.1.8">
+<h3 data-number="6.1.8" class="anchored" data-anchor-id="plate-8"><span class="header-section-number">6.1.8</span> Plate 8</h3>
+<div id="fig-08" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-08-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-08-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Growth curves for <strong>bacteria only</strong> conditions on <strong>Plate 8</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="streptomycin-conditions" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="streptomycin-conditions"><span class="header-section-number">6.2</span> Streptomycin conditions</h2>
+<section id="plate-1-1" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="plate-1-1"><span class="header-section-number">6.2.1</span> Plate 1</h3>
+<div id="fig-09" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-09-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-09-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 1</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-2-1" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="plate-2-1"><span class="header-section-number">6.2.2</span> Plate 2</h3>
+<div id="fig-10" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 2</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-3-1" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="plate-3-1"><span class="header-section-number">6.2.3</span> Plate 3</h3>
+<div id="fig-11" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 3</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-4-1" class="level3" data-number="6.2.4">
+<h3 data-number="6.2.4" class="anchored" data-anchor-id="plate-4-1"><span class="header-section-number">6.2.4</span> Plate 4</h3>
+<div id="fig-12" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Growth curves for the <strong>Streptomycin</strong> conditions on <strong>Plate 4</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-5-1" class="level3" data-number="6.2.5">
+<h3 data-number="6.2.5" class="anchored" data-anchor-id="plate-5-1"><span class="header-section-number">6.2.5</span> Plate 5</h3>
+<div id="fig-13" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 5</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-6-1" class="level3" data-number="6.2.6">
+<h3 data-number="6.2.6" class="anchored" data-anchor-id="plate-6-1"><span class="header-section-number">6.2.6</span> Plate 6</h3>
+<div id="fig-14" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 6</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-7-1" class="level3" data-number="6.2.7">
+<h3 data-number="6.2.7" class="anchored" data-anchor-id="plate-7-1"><span class="header-section-number">6.2.7</span> Plate 7</h3>
+<div id="fig-15" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 7</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="plate-8-1" class="level3" data-number="6.2.8">
+<h3 data-number="6.2.8" class="anchored" data-anchor-id="plate-8-1"><span class="header-section-number">6.2.8</span> Plate 8</h3>
+<div id="fig-16" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_growthrate_auc_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: Growth curves for <strong>Streptomycin</strong> conditions on <strong>Plate 8</strong>. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.
+</figcaption>
+</figure>
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb10" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">---</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="an">title:</span><span class="co"> "Estimate Area Under the Curve (AUC) and growth rates"</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="an">subtitle:</span><span class="co"> "From the STR clones workflow"</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="an">author:</span><span class="co"> "Shane Hogle"</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="an">abstract:</span><span class="co"> "This notebook estimates growth rates by fitting non-parametric splines using the really nice [`growthrates`](https://github.com/tpetzoldt/growthrates) package. AUC is esimated using the [`DescTools`](https://andrisignorell.github.io/DescTools/) package."</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co">---</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="fu"># Setup</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a></span>
+<span id="cb10-11"><a href="#cb10-11"></a>Load required packages</span>
+<span id="cb10-12"><a href="#cb10-12"></a></span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="in">```{r}</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="co">#| output: false</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a><span class="co">#| error: false</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a><span class="fu">library</span>(here)</span>
+<span id="cb10-20"><a href="#cb10-20"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb10-21"><a href="#cb10-21"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb10-22"><a href="#cb10-22"></a><span class="fu">library</span>(stringi)</span>
+<span id="cb10-23"><a href="#cb10-23"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb10-24"><a href="#cb10-24"></a><span class="fu">library</span>(fs)</span>
+<span id="cb10-25"><a href="#cb10-25"></a><span class="fu">library</span>(growthrates)</span>
+<span id="cb10-26"><a href="#cb10-26"></a><span class="fu">library</span>(DescTools)</span>
+<span id="cb10-27"><a href="#cb10-27"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"utils_generic.R"</span>))</span>
+<span id="cb10-28"><a href="#cb10-28"></a><span class="in">```</span></span>
+<span id="cb10-29"><a href="#cb10-29"></a></span>
+<span id="cb10-30"><a href="#cb10-30"></a>Functions to simplify plotting later</span>
+<span id="cb10-31"><a href="#cb10-31"></a></span>
+<span id="cb10-34"><a href="#cb10-34"></a><span class="in">```{r}</span></span>
+<span id="cb10-35"><a href="#cb10-35"></a>plotplate <span class="ot">&lt;-</span> <span class="cf">function</span>(df, dfxy, <span class="at">unsmoothed=</span><span class="cn">TRUE</span>, <span class="at">predicted=</span><span class="cn">FALSE</span>, plate, rows, cols, page){</span>
+<span id="cb10-36"><a href="#cb10-36"></a>  dffilt <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(df, plate <span class="sc">==</span> {{ plate }})</span>
+<span id="cb10-37"><a href="#cb10-37"></a>  xyfilt <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(dfxy)){ <span class="fu">left_join</span>(dfxy, <span class="fu">distinct</span>(dffilt, id, well, plate), <span class="at">by =</span> <span class="fu">join_by</span>(id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-38"><a href="#cb10-38"></a>      <span class="fu">drop_na</span>()}</span>
+<span id="cb10-39"><a href="#cb10-39"></a>  </span>
+<span id="cb10-40"><a href="#cb10-40"></a>  <span class="fu">ggplot</span>(dffilt, <span class="fu">aes</span>(<span class="at">x =</span> hours)) <span class="sc">+</span></span>
+<span id="cb10-41"><a href="#cb10-41"></a>    <span class="fu">list</span>(</span>
+<span id="cb10-42"><a href="#cb10-42"></a>      ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>OD600_smooth_avg), <span class="at">color =</span> <span class="st">"blue"</span>), </span>
+<span id="cb10-43"><a href="#cb10-43"></a>      <span class="cf">if</span> (unsmoothed) {ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>OD600), <span class="at">color =</span> <span class="st">"orange"</span>, <span class="at">lty =</span> <span class="dv">2</span>)},</span>
+<span id="cb10-44"><a href="#cb10-44"></a>      <span class="cf">if</span> (predicted) {ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>predicted), <span class="at">color =</span> <span class="st">"orange"</span>)}, </span>
+<span id="cb10-45"><a href="#cb10-45"></a>      <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(dfxy)) {ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">data =</span> xyfilt, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="dv">2</span>)},</span>
+<span id="cb10-46"><a href="#cb10-46"></a>      ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hours"</span>, <span class="at">y =</span> <span class="st">"OD600"</span>), </span>
+<span id="cb10-47"><a href="#cb10-47"></a>      ggplot2<span class="sc">::</span><span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">48</span>, <span class="dv">12</span>), <span class="at">labels =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">48</span>, <span class="dv">12</span>)), </span>
+<span id="cb10-48"><a href="#cb10-48"></a>      ggforce<span class="sc">::</span><span class="fu">facet_wrap_paginate</span>(<span class="sc">~</span> well, <span class="at">nrow =</span> rows, <span class="at">ncol =</span> cols, <span class="at">page =</span> page), <span class="co">#scales = "free_y"</span></span>
+<span id="cb10-49"><a href="#cb10-49"></a>      ggplot2<span class="sc">::</span><span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>))</span>
+<span id="cb10-50"><a href="#cb10-50"></a>    )</span>
+<span id="cb10-51"><a href="#cb10-51"></a>}</span>
+<span id="cb10-52"><a href="#cb10-52"></a><span class="in">```</span></span>
+<span id="cb10-53"><a href="#cb10-53"></a></span>
+<span id="cb10-54"><a href="#cb10-54"></a><span class="fu"># Read data</span></span>
+<span id="cb10-55"><a href="#cb10-55"></a></span>
+<span id="cb10-56"><a href="#cb10-56"></a>Read previously smoothed growth curves</span>
+<span id="cb10-57"><a href="#cb10-57"></a></span>
+<span id="cb10-60"><a href="#cb10-60"></a><span class="in">```{r}</span></span>
+<span id="cb10-61"><a href="#cb10-61"></a><span class="co">#| output: false</span></span>
+<span id="cb10-62"><a href="#cb10-62"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-63"><a href="#cb10-63"></a><span class="co">#| error: false</span></span>
+<span id="cb10-64"><a href="#cb10-64"></a>gcurves_thin_sm <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_cl, <span class="st">"gcurves_smoothed_thinned.tsv"</span>))</span>
+<span id="cb10-65"><a href="#cb10-65"></a><span class="in">```</span></span>
+<span id="cb10-66"><a href="#cb10-66"></a></span>
+<span id="cb10-67"><a href="#cb10-67"></a><span class="fu"># Spline based estimate for growth rate</span></span>
+<span id="cb10-68"><a href="#cb10-68"></a></span>
+<span id="cb10-69"><a href="#cb10-69"></a>Using the tool <span class="co">[</span><span class="ot">`growthrates`</span><span class="co">](https://cran.r-project.org/web/packages/growthrates/index.html)</span> to estimate mu_max. I have found this works a lot better the gcplyr and is more convenient than using another tool outside of R. Nonparametric estimate growth rates by spline is very fast. Fitting to a model takes more time resources. <span class="co">[</span><span class="ot">Generally it is best to try multiple approaches and to visualize/check the data to make sure it makes sense.</span><span class="co">](https://www.frontiersin.org/journals/ecology-and-evolution/articles/10.3389/fevo.2023.1313500/full)</span></span>
+<span id="cb10-70"><a href="#cb10-70"></a></span>
+<span id="cb10-73"><a href="#cb10-73"></a><span class="in">```{r}</span></span>
+<span id="cb10-74"><a href="#cb10-74"></a>gcurves_thin_sm <span class="ot">&lt;-</span> gcurves_thin_sm <span class="sc">%&gt;%</span> </span>
+<span id="cb10-75"><a href="#cb10-75"></a>  <span class="co"># make uniq id</span></span>
+<span id="cb10-76"><a href="#cb10-76"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">paste0</span>(plate, <span class="st">"|"</span>, well))</span>
+<span id="cb10-77"><a href="#cb10-77"></a><span class="in">```</span></span>
+<span id="cb10-78"><a href="#cb10-78"></a></span>
+<span id="cb10-79"><a href="#cb10-79"></a>Smoothing splines are a quick method to estimate maximum growth. The method is called nonparametric, because the growth rate is directly estimated from the smoothed data without being restricted to a specific model formula.</span>
+<span id="cb10-80"><a href="#cb10-80"></a></span>
+<span id="cb10-81"><a href="#cb10-81"></a>From <span class="co">[</span><span class="ot">growthrates documentation:</span><span class="co">](https://cran.r-project.org/web/packages/growthrates/growthrates.pdf)</span></span>
+<span id="cb10-82"><a href="#cb10-82"></a></span>
+<span id="cb10-83"><a href="#cb10-83"></a><span class="at">&gt; The method was inspired by an algorithm of </span><span class="co">[</span><span class="ot">Kahm et al. (2010)</span><span class="co">](https://www.jstatsoft.org/article/view/v033i07)</span><span class="at">, with different settings and assumptions. In the moment, spline fitting is always done with log-transformed data, assuming exponential growth at the time point of the maximum of the first derivative of the spline fit. All the hard work is done by function smooth.spline from package stats, that is highly user configurable. Normally, smoothness is automatically determined via cross-validation. This works well in many cases, whereas manual adjustment is required otherwise, e.g. by setting spar to a fixed value </span><span class="sc">\[</span><span class="at">0, 1</span><span class="sc">\]</span><span class="at"> that also disables cross-validation.</span></span>
+<span id="cb10-84"><a href="#cb10-84"></a></span>
+<span id="cb10-85"><a href="#cb10-85"></a><span class="fu">### Fit</span></span>
+<span id="cb10-86"><a href="#cb10-86"></a></span>
+<span id="cb10-89"><a href="#cb10-89"></a><span class="in">```{r}</span></span>
+<span id="cb10-90"><a href="#cb10-90"></a><span class="co">#| eval: false</span></span>
+<span id="cb10-91"><a href="#cb10-91"></a><span class="fu">set.seed</span>(<span class="dv">45278</span>)</span>
+<span id="cb10-92"><a href="#cb10-92"></a>many_spline <span class="ot">&lt;-</span> growthrates<span class="sc">::</span><span class="fu">all_splines</span>(OD600_smooth_avg <span class="sc">~</span> hours <span class="sc">|</span> id, <span class="at">data =</span> gcurves_thin_sm, <span class="at">spar =</span> <span class="fl">0.5</span>)</span>
+<span id="cb10-93"><a href="#cb10-93"></a></span>
+<span id="cb10-94"><a href="#cb10-94"></a>readr<span class="sc">::</span><span class="fu">write_rds</span>(many_spline, here<span class="sc">::</span><span class="fu">here</span>(data_cl, <span class="st">"spline_fits"</span>))</span>
+<span id="cb10-95"><a href="#cb10-95"></a><span class="in">```</span></span>
+<span id="cb10-96"><a href="#cb10-96"></a></span>
+<span id="cb10-99"><a href="#cb10-99"></a><span class="in">```{r}</span></span>
+<span id="cb10-100"><a href="#cb10-100"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-101"><a href="#cb10-101"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-102"><a href="#cb10-102"></a><span class="co">#| eval: true</span></span>
+<span id="cb10-103"><a href="#cb10-103"></a>many_spline <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_rds</span>(here<span class="sc">::</span><span class="fu">here</span>(data_cl, <span class="st">"spline_fits"</span>))</span>
+<span id="cb10-104"><a href="#cb10-104"></a><span class="in">```</span></span>
+<span id="cb10-105"><a href="#cb10-105"></a></span>
+<span id="cb10-106"><a href="#cb10-106"></a><span class="fu">### Results</span></span>
+<span id="cb10-107"><a href="#cb10-107"></a></span>
+<span id="cb10-110"><a href="#cb10-110"></a><span class="in">```{r}</span></span>
+<span id="cb10-111"><a href="#cb10-111"></a>many_spline_res <span class="ot">&lt;-</span> growthrates<span class="sc">::</span><span class="fu">results</span>(many_spline)</span>
+<span id="cb10-112"><a href="#cb10-112"></a><span class="in">```</span></span>
+<span id="cb10-113"><a href="#cb10-113"></a></span>
+<span id="cb10-114"><a href="#cb10-114"></a><span class="fu">### Predictions</span></span>
+<span id="cb10-115"><a href="#cb10-115"></a></span>
+<span id="cb10-118"><a href="#cb10-118"></a><span class="in">```{r}</span></span>
+<span id="cb10-119"><a href="#cb10-119"></a>many_spline_xy <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(many_spline<span class="sc">@</span>fits, \(x) <span class="fu">data.frame</span>(<span class="at">x =</span> x<span class="sc">@</span>xy[<span class="dv">1</span>], <span class="at">y =</span> x<span class="sc">@</span>xy[<span class="dv">2</span>])) <span class="sc">%&gt;%</span></span>
+<span id="cb10-120"><a href="#cb10-120"></a>  purrr<span class="sc">::</span><span class="fu">list_rbind</span>(<span class="at">names_to =</span> <span class="st">"id"</span>)</span>
+<span id="cb10-121"><a href="#cb10-121"></a></span>
+<span id="cb10-122"><a href="#cb10-122"></a>many_spline_fitted <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(many_spline<span class="sc">@</span>fits, \(x) <span class="fu">data.frame</span>(x<span class="sc">@</span><span class="fu">FUN</span>(x<span class="sc">@</span>obs<span class="sc">$</span>time, x<span class="sc">@</span>par))) <span class="sc">%&gt;%</span></span>
+<span id="cb10-123"><a href="#cb10-123"></a>  purrr<span class="sc">::</span><span class="fu">list_rbind</span>(<span class="at">names_to =</span> <span class="st">"id"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-124"><a href="#cb10-124"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">hours =</span> time, <span class="at">predicted =</span> y) <span class="sc">%&gt;%</span></span>
+<span id="cb10-125"><a href="#cb10-125"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(gcurves_thin_sm, <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id, hours)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-126"><a href="#cb10-126"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb10-127"><a href="#cb10-127"></a>  <span class="co"># this step makes sure we don't plot fits that go outside the range of the data</span></span>
+<span id="cb10-128"><a href="#cb10-128"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predicted =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(dplyr<span class="sc">::</span><span class="fu">between</span>(</span>
+<span id="cb10-129"><a href="#cb10-129"></a>    predicted, <span class="fu">min</span>(OD600_smooth_avg), <span class="fu">max</span>(OD600_smooth_avg <span class="sc">*</span> <span class="fl">1.5</span>)</span>
+<span id="cb10-130"><a href="#cb10-130"></a>  ), predicted, <span class="cn">NA_real_</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-131"><a href="#cb10-131"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span>
+<span id="cb10-132"><a href="#cb10-132"></a><span class="in">```</span></span>
+<span id="cb10-133"><a href="#cb10-133"></a></span>
+<span id="cb10-134"><a href="#cb10-134"></a><span class="fu"># AUC estimate</span></span>
+<span id="cb10-135"><a href="#cb10-135"></a></span>
+<span id="cb10-136"><a href="#cb10-136"></a>Calculates AUC using <span class="in">`DescTools`</span> package. The method empolyed is a simple <span class="co">[</span><span class="ot">trapezoid rule</span><span class="co">](https://en.wikipedia.org/wiki/Trapezoidal_rule)</span>, where the growth curve is formed by connecting all points by a direct line (composite trapezoid rule).</span>
+<span id="cb10-137"><a href="#cb10-137"></a></span>
+<span id="cb10-138"><a href="#cb10-138"></a></span>
+<span id="cb10-141"><a href="#cb10-141"></a><span class="in">```{r}</span></span>
+<span id="cb10-142"><a href="#cb10-142"></a>many_auc_res <span class="ot">&lt;-</span> gcurves_thin_sm <span class="sc">%&gt;%</span> </span>
+<span id="cb10-143"><a href="#cb10-143"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">auc =</span> DescTools<span class="sc">::</span><span class="fu">AUC</span>(hours, OD600_smooth_avg),</span>
+<span id="cb10-144"><a href="#cb10-144"></a>            <span class="at">max_od =</span> <span class="fu">max</span>(OD600_smooth_avg),</span>
+<span id="cb10-145"><a href="#cb10-145"></a>            <span class="at">min_od =</span> <span class="fu">min</span>(OD600_smooth_avg),</span>
+<span id="cb10-146"><a href="#cb10-146"></a>            <span class="at">.by =</span> <span class="fu">c</span>(plate, well))</span>
+<span id="cb10-147"><a href="#cb10-147"></a><span class="in">```</span></span>
+<span id="cb10-148"><a href="#cb10-148"></a></span>
+<span id="cb10-149"><a href="#cb10-149"></a><span class="fu"># Combine and write output</span></span>
+<span id="cb10-150"><a href="#cb10-150"></a></span>
+<span id="cb10-153"><a href="#cb10-153"></a><span class="in">```{r}</span></span>
+<span id="cb10-154"><a href="#cb10-154"></a>many_spline_res <span class="sc">%&gt;%</span> </span>
+<span id="cb10-155"><a href="#cb10-155"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(dplyr<span class="sc">::</span><span class="fu">distinct</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(gcurves_thin_sm, id, plate, well)), <span class="at">by =</span> <span class="fu">join_by</span>(id)) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-156"><a href="#cb10-156"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-157"><a href="#cb10-157"></a>  dplyr<span class="sc">::</span><span class="fu">relocate</span>(y0<span class="sc">:</span>r2, <span class="at">.after=</span><span class="st">"well"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-158"><a href="#cb10-158"></a>  <span class="fu">left_join</span>(many_auc_res, <span class="at">by =</span> <span class="fu">join_by</span>(plate, well)) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-159"><a href="#cb10-159"></a>  readr<span class="sc">::</span><span class="fu">write_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_cl, <span class="st">"auc_mumax_results.tsv"</span>))</span>
+<span id="cb10-160"><a href="#cb10-160"></a><span class="in">```</span></span>
+<span id="cb10-161"><a href="#cb10-161"></a></span>
+<span id="cb10-162"><a href="#cb10-162"></a><span class="fu"># Plot growth rate estimates</span></span>
+<span id="cb10-163"><a href="#cb10-163"></a></span>
+<span id="cb10-164"><a href="#cb10-164"></a>Here we will manually inspect the different growth curves. We will compile a list of the worst curves with the strangest features to exclude from downstream analysis (into a blacklist file).</span>
+<span id="cb10-165"><a href="#cb10-165"></a></span>
+<span id="cb10-166"><a href="#cb10-166"></a>The subscripts at the ends of the plate contain information:</span>
+<span id="cb10-167"><a href="#cb10-167"></a></span>
+<span id="cb10-168"><a href="#cb10-168"></a><span class="ss">1. </span>The <span class="in">`_1`</span> subscript is the "bact" condition with no additional treatment</span>
+<span id="cb10-169"><a href="#cb10-169"></a><span class="ss">3. </span>The <span class="in">`_3`</span> subscript is the "bact_strep" condition which has streptomycin</span>
+<span id="cb10-170"><a href="#cb10-170"></a></span>
+<span id="cb10-171"><a href="#cb10-171"></a><span class="fu">## Bact conditions</span></span>
+<span id="cb10-172"><a href="#cb10-172"></a></span>
+<span id="cb10-173"><a href="#cb10-173"></a><span class="fu">### Plate 1</span></span>
+<span id="cb10-174"><a href="#cb10-174"></a></span>
+<span id="cb10-175"><a href="#cb10-175"></a>::: {#fig-01}</span>
+<span id="cb10-178"><a href="#cb10-178"></a><span class="in">```{r}</span></span>
+<span id="cb10-179"><a href="#cb10-179"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-180"><a href="#cb10-180"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-181"><a href="#cb10-181"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-182"><a href="#cb10-182"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-183"><a href="#cb10-183"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A1_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-184"><a href="#cb10-184"></a><span class="in">```</span></span>
+<span id="cb10-185"><a href="#cb10-185"></a>Growth curves for the **bacteria only** conditions on **Plate 1**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-186"><a href="#cb10-186"></a>:::</span>
+<span id="cb10-187"><a href="#cb10-187"></a></span>
+<span id="cb10-188"><a href="#cb10-188"></a><span class="fu">### Plate 2</span></span>
+<span id="cb10-189"><a href="#cb10-189"></a></span>
+<span id="cb10-190"><a href="#cb10-190"></a>::: {#fig-02}</span>
+<span id="cb10-193"><a href="#cb10-193"></a><span class="in">```{r}</span></span>
+<span id="cb10-194"><a href="#cb10-194"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-195"><a href="#cb10-195"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-196"><a href="#cb10-196"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-197"><a href="#cb10-197"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-198"><a href="#cb10-198"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A2_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-199"><a href="#cb10-199"></a><span class="in">```</span></span>
+<span id="cb10-200"><a href="#cb10-200"></a>Growth curves for the **bacteria only** conditions on **Plate 2**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-201"><a href="#cb10-201"></a>:::</span>
+<span id="cb10-202"><a href="#cb10-202"></a></span>
+<span id="cb10-203"><a href="#cb10-203"></a><span class="fu">### Plate 3</span></span>
+<span id="cb10-204"><a href="#cb10-204"></a></span>
+<span id="cb10-205"><a href="#cb10-205"></a>::: {#fig-03}</span>
+<span id="cb10-208"><a href="#cb10-208"></a><span class="in">```{r}</span></span>
+<span id="cb10-209"><a href="#cb10-209"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-210"><a href="#cb10-210"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-211"><a href="#cb10-211"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-212"><a href="#cb10-212"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-213"><a href="#cb10-213"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A3_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-214"><a href="#cb10-214"></a><span class="in">```</span></span>
+<span id="cb10-215"><a href="#cb10-215"></a>Growth curves for the **bacteria only** conditions on **Plate 3**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-216"><a href="#cb10-216"></a>:::</span>
+<span id="cb10-217"><a href="#cb10-217"></a></span>
+<span id="cb10-218"><a href="#cb10-218"></a><span class="fu">### Plate 4</span></span>
+<span id="cb10-219"><a href="#cb10-219"></a></span>
+<span id="cb10-220"><a href="#cb10-220"></a>::: {#fig-04}</span>
+<span id="cb10-223"><a href="#cb10-223"></a><span class="in">```{r}</span></span>
+<span id="cb10-224"><a href="#cb10-224"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-225"><a href="#cb10-225"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-226"><a href="#cb10-226"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-227"><a href="#cb10-227"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-228"><a href="#cb10-228"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A4_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-229"><a href="#cb10-229"></a><span class="in">```</span></span>
+<span id="cb10-230"><a href="#cb10-230"></a>Growth curves for the **bacteria only** conditions on **Plate 4**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-231"><a href="#cb10-231"></a>:::</span>
+<span id="cb10-232"><a href="#cb10-232"></a></span>
+<span id="cb10-233"><a href="#cb10-233"></a><span class="fu">### Plate 5</span></span>
+<span id="cb10-234"><a href="#cb10-234"></a></span>
+<span id="cb10-235"><a href="#cb10-235"></a>::: {#fig-05}</span>
+<span id="cb10-238"><a href="#cb10-238"></a><span class="in">```{r}</span></span>
+<span id="cb10-239"><a href="#cb10-239"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-240"><a href="#cb10-240"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-241"><a href="#cb10-241"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-242"><a href="#cb10-242"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-243"><a href="#cb10-243"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A5_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-244"><a href="#cb10-244"></a><span class="in">```</span></span>
+<span id="cb10-245"><a href="#cb10-245"></a>Growth curves for **bacteria only** conditions on **Plate 5**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-246"><a href="#cb10-246"></a>:::</span>
+<span id="cb10-247"><a href="#cb10-247"></a></span>
+<span id="cb10-248"><a href="#cb10-248"></a><span class="fu">### Plate 6</span></span>
+<span id="cb10-249"><a href="#cb10-249"></a></span>
+<span id="cb10-250"><a href="#cb10-250"></a>::: {#fig-06}</span>
+<span id="cb10-253"><a href="#cb10-253"></a><span class="in">```{r}</span></span>
+<span id="cb10-254"><a href="#cb10-254"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-255"><a href="#cb10-255"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-256"><a href="#cb10-256"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-257"><a href="#cb10-257"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-258"><a href="#cb10-258"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A6_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-259"><a href="#cb10-259"></a><span class="in">```</span></span>
+<span id="cb10-260"><a href="#cb10-260"></a>Growth curves for **bacteria only** conditions on **Plate 6**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-261"><a href="#cb10-261"></a>:::</span>
+<span id="cb10-262"><a href="#cb10-262"></a></span>
+<span id="cb10-263"><a href="#cb10-263"></a><span class="fu">### Plate 7</span></span>
+<span id="cb10-264"><a href="#cb10-264"></a></span>
+<span id="cb10-265"><a href="#cb10-265"></a>::: {#fig-07}</span>
+<span id="cb10-268"><a href="#cb10-268"></a><span class="in">```{r}</span></span>
+<span id="cb10-269"><a href="#cb10-269"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-270"><a href="#cb10-270"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-271"><a href="#cb10-271"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-272"><a href="#cb10-272"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-273"><a href="#cb10-273"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A7_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-274"><a href="#cb10-274"></a><span class="in">```</span></span>
+<span id="cb10-275"><a href="#cb10-275"></a>Growth curves for **bacteria only** conditions on **Plate 7**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-276"><a href="#cb10-276"></a>:::</span>
+<span id="cb10-277"><a href="#cb10-277"></a></span>
+<span id="cb10-278"><a href="#cb10-278"></a><span class="fu">### Plate 8</span></span>
+<span id="cb10-279"><a href="#cb10-279"></a></span>
+<span id="cb10-280"><a href="#cb10-280"></a>::: {#fig-08}</span>
+<span id="cb10-283"><a href="#cb10-283"></a><span class="in">```{r}</span></span>
+<span id="cb10-284"><a href="#cb10-284"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-285"><a href="#cb10-285"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-286"><a href="#cb10-286"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-287"><a href="#cb10-287"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-288"><a href="#cb10-288"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A8_1"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-289"><a href="#cb10-289"></a><span class="in">```</span></span>
+<span id="cb10-290"><a href="#cb10-290"></a>Growth curves for **bacteria only** conditions on **Plate 8**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-291"><a href="#cb10-291"></a>:::</span>
+<span id="cb10-292"><a href="#cb10-292"></a></span>
+<span id="cb10-293"><a href="#cb10-293"></a><span class="fu">## Streptomycin conditions</span></span>
+<span id="cb10-294"><a href="#cb10-294"></a></span>
+<span id="cb10-295"><a href="#cb10-295"></a><span class="fu">### Plate 1</span></span>
+<span id="cb10-296"><a href="#cb10-296"></a></span>
+<span id="cb10-297"><a href="#cb10-297"></a>::: {#fig-09}</span>
+<span id="cb10-300"><a href="#cb10-300"></a><span class="in">```{r}</span></span>
+<span id="cb10-301"><a href="#cb10-301"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-302"><a href="#cb10-302"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-303"><a href="#cb10-303"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-304"><a href="#cb10-304"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-305"><a href="#cb10-305"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A1_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-306"><a href="#cb10-306"></a><span class="in">```</span></span>
+<span id="cb10-307"><a href="#cb10-307"></a>Growth curves for the **Streptomycin** conditions on **Plate 1**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-308"><a href="#cb10-308"></a>:::</span>
+<span id="cb10-309"><a href="#cb10-309"></a></span>
+<span id="cb10-310"><a href="#cb10-310"></a><span class="fu">### Plate 2</span></span>
+<span id="cb10-311"><a href="#cb10-311"></a></span>
+<span id="cb10-312"><a href="#cb10-312"></a>::: {#fig-10}</span>
+<span id="cb10-315"><a href="#cb10-315"></a><span class="in">```{r}</span></span>
+<span id="cb10-316"><a href="#cb10-316"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-317"><a href="#cb10-317"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-318"><a href="#cb10-318"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-319"><a href="#cb10-319"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-320"><a href="#cb10-320"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A2_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-321"><a href="#cb10-321"></a><span class="in">```</span></span>
+<span id="cb10-322"><a href="#cb10-322"></a>Growth curves for the **Streptomycin** conditions on **Plate 2**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-323"><a href="#cb10-323"></a>:::</span>
+<span id="cb10-324"><a href="#cb10-324"></a></span>
+<span id="cb10-325"><a href="#cb10-325"></a><span class="fu">### Plate 3</span></span>
+<span id="cb10-326"><a href="#cb10-326"></a></span>
+<span id="cb10-327"><a href="#cb10-327"></a>::: {#fig-11}</span>
+<span id="cb10-330"><a href="#cb10-330"></a><span class="in">```{r}</span></span>
+<span id="cb10-331"><a href="#cb10-331"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-332"><a href="#cb10-332"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-333"><a href="#cb10-333"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-334"><a href="#cb10-334"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-335"><a href="#cb10-335"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A3_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-336"><a href="#cb10-336"></a><span class="in">```</span></span>
+<span id="cb10-337"><a href="#cb10-337"></a>Growth curves for the **Streptomycin** conditions on **Plate 3**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-338"><a href="#cb10-338"></a>:::</span>
+<span id="cb10-339"><a href="#cb10-339"></a></span>
+<span id="cb10-340"><a href="#cb10-340"></a><span class="fu">### Plate 4</span></span>
+<span id="cb10-341"><a href="#cb10-341"></a></span>
+<span id="cb10-342"><a href="#cb10-342"></a>::: {#fig-12}</span>
+<span id="cb10-345"><a href="#cb10-345"></a><span class="in">```{r}</span></span>
+<span id="cb10-346"><a href="#cb10-346"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-347"><a href="#cb10-347"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-348"><a href="#cb10-348"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-349"><a href="#cb10-349"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-350"><a href="#cb10-350"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A4_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-351"><a href="#cb10-351"></a><span class="in">```</span></span>
+<span id="cb10-352"><a href="#cb10-352"></a>Growth curves for the **Streptomycin** conditions on **Plate 4**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-353"><a href="#cb10-353"></a>:::</span>
+<span id="cb10-354"><a href="#cb10-354"></a></span>
+<span id="cb10-355"><a href="#cb10-355"></a><span class="fu">### Plate 5</span></span>
+<span id="cb10-356"><a href="#cb10-356"></a></span>
+<span id="cb10-357"><a href="#cb10-357"></a>::: {#fig-13}</span>
+<span id="cb10-360"><a href="#cb10-360"></a><span class="in">```{r}</span></span>
+<span id="cb10-361"><a href="#cb10-361"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-362"><a href="#cb10-362"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-363"><a href="#cb10-363"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-364"><a href="#cb10-364"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-365"><a href="#cb10-365"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A5_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-366"><a href="#cb10-366"></a><span class="in">```</span></span>
+<span id="cb10-367"><a href="#cb10-367"></a>Growth curves for **Streptomycin** conditions on **Plate 5**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-368"><a href="#cb10-368"></a>:::</span>
+<span id="cb10-369"><a href="#cb10-369"></a></span>
+<span id="cb10-370"><a href="#cb10-370"></a><span class="fu">### Plate 6</span></span>
+<span id="cb10-371"><a href="#cb10-371"></a></span>
+<span id="cb10-372"><a href="#cb10-372"></a>::: {#fig-14}</span>
+<span id="cb10-375"><a href="#cb10-375"></a><span class="in">```{r}</span></span>
+<span id="cb10-376"><a href="#cb10-376"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-377"><a href="#cb10-377"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-378"><a href="#cb10-378"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-379"><a href="#cb10-379"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-380"><a href="#cb10-380"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A6_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-381"><a href="#cb10-381"></a><span class="in">```</span></span>
+<span id="cb10-382"><a href="#cb10-382"></a>Growth curves for **Streptomycin** conditions on **Plate 6**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-383"><a href="#cb10-383"></a>:::</span>
+<span id="cb10-384"><a href="#cb10-384"></a></span>
+<span id="cb10-385"><a href="#cb10-385"></a><span class="fu">### Plate 7</span></span>
+<span id="cb10-386"><a href="#cb10-386"></a></span>
+<span id="cb10-387"><a href="#cb10-387"></a>::: {#fig-15}</span>
+<span id="cb10-390"><a href="#cb10-390"></a><span class="in">```{r}</span></span>
+<span id="cb10-391"><a href="#cb10-391"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-392"><a href="#cb10-392"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-393"><a href="#cb10-393"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-394"><a href="#cb10-394"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-395"><a href="#cb10-395"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A7_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-396"><a href="#cb10-396"></a><span class="in">```</span></span>
+<span id="cb10-397"><a href="#cb10-397"></a>Growth curves for **Streptomycin** conditions on **Plate 7**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-398"><a href="#cb10-398"></a>:::</span>
+<span id="cb10-399"><a href="#cb10-399"></a></span>
+<span id="cb10-400"><a href="#cb10-400"></a><span class="fu">### Plate 8</span></span>
+<span id="cb10-401"><a href="#cb10-401"></a></span>
+<span id="cb10-402"><a href="#cb10-402"></a>::: {#fig-16}</span>
+<span id="cb10-405"><a href="#cb10-405"></a><span class="in">```{r}</span></span>
+<span id="cb10-406"><a href="#cb10-406"></a><span class="co">#| fig.width: 12</span></span>
+<span id="cb10-407"><a href="#cb10-407"></a><span class="co">#| fig.height: 8</span></span>
+<span id="cb10-408"><a href="#cb10-408"></a><span class="co">#| echo: false</span></span>
+<span id="cb10-409"><a href="#cb10-409"></a><span class="co">#| warning: false</span></span>
+<span id="cb10-410"><a href="#cb10-410"></a><span class="fu">plotplate</span>(many_spline_fitted, <span class="at">dfxy=</span>many_spline_xy, <span class="at">unsmoothed=</span><span class="cn">FALSE</span>, <span class="at">predicted=</span><span class="cn">TRUE</span>, <span class="at">plate=</span><span class="st">"A8_3"</span>, <span class="at">rows=</span><span class="dv">8</span>, <span class="at">cols=</span><span class="dv">12</span>, <span class="at">page=</span><span class="dv">1</span>)</span>
+<span id="cb10-411"><a href="#cb10-411"></a><span class="in">```</span></span>
+<span id="cb10-412"><a href="#cb10-412"></a>Growth curves for **Streptomycin** conditions on **Plate 8**. Blue line is smoothed with a moving average window of 5 points. Orange is slope of max predicted growth rate from the first derivative of a smoothing spline. Red dot is hours and OD600 at which maximum growth rate is reached.</span>
+<span id="cb10-413"><a href="#cb10-413"></a>:::</span>
+<span id="cb10-414"><a href="#cb10-414"></a></span>
+<span id="cb10-415"><a href="#cb10-415"></a></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

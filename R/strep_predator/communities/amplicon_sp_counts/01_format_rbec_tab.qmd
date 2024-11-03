@@ -1,0 +1,216 @@
+---
+title: "Predator and STR Community species composition workflow i) Data formatting from 20240318_BTK_illumina_v3"
+author: "Shane Hogle"
+date: today
+link-citations: true
+---
+
+Contains both results from hambiYSKpleiotropy experiment and also a test of the boilprep extraction method from the tipping point experiment.
+
+# Setup
+
+Loads required libraries and sets global variables
+
+```{r}
+#| output: false
+library(tidyverse)
+library(here)
+library(fs)
+library(archive)
+source(here::here("R", "utils_generic.R"))
+```
+
+Sets some important variables for the analysis. In particular it defines a temporary location on disk to decompress the Rbec tarball
+
+```{r}
+data_raw <- here::here("_data_raw", "communities", "20240318_BTK_illumina_v3")
+amplicontar <- here::here(data_raw, "rbec_output.tar.gz")
+
+# create temporary location to decompress
+tmpdir <- fs::file_temp()
+```
+
+## 16S copy number data
+
+This tibble contains information mapping rRNA 16S locus tags to species and also total copy number of 16S rRNAs in each genome
+
+```{r}
+tax_locus_copynum <- tibble::tribble(
+     ~strainID, ~rRNA16S_cn, ~rRNA16S_locus,             ~genus,        ~species,
+  "HAMBI_0006",          7L,  "H0006_04757",      "Pseudomonas",        "putida",
+  "HAMBI_0097",          7L,  "H0097_00044",    "Acinetobacter",     "johnsonii",
+  "HAMBI_0097",          7L,  "H0097_02759",    "Acinetobacter",     "johnsonii",
+  "HAMBI_0097",          7L,  "H0097_01762",    "Acinetobacter",     "johnsonii",
+  "HAMBI_0105",          4L,  "H0105_02306",    "Agrobacterium",   "tumefaciens",
+  "HAMBI_0262",          3L,  "H0262_00030",    "Brevundimonas",       "bullata",
+  "HAMBI_0403",          9L,  "H0403_00517",        "Comamonas",  "testosteroni",
+  "HAMBI_0403",          9L,  "H0403_00522",        "Comamonas",  "testosteroni",
+  "HAMBI_1279",          7L,  "H1279_03627",           "Hafnia",         "alvei",
+  "HAMBI_1279",          7L,  "H1279_00125",           "Hafnia",         "alvei",
+  "HAMBI_1279",          7L,  "H1279_03957",           "Hafnia",         "alvei",
+  "HAMBI_1287",          7L,  "H1287_03997",      "Citrobacter",        "koseri",
+  "HAMBI_1287",          7L,  "H1287_03402",      "Citrobacter",        "koseri",
+  "HAMBI_1292",          7L,  "H1292_03239",       "Morganella",      "morganii",
+  "HAMBI_1299",          8L,  "H1299_04293",         "Kluyvera",    "intermedia",
+  "HAMBI_1299",          8L,  "H1299_01283",         "Kluyvera",    "intermedia",
+  "HAMBI_1299",          8L,  "H1279_03957",         "Kluyvera",    "intermedia",
+  "HAMBI_1842",          4L,  "H1842_01650",      "Sphingobium",    "yanoikuyae",
+  "HAMBI_1896",          4L,  "H1896_00963", "Sphingobacterium",  "spiritivorum",
+  "HAMBI_1972",         10L,  "H1972_00343",        "Aeromonas",        "caviae",
+  "HAMBI_1972",         10L,  "H1972_03531",        "Aeromonas",        "caviae",
+  "HAMBI_1977",          5L,  "H1977_00118",      "Pseudomonas",  "chlororaphis",
+  "HAMBI_1988",          5L,  "H1988_05160",     "Chitinophaga",        "sancti",
+  "HAMBI_1988",          5L,  "H1988_05152",     "Chitinophaga",        "sancti",
+  "HAMBI_1988",          5L,  "H1988_05165",     "Chitinophaga",        "sancti",
+  "HAMBI_2159",          4L,  "H2159_01406",        "Trinickia",   "caryophylli",
+  "HAMBI_2159",          4L,  "H2159_05851",        "Trinickia",   "caryophylli",
+  "HAMBI_2160",          3L,  "H2160_00530",       "Bordetella",         "avium",
+  "HAMBI_2164",          5L,  "H2164_03337",      "Cupriavidus",    "oxalaticus",
+  "HAMBI_2443",          3L,  "H2443_00128",       "Paracoccus", "denitrificans",
+  "HAMBI_2494",          4L,  "H2494_03389", "Paraburkholderia",   "kururiensis",
+  "HAMBI_2659",          4L,  "H2659_00367", "Stenotrophomonas",   "maltophilia",
+  "HAMBI_2792",          4L,  "H2792_00549",        "Moraxella",         "canis",
+  "HAMBI_3031",          2L,  "H3031_00830",         "Niabella",  "yanshanensis",
+  "HAMBI_3237",          6L,  "H3237_00875",       "Microvirga",   "lotononidis",
+  "HAMBI_1923",          6L,  "H1923_00876",   "Flavobacterium",      "odoratum"
+  )
+```
+
+## Functions
+
+These are functions to aid in reading and processing output from Rbec
+
+```{r}
+# this function 
+normalize_by_copy <- function(.data, tlc = tax_locus_copynum){
+  .data %>% 
+    # join with the copy number data frame. We join by the locus tag so this will add H1279_03957 to HAMBI_1299
+    dplyr::left_join(tlc, by = join_by(rRNA16S_locus), relationship = "many-to-many") %>%
+    # get total number of mapping reads per species. This aggregates all the difference ASVs per species
+    dplyr::summarize(count = sum(count), .by = c(sample, strainID, rRNA16S_cn)) %>% 
+    # group by sample
+    dplyr::group_by(sample) %>% 
+    # calculate a corrected count which is simply the count divided by copy num for each species
+    # dividide by the sum of count divided by copy num for whole sample multiplied by the total
+    # number of mapped reads per sample
+    dplyr::mutate(count_correct = round(sum(count)*(count/rRNA16S_cn)/sum(count/rRNA16S_cn))) %>%  
+    dplyr::ungroup() %>% 
+    dplyr::select(sample, strainID, count, count_correct)
+  }
+
+# this function replaces missing species counts with zero
+completecombos <- function(.data, tlc = tax_locus_copynum, countname = count, remove1923 = TRUE){
+ 
+  # get unique strainIDs
+  strainID <- unique(tlc$strainID)
+  # table for assigning genus and species names. Doesn't matter if 1923 is there or not
+  # because it is filter joined later
+  tax <- dplyr::distinct(dplyr::select(tlc, strainID, genus, species))
+  if (remove1923) {
+    # get unique strainIDs but exclude 1923 if remove1923 is true
+    strainID <- strainID[strainID != "HAMBI_1923"]
+  }
+  
+  dplyr::bind_rows(tibble::tibble(strainID = strainID, sample = "dummy"), .data) %>% 
+    dplyr::mutate( "{{ countname }}" := dplyr::if_else(sample == "dummy", 1, {{ countname }})) %>% 
+    tidyr::complete(sample, strainID) %>% 
+    dplyr::filter(sample != "dummy") %>% 
+    dplyr::mutate( "{{ countname }}" := dplyr::if_else(is.na({{ countname }}), 0, {{ countname }})) %>% 
+    tidyr::replace_na(list(count_correct = 0)) %>% 
+    dplyr::left_join(dplyr::distinct(dplyr::select(tlc, strainID, genus, species)), by = join_by(strainID)) %>% 
+    dplyr::relocate(genus, species, .after = strainID)
+}
+```
+
+# Read data
+
+## Metadata
+
+Reads metadata for the samples
+
+```{r}
+mddf <- readr::read_tsv(here::here(data_raw, "20240318_BTK_illumina_v3_metadata.tsv"))
+```
+
+## Rbec 
+
+Untar Rbec output tarball which contains raw counts tables
+
+```{r}
+archive::archive_extract(
+  amplicontar,
+  dir = tmpdir,
+  files = NULL,
+  options = character(),
+  strip_components = 0L
+)
+```
+
+Sets up directory structure for decompressing
+
+```{r}
+tabdir <- here::here(tmpdir, "rbec_output")
+samppaths <- fs::dir_ls(tabdir)
+sampnames <- fs::path_split(samppaths) %>% 
+  purrr::map_chr(dplyr::last)
+```
+
+Reads all the `strain_table.txt` files in a loop
+
+```{r}
+straintabs <- paste0(samppaths, "/strain_table.txt") %>% 
+  purrr::set_names(sampnames) %>% 
+  purrr::map(
+  readr::read_tsv,
+  skip = 1,
+  col_names = c("rRNA16S_locus","count"),
+  show_col_types = FALSE) %>% 
+  purrr::list_rbind(names_to = "sample")
+```
+
+# Format
+
+Calls function from above that normalize counts by 16S copy number
+
+```{r}
+straintabs_norm <- normalize_by_copy(straintabs)
+```
+
+Calls function from above that complete all combinations of 23 species
+
+```{r}
+straintabs_norm_fmt <- completecombos(straintabs_norm, tlc = tax_locus_copynum, countname = count, remove1923 = TRUE) 
+```
+
+Joins the count data and metadata
+
+```{r}
+finaltable <- dplyr::left_join(straintabs_norm_fmt, mddf, by = join_by(sample))
+```
+
+Parition out the two different projects (tipping points and pleiotropy were sequenced on same flow cell) 
+
+```{r}
+finaltip <- finaltable %>% 
+  filter(project == "tipping_points") %>% 
+  dplyr::select(-c(pool:project), -lib_prep, -measure_env, -evolution_env)
+
+finalpleio <- finaltable %>% 
+  filter(project == "amanda_chapt01") %>% 
+  dplyr::select(-c(pool:project), -lib_prep, -evo_hist, -amp_conc)
+```
+
+# Write results
+
+```{r}
+readr:::write_tsv(finalpleio, here::here(data_stp_sp, "species_counts_md.tsv"))
+
+readr::write_tsv(finaltip, here::here(data_stp_sp, "species_counts_md_tippingpoints.tsv"))
+```
+
+# Clean up
+
+remove decompressed coverage directory from temp location
+```{r}
+fs::dir_delete(tmpdir)
+```

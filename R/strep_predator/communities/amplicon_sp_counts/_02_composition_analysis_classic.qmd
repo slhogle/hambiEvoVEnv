@@ -1,0 +1,650 @@
+---
+title: "Community composition analysis using classic ordination technique"
+author: "Shane Hogle"
+date: today
+link-citations: true
+---
+# Setup 
+
+## Libraries and global variables
+```{r}
+#| output: false
+library(tidyverse)
+library(here)
+library(fs)
+library(patchwork)
+library(scales)
+library(ggh4x)
+library(withr)
+library(Rtsne)
+library(patchwork)
+source(here::here("R", "utils_generic.R"))
+```
+
+## Required directories
+```{r}
+data_raw <- here::here("_data_raw", "20240318_BTK_illumina_v3")
+data <- here::here("data", "20240318_BTK_illumina_v3")
+figs <- here::here("figs", "20240318_BTK_illumina_v3")
+
+# make processed data and figs directories if they don't exist
+fs::dir_create(data)
+fs::dir_create(figs)
+```
+
+## Read and format 16S amplicon data
+```{r}
+#| output: false
+#| warning: false
+sptable <- read_tsv(here::here(data, "species_counts_md.tsv")) %>% 
+  mutate(transfer = day/7)
+
+counts_f <- sptable %>% 
+  group_by(sample) %>% 
+  mutate(f=norm_count/sum(norm_count)) %>% 
+  ungroup() %>% 
+  mutate(measure_env_short = case_when(measure_env == "bact" ~ "Meas: B",
+                                       measure_env == "bact_pred" ~ "Meas: BP",
+                                       measure_env == "bact_strep" ~ "Meas: BS",
+                                       measure_env == "bact_pred_strep" ~ "Meas: BPS")) %>% 
+  mutate(home_env_short = case_when(evolution_env == "anc" ~ "Home: Anc",
+                                    evolution_env == "bact" ~ "Home: B",
+                                    evolution_env == "bact_pred" ~ "Home: BP",
+                                    evolution_env == "bact_strep" ~ "Home: BS",
+                                    evolution_env == "bact_pred_strep" ~ "Home: BPS")) %>% 
+  mutate(measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BP", "Meas: BS", "Meas: BPS")),
+         home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+## Tidying
+```{r}
+# these are communities of a (supposedly) known composition. Can be used with metacal
+pos_ctrl_samples <- counts_f %>% 
+  filter(str_detect(sample, "pos_ctrl"))
+
+# these are samples taken directly from YSK and represent the composition of the communities used to start the experiment
+t0_samples <- counts_f %>% 
+  filter(!str_detect(sample, "pos_ctrl")) %>% 
+  filter(day == 0)
+
+# only samples from the experiment
+counts_f_experiment <- anti_join(counts_f, pos_ctrl_samples) %>% 
+  anti_join(., t0_samples)
+
+# combine t0 samples with experiment samples for plotting
+counts_f_full <- t0_samples %>% 
+  dplyr::select(-measure_env_short) %>% 
+  expand_grid(measure_env_short = c("Meas: B", "Meas: BP", "Meas: BS", "Meas: BPS")) %>% 
+  bind_rows(counts_f_experiment) %>% 
+  mutate(measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BP", "Meas: BS", "Meas: BPS")),
+         home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+# Visualize ommunity composition
+
+```{r}
+#| fig.width: 8
+#| fig.height: 8
+pbar <- ggplot(counts_f_full) +
+  geom_bar(aes(y = f, x=interaction(replicate, transfer), fill = strainID), color="black", linewidth=0.25, stat="identity") +
+  labs(x="Replicate | transfer", y="% abundance", fill="") + 
+  scale_fill_manual(values = hambi_colors) + 
+  facet_grid(measure_env_short ~ home_env_short) +
+  scale_y_continuous(limits = c(0,1.01), expand = c(0, 0), labels = percent) +
+  scale_x_discrete(guide = "axis_nested") +
+  theme_bw() +
+  mybartheme()
+```
+
+
+::: {#fig-01}
+```{r}
+#| fig.width: 8
+#| fig.height: 8
+#| echo: false
+pbar
+```
+
+Relative abundance (Y axis, percent) of species from replicate microcosms over time (X axis, A-F, transfers 0-12) in the transplantation experiment. Columns in the grid show evolved communities obtained from various "Home" conditions of the YSK long-term community evolution experiment or from a manually constructed community of clonally-derived species (far left, "Anc"). Rows in the grid show the different experimental measurement conditions that each "Home" community was transplanted into. B = bacteria grown without amendment, BS = streptomycin treatment, BP = *Tetrahymena thermophila* treatment, BPS = combined *Tetrahymena thermophila* and streptomycin treatment. 
+:::
+
+## Save
+
+```{r}
+ggsave(here::here(figs, "species_composition_bar.svg"), pbar, width=9, height=8, units="in",
+       device="svg")
+```
+
+# Ordination of community composition using CLR transform
+
+Need some additional libraries
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+library(compositions)
+library(zCompositions)
+library(vegan)
+library(ape)
+library(corrr)
+library(ggrepel)
+```
+
+## Transform data
+
+zCompositions has problems with species with \< 2 observations so we need to filter these out
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+counts_f_experiment %>% 
+  group_by(strainID) %>% 
+  summarize(n_samples = n(),
+            n_gt0 = sum(norm_count > 0),
+            p_gt0 = n_gt0 / n_samples) %>% 
+  ungroup() %>% 
+  arrange(n_gt0)
+```
+
+Here we remove strains present in \< 50 samples across transfer categories and present in \< 20 samples in at least 2/3 transfer categories
+
+```{r}
+lowstrainsv <- c(
+  "HAMBI_0097",
+  "HAMBI_2792",
+  "HAMBI_0262",
+  "HAMBI_1988",
+  "HAMBI_1842",
+  "HAMBI_1279",
+  "HAMBI_1299"
+)
+```
+
+transform to matrix
+
+```{r}
+mymat <- counts_f_experiment %>% 
+  filter(strainID %nin% lowstrainsv) %>% 
+  dplyr::select(sample, strainID, norm_count) %>% 
+  # important to arrange by sample as this makes some later joins easier
+  arrange(sample) %>% 
+  pivot_wider(names_from = "strainID", values_from = "norm_count") %>% 
+  column_to_rownames(var = "sample") %>% 
+  data.frame()
+```
+
+## Replace zeros
+
+Compositional analysis with the centered log-ratio can't handle zero values. Some people just replace them with a pseudocount. Another way is to impute them based on various different strategies.
+
+Literature:
+
+-   [A field guide for the compositional analysis of any-omics data](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6755255/)
+    -   [Supplemental material](https://zenodo.org/record/3270954#.Y1KastJBxhE)
+-   [zCompositions --- R package for multivariate imputation of left-censored data under a compositional approach](https://doi.org/10.1016/j.chemolab.2015.02.019)
+
+Here we will uses a Geometric Bayesian-multiplicative replacement strategy that preserves the ratios between the non-zero components. The "prop" option returns relative abundances.
+
+```{r}
+with_seed(12378, comp <- zCompositions::cmultRepl(mymat, method = "GBM", output = "prop"))
+```
+
+## Calculate Bray-curtis dissimilarity
+
+```{r}
+with_seed(12378, bray_dist      <- vegan::vegdist(comp, method = "bray"))  
+with_seed(12353, pcoa_ord_bray  <- ape::pcoa(bray_dist))
+```
+
+## Calculate with Aitchison distance
+
+Aitchison distance is the Euclidean distance of the centered log-ratio transform (clr). This distance (unlike Euclidean distance on read counts) has scale invariance, perturbation invariance, permutation invariance and sub-compositional dominance.
+
+```{r}
+with_seed(12353, balclr     <- compositions::clr(comp))
+with_seed(12353, aitc_dist  <- vegan::vegdist(balclr, method = "euclidean")) 
+```
+
+## Compare Aitchison distance with CLR
+
+When the Aitchison distance is used in Principle co-ordinate Analysis (PCoA) it is equivalent to standard Principle Component Analyis (PCA) on the clr transformed data
+
+```{r}
+with_seed(12353, pcoa_ord_aitc  <- ape::pcoa(aitc_dist))
+with_seed(12353, pca_ord_aitc   <- prcomp(balclr))
+```
+
+For example, these ordinations are the same, just that Axis2 is the mirror image between. Since the rotation is arbitrary this does not matter.
+
+::: {#fig-03}
+```{r}
+#| warning: false
+#| error: false
+#| fig.width: 6
+#| fig.height: 6
+plot(pcoa_ord_aitc$vectors)
+```
+
+Plot of Principal Coordinate Analysis (PCoA) done in the Aitchison geometry of the simplex (i.e. PCoA on the euclidean distance of the centered log-ratio transform species compositions). 
+:::
+
+::: {#fig-04}
+```{r}
+#| warning: false
+#| error: false
+#| fig.width: 6
+#| fig.height: 6
+plot(pca_ord_aitc$x)
+```
+Plot of Principal Component Analysis (PCA) done in the Aitchison geometry of the simplex (i.e. PCA on the centered log-ratio transform species compositions). Notice that the PCoA using the euclidean distance of centered log-ratio transformed species frequencies is equivalent to the PCA directly using clr-transformed values in @fig-03.
+:::
+
+## Environment vectors
+
+left_join with metadata
+
+```{r}
+#| output: false
+#| warning: false
+#| error: false
+pca2plot <- data.frame(pca_ord_aitc$x) %>% 
+  rownames_to_column(var = "sample") %>% 
+  left_join(dplyr::select(counts_f_experiment, sample, replicate, transfer, measure_env_short, home_env_short)) %>% 
+  arrange(sample)
+```
+
+About 80% of variance explained in first 5 PCs with about 65% in just the first 2 PCs alone.
+
+```{r}
+pca_ord_aitc_importance <- as.data.frame(summary(pca_ord_aitc)$importance) %>% 
+  rownames_to_column(var = "parameter")
+
+pca_ord_aitc_importance
+```
+
+Environmental/experimental variables associated with ordinatoion
+
+```{r}
+#| warning: false
+#| error: false
+efdata <- dplyr::select(counts_f_experiment, sample, replicate, transfer, measure_env_short, home_env_short) %>% 
+  distinct() %>% 
+  column_to_rownames(var = "sample")
+
+ef <-
+  envfit(
+    pca_ord_aitc ~ replicate + transfer + measure_env_short + home_env_short,
+    data = efdata,
+    na.rm = T,
+    choices = c(1, 2)
+  )
+```
+
+::: {#fig-05}
+```{r}
+#| warning: false
+#| error: false
+#| fig.width: 6
+#| fig.height: 6
+biplot(pca_ord_aitc, choices=c(1,2), labSize=0)
+plot(ef)
+```
+Environmental vectors plotted onto ordination in @fig-04
+:::
+
+### Significance of the environmental covariates
+
+```{r}
+ef
+```
+
+```{r}
+con_scrs <- as.data.frame(scores(ef, display = "vectors")) %>%
+  rownames_to_column(var = "var") %>% tibble()
+
+fct_scrs <- as.data.frame(scores(ef, display = "factors")) %>% 
+  rownames_to_column(var = "var") %>%  tibble()
+
+scale_factor <- 15
+```
+
+### Plot with measurement condition highlighted
+
+::: {#fig-06}
+```{r}
+ggplot(pca2plot) +
+  geom_point(aes(
+    x = PC1,
+    y = PC2,
+    color = measure_env_short,
+    shape = factor(transfer)), size=3 ) +
+  labs(x = paste0("PC1 (", round(pca_ord_aitc_importance[2,2]*100, 1),"%)"), 
+       y = paste0("PC2 (", round(pca_ord_aitc_importance[2,3]*100, 1),"%)"),
+       shape = "Transfer",
+       color = "Measurement\nenvironment") +
+  stat_ellipse(aes(x = PC1, y = PC2, color = measure_env_short)) + 
+  #facet_grid(~transfer) +
+  coord_fixed() +
+  scale_color_brewer(palette = "Set1") +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+  )
+```
+Plot of principal component analysis (PCA) done in the Aitchison geometry of the simplex (i.e. centered log-ratio transform species compositions) for all home environments, measurement environments, replicates, and transfers. Color shows the different measurement environments assayed and shape shows the number of transfers. Ellipses depict statistically significant (P < 0.05) categorical  variables (measurement environments) fit to the ordination axes via regression (`vegan::envfit`) and projected onto the ordination plot. Significance is assessed by permutation.
+:::
+
+::: {#fig-07}
+```{r}
+ggplot(pca2plot) +
+  geom_point(aes(
+    x = PC1,
+    y = PC2,
+    color = measure_env_short,
+    shape = factor(transfer)), size=3 ) +
+  labs(x = paste0("PC1 (", round(pca_ord_aitc_importance[2,2]*100, 1),"%)"), 
+       y = paste0("PC2 (", round(pca_ord_aitc_importance[2,3]*100, 1),"%)"),
+       shape = "Transfer",
+       color = "Measurement\nenvironment") +
+  facet_grid(home_env_short ~ transfer) +
+  coord_fixed() +
+  scale_color_brewer(palette = "Set1") +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+  )
+```
+As in @Fig-06 but separated into subplots by the home environment. 
+:::
+
+
+::: {#fig-08}
+```{r}
+ggplot(pca2plot) +
+  geom_point(aes(
+    x = PC1,
+    y = PC2,
+    color = home_env_short,
+    shape = factor(transfer)), size=3 ) +
+  labs(x = paste0("PC1 (", round(pca_ord_aitc_importance[2,2]*100, 1),"%)"), 
+       y = paste0("PC2 (", round(pca_ord_aitc_importance[2,3]*100, 1),"%)"),
+       shape = "Transfer",
+       color = "Home\nenvironment") +
+  facet_grid(measure_env_short ~ transfer) +
+  coord_fixed() +
+  scale_color_brewer(palette = "Set1") +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+  )
+```
+As in @Fig-06 but separated into subplots by the measurement environment and colored by the home environment.
+:::
+
+
+
+```{r}
+m <- as.matrix(aitc_dist)
+
+xy <- t(combn(colnames(m), 2))
+
+#data.frame(xy, dist=m[xy]) %>% 
+data.frame(X1=colnames(m)[col(m)], X2=rownames(m)[row(m)], dist=c(m)) %>% 
+  rename(sample = X1) %>% 
+  left_join(rownames_to_column(efdata, var = "sample")) %>% 
+  rename(sample01 = sample, replicate01 = replicate,
+         day01 = day, measure_env_short01 = measure_env_short,
+         home_env_short01 = home_env_short, sample = X2) %>% 
+  left_join(rownames_to_column(efdata, var = "sample")) %>%  
+  #filter(day == 84 & day01 == 84) %>% 
+  #filter(measure_env_short == "Meas: BPS" & measure_env_short01 == "Meas: BPS") %>% 
+  #filter(home_env_short == "Home: Anc") %>% 
+  ggplot() +
+  geom_tile(aes( x = interaction(replicate01, day01, home_env_short01, measure_env_short01), 
+                 y = interaction(replicate, day, home_env_short, measure_env_short), 
+                 fill = dist)) +
+  scale_x_discrete(guide = "axis_nested", limits=rev) +
+  scale_y_discrete(guide = "axis_nested") +
+  #facet_grid(measure_env_short01 ~ measure_env_short, scales = "free") + 
+  scale_fill_viridis_c()
+
+```
+
+
+```{r}
+data.frame(xy, dist=m[xy]) %>% 
+  rename(sample = X1) %>% 
+  left_join(rownames_to_column(efdata, var = "sample")) %>% 
+  ggplot() +
+  geom_tile(aes( x = interaction(replicate, day, home_env_short, measure_env_short), 
+                 y = X2,
+                 fill = dist)) +
+  scale_x_discrete(guide = "axis_nested") +
+  scale_fill_viridis_c()
+```
+
+
+# Focusing on individual species
+
+```{r}
+data.frame(balclr) %>% 
+  rownames_to_column(var = "sample") %>%
+  pivot_longer(-sample, names_to = "strainID", values_to = "clr") %>% 
+  #dplyr::select(sample, HAMBI_1977) %>% 
+  left_join(rownames_to_column(efdata, var = "sample")) %>% 
+  pivot_wider(id_cols = c("measure_env_short", "replicate", "transfer", "strainID"), 
+              values_from = clr, names_from = "home_env_short") %>% 
+  pivot_longer(`Home: B`:`Home: BPS`) %>% 
+  mutate(clr_anc_ref = value - `Home: Anc`) %>% 
+  dplyr::select(measure_env_short, replicate, transfer, strainID, home_env_short = name, clr_anc_ref) %>% 
+  mutate(home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS"))) %>% 
+  ggplot() +
+  geom_tile(aes( x = interaction(replicate, transfer, measure_env_short), 
+                 y = home_env_short,
+                 fill = clr_anc_ref)) +
+  facet_wrap(~strainID) +
+    scale_x_discrete(guide = "axis_nested") +
+  scale_fill_gradient2()
+  scale_fill_viridis_c()
+```
+
+```{r}
+data.frame(balclr) %>% 
+  rownames_to_column(var = "sample") %>%
+  pivot_longer(-sample, names_to = "strainID", values_to = "clr") %>% 
+  left_join(rownames_to_column(efdata, var = "sample")) %>%
+  pivot_wider(id_cols = c("measure_env_short", "replicate", "transfer", "strainID"), 
+              values_from = clr, names_from = "home_env_short") %>% 
+  pivot_longer(`Home: B`:`Home: BPS`) %>% 
+  mutate(clr_anc_ref = value - `Home: Anc`) %>% 
+  dplyr::select(measure_env_short, replicate, transfer, strainID, home_env_short = name, clr_anc_ref) %>% 
+  group_by(strainID, home_env_short, measure_env_short) %>% 
+  summarize(clr_anc_ref = median(clr_anc_ref, na.rm = TRUE)) %>% 
+  mutate(home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS"))) %>% 
+  ggplot() +
+  geom_tile(aes( x = measure_env_short, 
+                 y = home_env_short,
+                 fill = clr_anc_ref)) +
+  facet_wrap(~strainID) +
+   # scale_x_discrete(guide = "axis_nested") +
+  scale_fill_gradient2()
+  scale_fill_viridis_c()
+```
+
+```{r}
+data.frame(comp) %>% 
+  rownames_to_column(var = "sample") %>%
+  pivot_longer(-sample, names_to = "strainID", values_to = "f") %>% 
+  left_join(rownames_to_column(efdata, var = "sample")) %>%
+  pivot_wider(id_cols = c("measure_env_short", "replicate", "transfer", "strainID"), 
+              values_from = f, names_from = "home_env_short") %>% 
+  pivot_longer(`Home: B`:`Home: BPS`) %>% 
+  mutate(logfc = log(value/`Home: Anc`)) %>% 
+  dplyr::select(measure_env_short, replicate, transfer, strainID, home_env_short = name, logfc) %>% 
+  group_by(strainID, home_env_short, measure_env_short) %>% 
+  summarize(logfc = mean(logfc, na.rm = TRUE)) %>% 
+  mutate(home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BP", "Home: BS", "Home: BPS"))) %>% 
+  ggplot() +
+  geom_tile(aes( x = measure_env_short, 
+                 y = home_env_short,
+                 fill = logfc)) +
+  facet_wrap(~strainID) +
+   # scale_x_discrete(guide = "axis_nested") +
+  #scale_fill_steps2(low = "red",mid = "white",high = "blue")
+  scale_fill_gradient2(low = "red", mid = "white", high = "blue")
+  scale_fill_viridis_c()
+```
+
+
+# Format data
+
+```{r}
+counts_f <- sptable %>% 
+  group_by(sample) %>% 
+  mutate(f=norm_count/sum(norm_count)) %>% 
+  ungroup() %>% 
+  mutate(measure_env = factor(measure_env),
+         day = factor(day),
+         replicate = factor(replicate),
+         evolution_env = factor(evolution_env),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+``` 
+
+# Compositional barplot
+
+```{r}
+#| output: false
+#| warning: false
+pinit <- counts_f |> 
+  filter(c_elegans == "init")  |> 
+  group_by(bacteria_anc_evo) |>
+  group_split() |>
+  map(mybarplot) |>
+  wrap_plots(., ncol = 1)
+
+panc <- counts_f |>
+  filter(c_elegans != "init") |>
+  filter(bacteria_anc_evo == "anc") |>
+  group_by(day, c_elegans) |>
+  group_split() |>
+  map(mybarplot) |>
+  wrap_plots(., ncol = 4)
+
+pevo <- counts_f |>
+  filter(c_elegans != "init") |>
+  filter(bacteria_anc_evo == "evo") |>
+  group_by(day, c_elegans) |>
+  group_split() |>
+  map(mybarplot) |>
+  wrap_plots(., ncol = 4) 
+```
+
+
+make a patchwork layout for the plot
+```{r}
+layout <- "
+ACCCCCCCCCCC
+BCCCCCCCCCCC
+"
+```
+
+Final patchwork plot
+
+```{r}
+pfinal <- pinit + (panc / pevo) +
+  plot_layout(guides = 'collect', design = layout) +
+  plot_annotation(tag_levels = 'A')
+```
+
+::: {#fig-barplot}
+```{r}
+#| warning: false
+#| fig-width: 16.5
+#| fig-height: 7
+pfinal
+```
+
+A and B are the starting abundances of anc and evo (only three replicates sequenced) where all HAMBI species were added at approximately equal proportions. C) and D) are for the ancestral bacteria at day 16 - the final day of the antibiotic pulse. D) is with worm included. E) and F) are the same as for C) and D) but this is at day 32 which is 8 days after the antibiotics were stopped (the recovery period). G), H), I), J) are the same as C-F) but these conditions include the evolved bacteria.
+:::
+
+# Save
+```{r}
+#| warning: false
+ggsave(
+  here::here(figs, "species_comp_full.svg"),
+  pfinal,
+  width = 16.5,
+  height = 7,
+  units = "in",
+  device = "svg"
+)
+
+ggsave(
+  here::here(figs, "species_comp_full.png"),
+  pfinal,
+  width = 16.5,
+  height = 7,
+  units = "in",
+  device = "png",
+  dpi = 320
+)
+```
+
+
+
+```{r}
+mybartheme <- function(){
+  theme(
+    panel.spacing.x = unit(0,"line"),
+    strip.placement = 'outside',
+    strip.background.x = element_blank(),
+    panel.grid = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    #axis.text.x = element_blank(),
+    axis.line.x = element_line(color = "black"),
+    axis.line.y = element_line(color = "black"),
+    legend.title = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank())
+}
+```
+
+```{r}
+mybarplot <- function(.data){
+    c_el <- unique(.data$c_elegans)
+    bac <- unique(.data$bacteria_anc_evo)
+    
+    mytitle <- case_when(c_el == "yes" & bac == "evo" ~ "evo + worm",
+                         c_el == "no" & bac == "evo" ~ "evo",
+                         c_el == "yes" & bac == "anc" ~ "anc + worm",
+                         c_el == "no" & bac == "anc" ~ "anc",
+                         c_el == "init" & bac == "anc" ~ "anc start",
+                         c_el == "init" & bac == "evo" ~ "evo start",
+              )
+    
+    ggplot(.data) +
+      geom_bar(aes(y = f, x=replicate, fill = strainID), 
+               color="black", linewidth=0.25, stat="identity") +
+      facet_grid(day ~ strep_conc_ugml_cat, switch = "x") +
+      scale_fill_manual(values = hambi_colors) + 
+      scale_y_continuous(limits = c(0,1.01), expand = c(0, 0), labels = percent) +
+      labs(x="", y="% abundance", fill="", title=mytitle) + 
+      theme_bw() + 
+      mybartheme()
+}
+```
