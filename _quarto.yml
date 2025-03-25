@@ -7,57 +7,38 @@ project:
   output-dir: docs
 
 website:
-  title: "hambiYSKpleiotropy"
+  title: "hambiEvoVEnv"
   sidebar:
     style: "docked"
     background: light
     search: true
     contents:
-      - section: "1. Community densities workflow (STR)"
+      - section: "Community densities workflow"
         contents:
-          - text: "i) Process and plot densities"
+          - text: "1) Process and plot densities"
             file: R/strep_only/communities/cell_density/01_analysis.qmd
       
-      - section: "2. Community composition workflow (STR)"
+      - section: "Community composition workflow"
         contents:
-          - text: "i) Amplicon data wrangling"
+          - text: "1) Amplicon data wrangling"
             file: R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.qmd
-          - text: "ii) Community composition"
-            file: R/strep_only/communities/amplicon_sp_counts/02_composition_analysis.qmd
-          - text: "iii) Machine learning the home environment"
-            file: R/strep_only/communities/machine_learning_pipelines/01_machine_learn_home_env.qmd
+          - text: "2) Community composition barplot"
+            file: R/strep_only/communities/amplicon_sp_counts/02_composition_plotting.qmd
+          - text: "3) Community ordination"
+            file: R/strep_only/communities/amplicon_sp_counts/03_ordination_analysis.qmd
+          - text: "4) Community diversity"
+            file: R/strep_only/communities/amplicon_sp_counts/04_diversity.qmd
+          - text: "5) Community JSD divergences"
+            file: R/strep_only/communities/amplicon_sp_counts/05_JSD_analysis.qmd
 
-      - section: "3. Clones workflow (STR)"
+      - section: "Clones workflow"
         contents:
-          - text: "i) Inspect/Smooth curves"
+          - text: "1) Inspect/Smooth curves"
             file: R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.qmd
-          - text: "ii) Summarize curves"
+          - text: "2) Summarize curves"
             file: R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.qmd
-          - text: "iii) Analysis and plot"
+          - text: "3) Analysis and plot"
             file: R/strep_only/monocultures/clone_phenotyping/03_growth_summary_analysis.qmd
-
-      - section: "1A. Community densities workflow (Predator and STR)"
-        contents:
-          - text: "i) Process and plot densities"
-            file: R/strep_predator/communities/cell_density/01_analysis.qmd
-
-      - section: "2A. Community composition workflow (Predator and STR)"
-        contents:
-          - text: "i) Amplicon data wrangling"
-            file: R/strep_predator/communities/amplicon_sp_counts/01_format_rbec_tab.qmd
-          - text: "ii) Community composition"
-            file: R/strep_predator/communities/amplicon_sp_counts/02_composition_analysis.qmd
-          - text: "iii) Machine learning the home environment"
-            file: R/strep_predator/communities/machine_learning_pipelines/01_machine_learn_home_env.qmd
-
-      - section: "3A. Clones workflow (Predator and STR)"
-        contents:
-          - text: "i) Inspect/Smooth curves"
-            file: R/strep_predator/monocultures/clone_phenotyping/01_growth_curve_qc.qmd
-          - text: "ii) Summarize curves"
-            file: R/strep_predator/monocultures/clone_phenotyping/02_growthrate_auc.qmd
-          - text: "iii) Analysis and plot"
-            file: R/strep_predator/monocultures/clone_phenotyping/03_growth_summary_analysis.qmd
 
 format:
   html:

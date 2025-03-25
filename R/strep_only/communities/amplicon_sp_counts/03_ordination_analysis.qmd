@@ -1,0 +1,554 @@
+---
+title: "Ordination of species abundance data"
+subtitle: "Community composition workflow"
+author: "Shane Hogle"
+date: today
+abstract: "This notebook conducts ordination of CLR transformed count data using PCA, Redundancy Analysis (RDA), and tSNE"
+---
+
+# Setup
+
+Loads required libraries and sets global variables
+
+```{r}
+#| output: false
+library(tidyverse)
+library(here)
+library(fs)
+library(scales)
+library(Rtsne)
+library(patchwork)
+library(vegan)
+source(here::here("R", "utils_generic.R"))
+```
+
+# Read
+
+Read species abundance data (16S v3 amplicon counts) and do some light formatting of metadata 
+
+```{r}
+#| output: false
+#| warning: false
+sptable <- readr::read_tsv(here::here(data_sp, "species_counts_md.tsv")) %>% 
+  dplyr::mutate(transfer = day/7)
+
+counts_f <- sptable %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::mutate(f=count_correct/sum(count_correct)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(measure_env_short = dplyr::case_when(measure_env == "bact" ~ "Meas: B",
+                                       measure_env == "bact_strep" ~ "Meas: BS")) %>% 
+  dplyr::mutate(home_env_short = dplyr::case_when(
+                                    evolution_env == "anc" ~ "Home: Anc",
+                                    evolution_env == "bact" ~ "Home: B",
+                                    evolution_env == "bact_strep" ~ "Home: BS")) %>% 
+  dplyr::mutate(
+    measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BS")),
+    home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+# Formatting
+
+Some light formatting to subset data into distint tibbles for later plotting
+
+```{r}
+#| output: false
+#| warning: false
+# these are communities of a (supposedly) known composition. Can be used with metacal
+pos_ctrl_samples <- counts_f %>% 
+  dplyr::filter(str_detect(sample, "pos_ctrl"))
+
+# these are samples taken directly from YSK and represent the composition of the communities used to start the experiment
+t0_samples <- counts_f %>% 
+  dplyr::filter(!str_detect(sample, "pos_ctrl")) %>% 
+  dplyr::filter(day == 0)
+
+# only samples from the experiment
+counts_f_experiment <- dplyr::anti_join(counts_f, pos_ctrl_samples, 
+                            by = join_by(sample, strainID, genus, 
+                                         species, count, count_correct, 
+                                         replicate, day, measure_env, 
+                                         evolution_env, transfer, f, 
+                                         measure_env_short, home_env_short)) %>% 
+  dplyr::anti_join(., t0_samples,
+                   by = join_by(sample, strainID, genus, species, count, 
+                                count_correct, replicate, day, measure_env, 
+                                evolution_env, transfer, f, measure_env_short, 
+                                home_env_short)) %>% 
+  dplyr::mutate(
+    measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BS")),
+    home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+# Data transformation
+
+Some preliminary inspections of the number of samples with zeros. This is needed for zcompositions
+
+```{r}
+counts_f_experiment %>% 
+  dplyr::group_by(strainID) %>% 
+  dplyr::summarize(n_samples = n(),
+            n_gt0 = sum(count > 0),
+            p_gt0 = n_gt0 / n_samples) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::arrange(n_gt0)
+```
+
+Here we will use the [centered log-ratio transformation](https://en.wikipedia.org/wiki/Compositional_data#Center_log_ratio_transform) for the species abundances. The centered log-ratio can be interpreted as the log-fold change of species i relative to the average microbe in a sample. The formula for the transformation is:
+
+$$
+\text{clr}(\mathbf x)= \left(log
+\frac{x_i}{g(\mathbf x)} \right)_{i=1,...,D} \qquad \text{with} \quad
+g(\mathbf x) = \left(\prod_{i=1}^Dx_i\right)^{1/D} =
+\exp\left(\frac{1}{D}\sum_{i=1}^D \log x_i\right)\text{,}
+$$ {#eq-clr}
+
+We will use the implementation of centered log-ratio transform in the `compositions` package
+
+```{r}
+set.seed(234781)
+
+# exclude these species because they have too many zeros
+lowstrainsv <- c(
+  "HAMBI_0097",
+  "HAMBI_2792"
+)
+
+# make a species count matrix
+count_mat <- counts_f_experiment %>% 
+  dplyr::filter(!(strainID %in% lowstrainsv)) %>% 
+  dplyr::select(sample, strainID, count) %>% 
+  dplyr::mutate(count = count + 1) %>% 
+  # important to arrange by sample as this makes some later joins easier
+  dplyr::arrange(sample) %>% 
+  tidyr::pivot_wider(names_from = "strainID", values_from = "count") %>% 
+  tibble::column_to_rownames(var = "sample") %>% 
+  data.frame()
+
+# calculate clr
+clr_mat <- compositions::clr(count_mat)
+
+env_mat <- counts_f_experiment %>% 
+  dplyr::select(sample, home_env_short, measure_env_short) %>% 
+  distinct() %>% 
+  # important to arrange by sample as this makes some later joins easier
+  dplyr::arrange(sample) %>% 
+  tibble::column_to_rownames(var = "sample") %>% 
+  data.frame()
+```
+
+
+# Constrain ordination - Redundancy analysis (RDA)
+
+[See this useful resource](https://www.davidzeleny.net/anadat-r/doku.php/en:rda_cca)
+
+> Linear constrained ordination methods implicitly based on Euclidean (RDA) or Hellinger/chord/other (tb-RDA) distances. The calculation (detailed below) can be simply described as a set of (multiple) linear regression analyses, where species abundances (for each species in the species composition matrix separately) are regressed against (one or several) environmental variable(s). The result is that variation in species composition is decomposed into variation related to environmental variables (represented by constrained/canonical axes) and not related to environmental variables (unconstrained axes). The number of constrained axes is equal or lower than the number of quantitative explanatory variables; in the case of a qualitative/categorical variable, the number of constrained axes is equal to the number of categories in that variable minus one. Each canonical axis is a linear combination of all explanatory variables.
+>
+> The algorithm of RDA can be summarised as follows (figure 1 and figure 2). The matrix of species composition (sample x species) and the matrix of environmental variables (sample x env.variables, for simplicity containing only one env. variable in the illustration below) needs to be available.
+>
+> 1. Abundances of the first species (spe1) are regressed against environmental variable (env1) by linear regression (or by multiple regression if more env. variables are available), with spe1 as the dependent variable and env1 (and other env. variables if available) as explanatory.
+>
+>2. The values of species abundances fitted by the regression model (i.e. located on the regression line) are stored in the matrix of fitted values, while residuals of species abundances (the difference between observed abundances and fitted abundances) are stored in the matrix of residuals.
+>
+>3. The same is repeated for all species in a matrix of species composition. Resulting matrices of predicted values and residual values have the same size (no. of samples x no. of species) as the original matrix of species composition.
+>
+>4. The matrix of predicted values is used in PCA to extract constrained ordination axes, while the matrix of residual values is used in PCA to extract unconstrained axes.
+>
+>5. In the example on figure 2 with only one explanatory variable there is only one constrained ordination axis (the second, vertical one in the ordination diagram is the first unconstrained axis).
+
+Perform the RDA analysis
+
+```{r}
+set.seed(12353)
+
+pca_ord_aitc <- vegan::rda(clr_mat)
+rda_ord_aitc <- vegan::rda(clr_mat ~ home_env_short + measure_env_short, data = env_mat)
+```
+
+Summary information of the RDA
+
+```{r}
+summary(rda_ord_aitc)
+```
+
+## Explained variation
+
+[See this useful resource](https://www.davidzeleny.net/anadat-r/doku.php/en:expl_var)
+
+> Constrained ordination is a set of multivariate regression analyses, and as in ordinary least squared regression, the effect size is measured by R2, the coefficient of determination. R2 quantifies the variation in species composition explained by environmental variable(s), and can be calculated (if no covariables are included) as the sum of eigenvalues of all constrained axes divided by the total variation (sum of eigenvalues of all axes).
+> 
+> The value of R2 in constrained ordination suffers from the same drawback as in ordinary regression, namely that it decreases with the number of samples in the dataset and increases with the number of explanatory variables, making the values incomparable between datasets of different size. The solution is to use adjusted R2. The absolute value of explained variation itself is not too informative on its own unless it is put into the context, for example by comparing it to the variation the same number of explanatory variables could possibly explain on the same species composition data. Even if the explanatory variables are in fact randomly generated, the R2 is non-zero and positive (in contrast to adjusted R2, which may be zero or even negative), and to decide whether the results are interpretable, it is useful to test their significance by Monte Carlo permutation test.
+
+Variation explained by RDAs and PCs
+
+::: {#fig-01}
+```{r}
+data.frame(value = c(rda_ord_aitc$CCA$eig/rda_ord_aitc$tot.chi*100, 
+                     rda_ord_aitc$CA$eig/rda_ord_aitc$tot.chi*100)) %>% 
+  rownames_to_column() %>%
+  mutate(type = if_else(str_detect(rowname, "RDA"), "RDA", "PC")) %>% 
+  mutate(rowname = fct_inorder(rowname)) %>% 
+  ggplot() + 
+  geom_col(aes(x =value , y = rowname, fill = type)) +
+  labs(x = '% variation', y = "") +
+  scale_y_discrete(limits=rev)
+```
+Proportion of variation explained by each of the Principal Component axes (red) and the RDA axes (blue)
+:::
+
+There are n-1 RDA axis for each categorical variable in the constrained ordination. In our case, `measure_env_short` has 2 categories and `home_env_short` has 3 categories for a total of 3 RDA axes. Together the Measurement environment and the Home environment explain about 60% of the variance in species composition. Is this a significant amount of variance explained? To check we will follow the [tutorial here.](https://www.davidzeleny.net/anadat-r/doku.php/en:expl_var_examples)
+
+First let's compare this amount of variance explained in the constrained ordination compares to the variation explained in an unconstrained analysis (i.e., just regular PCA). PCA can kind of be thought of generating latent uncorrelated variables that explain the most variance possible. So if we check the amount of variance explained by PC1 and PC2 we are kind of comparing the maximum amount of variance explained with "idealized" uncorrelated latent variables
+
+```{r}
+set.seed(12353)
+PCA12 <- scores(pca_ord_aitc, display = 'sites', choices = 1:2)
+tbRDA_PCA12 <- vegan::rda(clr_mat ~ PCA12)
+
+tibble("var_exp_rda" = round(vegan::RsquareAdj(rda_ord_aitc)$r.squared,2),
+       "var_exp_pca12" = round(vegan::RsquareAdj(tbRDA_PCA12)$r.squared, 2))
+```
+So this analysis shows that 61% of the variance can be explained by 2 real variables while 70% of the variance could be explained by 2 idealized, uncorrelated latent variables. So this analysis shows that using the measurement and the home environemnts we are explaining something like `{r} round(vegan::RsquareAdj(rda_ord_aitc)$r.squared/vegan::RsquareAdj(tbRDA_PCA12)$r.squared, 2)*100` % of the maximum possible amount of variance explained in community composition.
+
+Now we test whether the amount of variance explained is higher than we would expect for just two random variables.
+
+```{r}
+set.seed(12353)
+randomize_rda <- function(){
+  # reshuffle the rows with environmental variabels
+  env_mat_rand <- env_mat[sample(1:nrow(env_mat)),] 
+  rda_ord_aitc_rand <- vegan::rda(clr_mat ~ home_env_short + measure_env_short, data = env_mat_rand)
+  vegan::RsquareAdj(rda_ord_aitc_rand)$r.squared
+}
+
+# run the simulation 999 times
+sim_r2 <- replicate(n = 999, randomize_rda(), simplify = TRUE)
+```
+
+So using the variables definitely is better than what we see after 999 Monte Carlo randomization permutations
+
+::: {#fig-02}
+```{r}
+ggplot(mapping = aes(sim_r2)) +
+  geom_histogram(bins = 30) +
+  geom_vline(xintercept = vegan::RsquareAdj(rda_ord_aitc)$r.squared, color = "red") +
+  xlab("Permuted R2 values")
+```
+Distribution of 999 randomly permuted (rows in environmental dataframe shuffled) R2 values from RDA analysis `vegan::rda(clr_mat ~ home_env_short + measure_env_short, data = env_mat_rand)`
+:::
+
+And the result is clearly statistically significant
+
+```{r}
+anova(rda_ord_aitc, permutations = 999)
+```
+
+```{r}
+anova(rda_ord_aitc, by = 'axis', permutations = 999)
+```
+
+```{r}
+anova(rda_ord_aitc, by = 'margin', permutations = 999)
+```
+
+## Variance partitioning
+
+[See this useful resource](https://www.davidzeleny.net/anadat-r/doku.php/en:varpart)
+
+> In case we have two or more explanatory variables, one may be interested in variation in species composition explained by each of them. If some of these explanatory variables are correlated, one must expect that variation explained by the first or the other variable cannot be separated - it will be shared.
+> 
+> The way how to approach this problem is variation partitioning, when variation explained by each variable (or set of variables) independently is partitioned into variation attributable purely to given environmental variable, and shared variation attributable to two or more variables.
+
+```{r}
+set.seed(12353)
+varp <- varpart(clr_mat, ~ home_env_short, ~ measure_env_short, data = env_mat)
+```
+
+- [a] = variation explained by variable 1 (conditional (or partial) effect of variable 1, i.e. variation this variable would explain if putting variable 2 as covariable)
+
+- [c] = variation explained by variable 2
+
+- [b] = shared variation explained by both variables (cannot be decided to which of them should be attributed, and is a result of correlation between both variables)
+
+- [a+b] = variation explained by variable 1 (independent simple (or marginal) effect of variable 1, i.e. variation this variable would explain if it is as the only explanatory variable in the model)
+
+- [b+c] = variation explained by variable 2
+
+- [d] = unexplained variation
+
+```{r}
+varp
+```
+
+> Now, when we know both simple and conditional effect of each variables, we may want to know whether these variances are significant, and hence worth of interpreting. Results from varpart contain the column testable with logical values indicating whether given fraction is testable or not. To test each of them, we will need the models defined above, and the function anova, which (if applied on single object resulting from rda or cca method, returns Monte Carlo permutation test of the predictor effect). For this, we need to first define also partial ordination models with one variable as exlanatory and the other as covariable (Condition)
+
+```{r}
+set.seed(12353)
+# fraction [a+c] = X1 (home_env_short)
+rda_ord_aitc_home <- rda(clr_mat ~ home_env_short, data = env_mat)
+# fraction [b+c] = X2 (measure_env_short)
+rda_ord_aitc_meas <- rda(clr_mat ~ measure_env_short, data = env_mat)
+# fraction [a] = home_env_short conditional upon measure_env_short
+rda_ord_aitc_home_meas <- rda(clr_mat ~ home_env_short + Condition (measure_env_short), data = env_mat)
+# fraction [c] = measure_env_short conditional upon home_env_short
+rda_ord_aitc_meas_home <- rda(clr_mat ~ measure_env_short + Condition (home_env_short), data = env_mat)
+```
+
+**[a+b+c] = X1+X2**
+
+The global model (fractions [a+b+c])
+
+```{r}
+anova(rda_ord_aitc)
+```
+
+**[a+c] = X1**
+
+Simple (marginal) effect of home env (fraction [a+c])
+
+```{r}
+anova(rda_ord_aitc_home)
+```
+
+**[b+c] = X2**
+
+Simple (marginal) effect of measurement env (fraction [b+c])
+
+```{r}
+anova(rda_ord_aitc_meas)
+```
+
+Conditional (partial) effect of home environment (fraction [a]):
+
+```{r}
+anova(rda_ord_aitc_home_meas)
+```
+
+Conditional (partial) effect of measurement environment (fraction [b]):
+
+```{r}
+anova(rda_ord_aitc_meas_home)
+```
+
+From these results, we can see that all simple (marginal) and conditional (partial) effects of both predictors are significant at P < 0.001.
+
+## Plot ordination
+
+```{r}
+env_dat2 <- counts_f_experiment %>% 
+  dplyr::select(sample, home_env_short, measure_env_short, replicate, transfer) %>% 
+  distinct()
+
+rda_wa <- data.frame(rda_ord_aitc$CCA$wa) %>% 
+  tibble::rownames_to_column(var = "sample") %>% 
+  dplyr::left_join(env_dat2, by = join_by(sample))
+
+pca_u <- data.frame(pca_ord_aitc$CA$u) %>% 
+  tibble::rownames_to_column(var = "sample") %>% 
+  dplyr::left_join(env_dat2, by = join_by(sample))
+```
+
+### Ordination plotting function
+
+```{r}
+p_ord <- function(ord_df, axis_1, axis_2, colorvar, shapevar, colors, ellipse = FALSE, coord_lim = FALSE, ylim = NULL, xlim = NULL){
+  # in case it is not a factor already
+  a <-  mutate(ord_df, transfer = factor(transfer)) 
+  
+  p <-  ggplot2::ggplot(data = a, aes(x = {{ axis_1 }}, y = {{ axis_2 }}))
+ 
+  p + list(
+    ggplot2::geom_point(aes(fill = {{ colorvar }}, shape = {{ shapevar }}), 
+                      alpha = 1, size = 2), 
+    if (ellipse == TRUE)
+      ggplot2::stat_ellipse(aes(color = {{ colorvar }})),
+    if (coord_lim == TRUE)
+      ggplot2::coord_fixed(ylim = ylim, xlim = xlim),
+    if (coord_lim == FALSE)
+      ggplot2::coord_fixed(),
+    ggplot2::labs(x = ggplot2::enquo(axis_1), 
+                  y = ggplot2::enquo(axis_2), shape = "Transfer"),
+    ggplot2::scale_fill_manual(values = colors),
+    ggplot2::scale_color_manual(values = colors, guide = 'none'),
+    ggplot2::scale_shape_manual(values = c(21, 22, 24)),
+    ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21))),
+    ggplot2::theme_bw(),
+    ggplot2::theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_blank(),
+      strip.placement = 'outside',
+      strip.background = element_blank(),
+  )) 
+}
+```
+
+### RDA plot
+
+```{r}
+p1 <- p_ord(rda_wa, RDA1, RDA2, 
+      colorvar = measure_env_short, 
+      shapevar = transfer, 
+      colors = c("#648FFF", "#FFB000"),
+      ellipse = FALSE,
+      coord_lim = TRUE,
+      ylim = c(-0.2, 0.3)) +
+  ggplot2::labs(fill = "Measurement\nconditions")
+
+p2 <- p_ord(rda_wa, RDA3, RDA2, 
+      colorvar = home_env_short, 
+      shapevar = transfer, 
+      colors = c("#DC267F", "#648FFF", "#FFB000"),
+      ellipse = TRUE,
+      coord_lim = TRUE,
+      ylim = c(-0.2, 0.3)) +
+  ggplot2::labs(fill = "Evolution\nconditions")
+
+prda <- p1 + p2 +
+  patchwork::plot_layout(guides = 'collect', ncol = 2) +
+  patchwork::plot_annotation(tag_levels = 'A')
+```
+
+::: {#fig-03}
+```{r}
+prda
+```
+A) Projection of experimental samples and environmental variables along the first two RDA axes (RDA1 = 53% variation explained, RDA2 = 5.5% variation explained). Point shape represents the transfer and color depicts the conditions of the measurement environment - B = bacterial community alone, BS = bacterial community + streptomycin. B) Projection of experimental samples and environmental variables along RDA2 (5.5% variation explained) and RDA3 (2.6% variation explained). Point shape represents the transfer and color depicts the conditions of the evolution environment - Anc = Ancestral bacteria/no evolution, B = bacterial community alone, BS = bacterial community + streptomycin
+:::
+
+#### Save RDA plot
+
+```{r}
+#| warning: false
+#| eval: false
+ggplot2::ggsave(
+  here::here(figs, "community_composition_rda.svg"),
+  prda,
+  width = 8,
+  height = 6,
+  units = "in",
+  device = "svg"
+)
+```
+
+### PCA plot
+
+```{r}
+p3 <- p_ord(pca_u, PC1, PC2, 
+      colorvar = measure_env_short, 
+      shapevar = transfer, 
+      colors = c("#648FFF", "#FFB000"),
+      ellipse = FALSE,
+      coord_lim = TRUE,
+      ylim = c(-0.225, 0.225)) +
+  ggplot2::labs(fill = "Measure\nenvironment")
+
+p4 <- p_ord(pca_u, PC3, PC2, 
+      colorvar = home_env_short, 
+      shapevar = transfer, 
+      colors = c("#DC267F", "#648FFF", "#FFB000"),
+      ellipse = TRUE,
+      coord_lim = TRUE,
+      ylim = c(-0.225, 0.225)) +
+  ggplot2::labs(fill = "Home\nenvironment")
+
+ppca <- p3 + p4 +
+  patchwork::plot_layout(guides = 'collect', ncol = 2) +
+  patchwork::plot_annotation(tag_levels = 'A')
+```
+
+::: {#fig-04}
+```{r}
+ppca
+```
+As in @fig-03, except here the principal components are plotted. PC1 = 60%, PC2 = 9.4%, PC3 = 6.7% variation explained. The ordination layouts are almost identical so the environmental variables we chose in the RDA likely correspond strongly to PCs.
+:::
+
+
+#### Save PCA plot
+
+```{r}
+#| warning: false
+#| eval: false
+ggplot2::ggsave(
+  here::here(figs, "community_composition_pca.svg"),
+  ppca,
+  width = 8,
+  height = 6,
+  units = "in",
+  device = "svg"
+)
+```
+
+# tSNE dimensionality reduction
+
+```{r}
+set.seed(24578)
+mymat_tsne <- Rtsne::Rtsne(as.matrix(clr_mat), perplexity = 30, dims = 2)
+
+mydf_tsne <- data.frame(mymat_tsne$Y) %>% 
+  cbind(dplyr::distinct(dplyr::select(counts_f_experiment, sample, replicate, transfer, measure_env_short, home_env_short))) %>% 
+  mutate(transfer = factor(transfer)) 
+```
+
+## Plot tSNE
+
+Call the plotting function, make the patchwork layout, and save in raster and vector format
+
+```{r}
+pm <- p_ord(mydf_tsne, X1, X2, 
+      colorvar = measure_env_short, 
+      shapevar = transfer, 
+      colors = c("#648FFF", "#FFB000"),
+      ellipse = FALSE,
+      coord_lim = FALSE) +
+  ggplot2::labs(fill = "Measure\nenvironment", 
+                x = "tSNE dimension 1", 
+                y = "tSNE dimension 2")
+
+ph <- p_ord(mydf_tsne, X1, X2, 
+      colorvar = home_env_short, 
+      shapevar = transfer, 
+      colors = c("#DC267F", "#648FFF", "#FFB000"),
+      ellipse = FALSE,
+      coord_lim = FALSE) +
+  ggplot2::labs(fill = "Home\nenvironment", 
+                x = "tSNE dimension 1", 
+                y = "tSNE dimension 2")
+
+pt <- pm + ph +
+  patchwork::plot_layout(guides = 'collect', ncol = 2) +
+  patchwork::plot_annotation(tag_levels = 'A')
+```
+
+::: {#fig-02}
+```{r}
+#| fig.width: 8
+#| fig.height: 6
+#| echo: false
+#| warning: false
+pt
+```
+Dimensional reduction of bacterial community composition using t-SNE. Each point represents a replicate microcosm sampled at serial transfers 4, 8, and 12 (grid columns). In **A)** point colors depict the experimental measurement condition from the transplantation experiment. In **B)** point colors depict the evolutionary history of the inoculating communities ("home environment").
+:::
+
+### Save tSNE plot
+
+```{r}
+#| warning: false
+#| eval: false
+ggplot2::ggsave(
+  here::here(figs, "community_composition_tsne.svg"),
+  pt,
+  width = 8,
+  height = 6,
+  units = "in",
+  device = "svg"
+)
+```

@@ -1,6 +1,6 @@
 ---
 title: "Data formatting of Rbec output from 20240318_BTK_illumina_v3"
-subtitle: "From the STR community composition workflow"
+subtitle: "Community composition workflow"
 author: "Shane Hogle"
 date: today
 abstract: "This notebook reads in the Rbec output and processes it into species counts tables that are usable in downstream steps. This sequencing run contains both results from hambiYSKpleiotropy experiment and also a test of the boilprep extraction method from the tipping point experiment. The tipping points experimental data is written but not used in this project."

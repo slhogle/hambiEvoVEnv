@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Shane Hogle">
+<meta name="dcterms.date" content="2025-03-25">
+
+<title>Diversity metrics for species abundance data – hambiEvoVEnv</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../">
+<script src="../../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../site_libs/bootstrap/bootstrap-1f23bf93a17969024013c136d185e5ce.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="../../../../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../../../../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html">Community composition workflow</a></li><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/04_diversity.html">4) Community diversity</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../../../">hambiEvoVEnv</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Community densities workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1) Process and plot densities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Community composition workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1) Amplicon data wrangling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/02_composition_plotting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2) Community composition barplot</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/03_ordination_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">3) Community ordination</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/04_diversity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">4) Community diversity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/05_JSD_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">5) Community JSD divergences</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Clones workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1) Inspect/Smooth curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2) Summarize curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">3) Analysis and plot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="header-section-number">1</span> Setup</a></li>
+  <li><a href="#read" id="toc-read" class="nav-link" data-scroll-target="#read"><span class="header-section-number">2</span> Read</a></li>
+  <li><a href="#formatting" id="toc-formatting" class="nav-link" data-scroll-target="#formatting"><span class="header-section-number">3</span> Formatting</a></li>
+  <li><a href="#inspect-data" id="toc-inspect-data" class="nav-link" data-scroll-target="#inspect-data"><span class="header-section-number">4</span> Inspect data</a></li>
+  <li><a href="#calculate-diversity" id="toc-calculate-diversity" class="nav-link" data-scroll-target="#calculate-diversity"><span class="header-section-number">5</span> Calculate diversity</a>
+  <ul class="collapse">
+  <li><a href="#shannon-diversity" id="toc-shannon-diversity" class="nav-link" data-scroll-target="#shannon-diversity"><span class="header-section-number">5.1</span> Shannon diversity</a></li>
+  <li><a href="#species-richness" id="toc-species-richness" class="nav-link" data-scroll-target="#species-richness"><span class="header-section-number">5.2</span> Species richness</a></li>
+  <li><a href="#evenness" id="toc-evenness" class="nav-link" data-scroll-target="#evenness"><span class="header-section-number">5.3</span> Evenness</a></li>
+  </ul></li>
+  <li><a href="#examining-relationship-between-alpha-diversity-and-experimental-conditions" id="toc-examining-relationship-between-alpha-diversity-and-experimental-conditions" class="nav-link" data-scroll-target="#examining-relationship-between-alpha-diversity-and-experimental-conditions"><span class="header-section-number">6</span> Examining relationship between alpha diversity and experimental conditions</a>
+  <ul class="collapse">
+  <li><a href="#species-richness-over-time" id="toc-species-richness-over-time" class="nav-link" data-scroll-target="#species-richness-over-time"><span class="header-section-number">6.0.1</span> Species richness over time</a></li>
+  <li><a href="#shannon-diversity-over-time" id="toc-shannon-diversity-over-time" class="nav-link" data-scroll-target="#shannon-diversity-over-time"><span class="header-section-number">6.0.2</span> Shannon diversity over time</a></li>
+  <li><a href="#pielous-evenness-over-time" id="toc-pielous-evenness-over-time" class="nav-link" data-scroll-target="#pielous-evenness-over-time"><span class="header-section-number">6.0.3</span> Pielou’s evenness over time</a></li>
+  </ul></li>
+  <li><a href="#model-relationship-between-alpha-diversity-and-experimental-treatments" id="toc-model-relationship-between-alpha-diversity-and-experimental-treatments" class="nav-link" data-scroll-target="#model-relationship-between-alpha-diversity-and-experimental-treatments"><span class="header-section-number">7</span> Model relationship between alpha diversity and experimental treatments</a>
+  <ul class="collapse">
+  <li><a href="#species-richness-1" id="toc-species-richness-1" class="nav-link" data-scroll-target="#species-richness-1"><span class="header-section-number">7.1</span> Species richness</a>
+  <ul class="collapse">
+  <li><a href="#visual-check-model-assumptions" id="toc-visual-check-model-assumptions" class="nav-link" data-scroll-target="#visual-check-model-assumptions"><span class="header-section-number">7.1.1</span> Visual check model assumptions</a></li>
+  <li><a href="#contrast-analysis" id="toc-contrast-analysis" class="nav-link" data-scroll-target="#contrast-analysis"><span class="header-section-number">7.1.2</span> Contrast analysis</a></li>
+  </ul></li>
+  <li><a href="#shannon-diversity-1" id="toc-shannon-diversity-1" class="nav-link" data-scroll-target="#shannon-diversity-1"><span class="header-section-number">7.2</span> Shannon diversity</a>
+  <ul class="collapse">
+  <li><a href="#visual-check-model-assumptions-1" id="toc-visual-check-model-assumptions-1" class="nav-link" data-scroll-target="#visual-check-model-assumptions-1"><span class="header-section-number">7.2.1</span> Visual check model assumptions</a></li>
+  <li><a href="#contrast-analysis-1" id="toc-contrast-analysis-1" class="nav-link" data-scroll-target="#contrast-analysis-1"><span class="header-section-number">7.2.2</span> Contrast analysis</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html">Community composition workflow</a></li><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/04_diversity.html">4) Community diversity</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Diversity metrics for species abundance data</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">Cmmunity composition workflow</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Shane Hogle </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 25, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    This notebook examines how simple diversity metrics relate to variables in the experiment.
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="setup" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Setup</h1>
+<p>Loads required libraries and sets global variables</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(fs)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"utils_generic.R"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="read" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Read</h1>
+<p>Read species abundance data (16S v3 amplicon counts) and do some light formatting of metadata</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>sptable <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_sp, <span class="st">"species_counts_md.tsv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-2"><a href="#cb2-2"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">transfer =</span> day<span class="sc">/</span><span class="dv">7</span>)</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a>counts_f <span class="ot">&lt;-</span> sptable <span class="sc">%&gt;%</span> </span>
+<span id="cb2-5"><a href="#cb2-5"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">f=</span>count_correct<span class="sc">/</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-7"><a href="#cb2-7"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb2-8"><a href="#cb2-8"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">measure_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(measure_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Meas: B"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9"></a>                                       measure_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Meas: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-10"><a href="#cb2-10"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">home_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb2-11"><a href="#cb2-11"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"anc"</span> <span class="sc">~</span> <span class="st">"Home: Anc"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Home: B"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Home: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-14"><a href="#cb2-14"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb2-16"><a href="#cb2-16"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb2-17"><a href="#cb2-17"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb2-18"><a href="#cb2-18"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb2-19"><a href="#cb2-19"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="formatting" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Formatting</h1>
+<p>Some light formatting to subset data into distint tibbles for later plotting</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># these are communities of a (supposedly) known composition. Can be used with metacal</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>pos_ctrl_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>))</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co"># these are samples taken directly from YSK and represent the composition of the communities used to start the experiment</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>t0_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb3-7"><a href="#cb3-7"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-8"><a href="#cb3-8"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(day <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb3-9"><a href="#cb3-9"></a></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="co"># only samples from the experiment</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a>counts_f_experiment <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(counts_f, pos_ctrl_samples) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-12"><a href="#cb3-12"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(., t0_samples) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-13"><a href="#cb3-13"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb3-14"><a href="#cb3-14"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb3-15"><a href="#cb3-15"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb3-16"><a href="#cb3-16"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb3-17"><a href="#cb3-17"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb3-18"><a href="#cb3-18"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="inspect-data" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Inspect data</h1>
+<p>Now we want to calculate richness (number of species found) and also the probability of observing each species. This can easily be done in vegan using rarefaction. Note that there is <a href="https://doi.org/10.1128/msphere.00354-23">often confusion</a> about rarefaction and rarerying. rarerying only subsamples the data one time giving a point estimate of richness. Rarefaction subsamples the data hundreds/thousands of times to get a distribution of how often each species was sampled. It is argued that the whole “waste not want not” paper suffered from this confusion and used rarefying instead of rarefaction to generate their results.</p>
+<p>Examine the distribution of total read counts per sample</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">max =</span> <span class="fu">max</span>(t),</span>
+<span id="cb4-5"><a href="#cb4-5"></a>            <span class="at">min =</span> <span class="fu">min</span>(t),</span>
+<span id="cb4-6"><a href="#cb4-6"></a>            <span class="at">mean =</span> <span class="fu">mean</span>(t),</span>
+<span id="cb4-7"><a href="#cb4-7"></a>            <span class="at">stdev =</span> <span class="fu">sd</span>(t))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["max"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["min"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["mean"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["stdev"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"34375","2":"334","3":"20489.71","4":"4573.295"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Let’s filter out the low read sample</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-4"><a href="#cb5-4"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(t)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["sample"],"name":[1],"type":["chr"],"align":["left"]},{"label":["t"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"T3BS4_t2","2":"334"},{"1":"T1A5_t3","2":"11906"},{"1":"T3B3_t3","2":"12103"},{"1":"T1A3_t3","2":"13310"},{"1":"T3A2_t2","2":"13388"},{"1":"T3BS4_t3","2":"13454"},{"1":"T1A4_t3","2":"13584"},{"1":"T3A1_t2","2":"14066"},{"1":"T3BS1_t3","2":"14861"},{"1":"T3BS5_t3","2":"14894"},{"1":"T1A6_t3","2":"14994"},{"1":"T1B5_t3","2":"15329"},{"1":"T3B1_t2","2":"15338"},{"1":"T3BS6_t3","2":"15549"},{"1":"T3BS5_t2","2":"15769"},{"1":"BS1_t0","2":"15902"},{"1":"T3A4_t2","2":"16045"},{"1":"T1B2_t1","2":"16214"},{"1":"T3B2_t2","2":"16221"},{"1":"T3BS5_t1","2":"16398"},{"1":"T3BS3_t3","2":"16679"},{"1":"T3BS6_t2","2":"17018"},{"1":"BS5_t0","2":"17111"},{"1":"T3BS2_t3","2":"17149"},{"1":"T3B6_t3","2":"17164"},{"1":"ANCMIX1_t0","2":"17290"},{"1":"T3B4_t2","2":"17308"},{"1":"T1BS6_t3","2":"17425"},{"1":"T3B6_t1","2":"17433"},{"1":"T1B3_t1","2":"17513"},{"1":"ANCMIX2_t0","2":"17639"},{"1":"T1BS1_t2","2":"17728"},{"1":"T3B2_t3","2":"17744"},{"1":"T1A1_t3","2":"17746"},{"1":"T1BS2_t2","2":"17830"},{"1":"T3A5_t1","2":"17946"},{"1":"T1B4_t1","2":"17958"},{"1":"T3A3_t2","2":"18011"},{"1":"T1BS3_t3","2":"18137"},{"1":"T1B1_t1","2":"18330"},{"1":"T1A5_t2","2":"18348"},{"1":"T1A1_t1","2":"18390"},{"1":"T3B5_t1","2":"18443"},{"1":"T3BS6_t1","2":"18546"},{"1":"T3B3_t2","2":"18668"},{"1":"T1A6_t2","2":"18823"},{"1":"T1BS1_t3","2":"18847"},{"1":"B5_t0","2":"19033"},{"1":"T3B3_t1","2":"19440"},{"1":"T1A2_t1","2":"19517"},{"1":"T1A4_t2","2":"19540"},{"1":"T3BS4_t1","2":"19717"},{"1":"T1B3_t3","2":"19779"},{"1":"T3A6_t1","2":"19779"},{"1":"T3BS3_t2","2":"19798"},{"1":"T1A2_t3","2":"19884"},{"1":"T3A1_t1","2":"19948"},{"1":"BS6_t0","2":"20016"},{"1":"T3A4_t1","2":"20473"},{"1":"T1BS4_t2","2":"20591"},{"1":"B6_t0","2":"20701"},{"1":"T3B5_t3","2":"20713"},{"1":"T3BS2_t2","2":"20769"},{"1":"T1B5_t2","2":"20928"},{"1":"T1B6_t3","2":"21067"},{"1":"T3A6_t2","2":"21141"},{"1":"T1B6_t1","2":"21209"},{"1":"T3B4_t3","2":"21264"},{"1":"T3B4_t1","2":"21288"},{"1":"T1A1_t2","2":"21296"},{"1":"BS2_t0","2":"21382"},{"1":"T1A3_t2","2":"21389"},{"1":"T3A3_t1","2":"21461"},{"1":"T3A5_t2","2":"21490"},{"1":"T1B6_t2","2":"21492"},{"1":"BS3_t0","2":"21756"},{"1":"T1B5_t1","2":"21911"},{"1":"T3BS2_t1","2":"21966"},{"1":"T1A2_t2","2":"21994"},{"1":"T1BS2_t3","2":"22000"},{"1":"T1BS3_t2","2":"22120"},{"1":"T3A1_t3","2":"22193"},{"1":"T3BS3_t1","2":"22250"},{"1":"T3BS1_t1","2":"22282"},{"1":"T1A5_t1","2":"22308"},{"1":"T3BS1_t2","2":"22581"},{"1":"B1_t0","2":"22657"},{"1":"ANCMIX3_t0","2":"22873"},{"1":"T1BS5_t3","2":"22892"},{"1":"B3_t0","2":"23033"},{"1":"T3B1_t1","2":"23080"},{"1":"T1B4_t3","2":"23084"},{"1":"T3B2_t1","2":"23156"},{"1":"T3B6_t2","2":"23183"},{"1":"T3B5_t2","2":"23305"},{"1":"T1BS2_t1","2":"23415"},{"1":"T1B2_t3","2":"23576"},{"1":"B4_t0","2":"23612"},{"1":"T1BS5_t2","2":"23640"},{"1":"T1A4_t1","2":"23936"},{"1":"T1B1_t3","2":"24325"},{"1":"T3A3_t3","2":"24671"},{"1":"T3A2_t1","2":"24677"},{"1":"T1A3_t1","2":"24735"},{"1":"BS4_t0","2":"24806"},{"1":"T1BS4_t3","2":"24876"},{"1":"T1BS6_t2","2":"25176"},{"1":"T1B4_t2","2":"25237"},{"1":"T3A6_t3","2":"25416"},{"1":"T3A2_t3","2":"25583"},{"1":"T1BS3_t1","2":"25720"},{"1":"T1BS1_t1","2":"25889"},{"1":"T1BS4_t1","2":"26764"},{"1":"T1A6_t1","2":"27508"},{"1":"T3A4_t3","2":"28066"},{"1":"T1B2_t2","2":"28298"},{"1":"T1B3_t2","2":"28463"},{"1":"T3A5_t3","2":"28842"},{"1":"T1B1_t2","2":"29212"},{"1":"B2_t0","2":"29708"},{"1":"T1BS5_t1","2":"32607"},{"1":"T1BS6_t1","2":"34375"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Lets say we need to have at least 1000 reads per sample</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>minreads <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a></span>
+<span id="cb6-3"><a href="#cb6-3"></a>low_counts <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb6-4"><a href="#cb6-4"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-5"><a href="#cb6-5"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-6"><a href="#cb6-6"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(t <span class="sc">&lt;=</span> minreads) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-7"><a href="#cb6-7"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(sample)</span>
+<span id="cb6-8"><a href="#cb6-8"></a></span>
+<span id="cb6-9"><a href="#cb6-9"></a>counts_filt <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb6-10"><a href="#cb6-10"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>(sample <span class="sc">%in%</span> low_counts))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>counts_filt <span class="sc">%&gt;%</span> </span>
+<span id="cb7-2"><a href="#cb7-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(count_correct <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">nsp =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-5"><a href="#cb7-5"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">max_sp =</span> <span class="fu">max</span>(nsp),</span>
+<span id="cb7-6"><a href="#cb7-6"></a>            <span class="at">min_sp =</span> <span class="fu">min</span>(nsp),</span>
+<span id="cb7-7"><a href="#cb7-7"></a>            <span class="at">mn_sp =</span> <span class="fu">mean</span>(nsp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["max_sp"],"name":[1],"type":["int"],"align":["right"]},{"label":["min_sp"],"name":[2],"type":["int"],"align":["right"]},{"label":["mn_sp"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"23","2":"12","3":"16.7438"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>counts_filt_df <span class="ot">&lt;-</span> counts_filt <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, strainID, count_correct) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-3"><a href="#cb8-3"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from =</span> <span class="st">"strainID"</span>, <span class="at">values_from =</span> <span class="st">"count_correct"</span>, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-4"><a href="#cb8-4"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-5"><a href="#cb8-5"></a>  <span class="fu">as.data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="calculate-diversity" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Calculate diversity</h1>
+<section id="shannon-diversity" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="shannon-diversity"><span class="header-section-number">5.1</span> Shannon diversity</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>h <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">H =</span> vegan<span class="sc">::</span><span class="fu">diversity</span>(counts_filt_df, <span class="at">index =</span> <span class="st">"shannon"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Any correlation between shannon diversity and sequencing effort? No</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-3"><a href="#cb10-3"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-4"><a href="#cb10-4"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb10-5"><a href="#cb10-5"></a>  <span class="fu">left_join</span>(h, <span class="at">by =</span> <span class="fu">join_by</span>(sample)) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-6"><a href="#cb10-6"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb10-7"><a href="#cb10-7"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> H)) <span class="sc">+</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Shannon diversity"</span>, <span class="at">x =</span> <span class="st">"Sequencing depth"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_diversity_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="species-richness" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="species-richness"><span class="header-section-number">5.2</span> Species richness</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">set.seed</span>(<span class="dv">243578</span>)</span>
+<span id="cb11-2"><a href="#cb11-2"></a>minreads <span class="ot">&lt;-</span> <span class="dv">11906</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a>richness <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rarefy</span>(counts_filt_df, minreads, <span class="at">se =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="fu">t</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-5"><a href="#cb11-5"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-6"><a href="#cb11-6"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-7"><a href="#cb11-7"></a>  tibble<span class="sc">::</span><span class="fu">tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-8"><a href="#cb11-8"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(dplyr<span class="sc">::</span><span class="fu">distinct</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(counts_f_experiment, sample, replicate, measure_env_short, home_env_short, transfer)), </span>
+<span id="cb11-9"><a href="#cb11-9"></a>                   <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="evenness" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="evenness"><span class="header-section-number">5.3</span> Evenness</h2>
+<p>Shannon’s Evenness (also called Pielou’s J) is calculated as a ratio of the Shannon index calculated from the real community (with S species and p1, p2i, p3….pi relative species abundances), and maximum Shannon index for the community with the same richness Hmax (i.e.&nbsp;with S species all having p1 = p2 = pi = 1/S). The value is 1 in case all species have the same relative abundances and decreases with increasing differences in species relative abundances in the community.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>J <span class="ot">&lt;-</span> <span class="cf">function</span>(df, minreads){</span>
+<span id="cb12-2"><a href="#cb12-2"></a>  H <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">diversity</span>(counts_filt_df, <span class="at">index =</span> <span class="st">"shannon"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3"></a>  S <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">specnumber</span>(df)</span>
+<span id="cb12-4"><a href="#cb12-4"></a>  H<span class="sc">/</span><span class="fu">log</span>(S)</span>
+<span id="cb12-5"><a href="#cb12-5"></a>}</span>
+<span id="cb12-6"><a href="#cb12-6"></a></span>
+<span id="cb12-7"><a href="#cb12-7"></a>j <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">J =</span> <span class="fu">J</span>(counts_filt_df, minreads)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-8"><a href="#cb12-8"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="examining-relationship-between-alpha-diversity-and-experimental-conditions" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Examining relationship between alpha diversity and experimental conditions</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>alph_div <span class="ot">&lt;-</span> richness <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2"></a>  <span class="fu">left_join</span>(h, <span class="at">by =</span> <span class="fu">join_by</span>(sample)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">left_join</span>(j, <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>What is the alpha diversity after the experimental evolution phase? also the ancestral species mixes?</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(replicate)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["sample"],"name":[1],"type":["chr"],"align":["left"]},{"label":["S"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["se"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["replicate"],"name":[4],"type":["fct"],"align":["left"]},{"label":["measure_env_short"],"name":[5],"type":["fct"],"align":["left"]},{"label":["home_env_short"],"name":[6],"type":["fct"],"align":["left"]},{"label":["transfer"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["H"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["J"],"name":[9],"type":["dbl"],"align":["right"]}],"data":[{"1":"ANCMIX1_t0","2":"23.00000","3":"1.144646e-34","4":"NA","5":"NA","6":"NA","7":"NA","8":"2.9235739","9":"0.9324125"},{"1":"ANCMIX2_t0","2":"23.00000","3":"4.130195e-39","4":"NA","5":"NA","6":"NA","7":"NA","8":"2.9258775","9":"0.9331472"},{"1":"ANCMIX3_t0","2":"23.00000","3":"3.853521e-29","4":"NA","5":"NA","6":"NA","7":"NA","8":"2.9376683","9":"0.9369076"},{"1":"B1_t0","2":"22.99940","3":"2.444436e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.6913724","9":"0.5394277"},{"1":"B2_t0","2":"22.99869","3":"3.614956e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.5004173","9":"0.4785266"},{"1":"B3_t0","2":"22.99696","3":"5.506302e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.7786025","9":"0.5672479"},{"1":"B4_t0","2":"22.98514","3":"1.210149e-01","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.6038867","9":"0.5115260"},{"1":"B5_t0","2":"22.99719","3":"5.291477e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.6146983","9":"0.5149741"},{"1":"B6_t0","2":"22.99998","3":"3.992623e-03","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.5617936","9":"0.4981013"},{"1":"BS1_t0","2":"22.99892","3":"3.283233e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"0.8926836","9":"0.2847027"},{"1":"BS2_t0","2":"22.99846","3":"3.923007e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"0.8425970","9":"0.2687286"},{"1":"BS3_t0","2":"22.99138","3":"9.241924e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.1273181","9":"0.3595344"},{"1":"BS4_t0","2":"22.97909","3":"1.432382e-01","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.1392922","9":"0.3633533"},{"1":"BS5_t0","2":"22.99921","3":"2.815538e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.1673486","9":"0.3723013"},{"1":"BS6_t0","2":"22.99936","3":"2.519919e-02","4":"NA","5":"NA","6":"NA","7":"NA","8":"1.2984409","9":"0.4141104"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>All species are present in these samples</p>
+<section id="species-richness-over-time" class="level3" data-number="6.0.1">
+<h3 data-number="6.0.1" class="anchored" data-anchor-id="species-richness-over-time"><span class="header-section-number">6.0.1</span> Species richness over time</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb15-3"><a href="#cb15-3"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> transfer, <span class="at">y =</span> S)) <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb15-5"><a href="#cb15-5"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> replicate)) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a>  <span class="fu">facet_grid</span>(measure_env_short <span class="sc">~</span> home_env_short)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_diversity_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="shannon-diversity-over-time" class="level3" data-number="6.0.2">
+<h3 data-number="6.0.2" class="anchored" data-anchor-id="shannon-diversity-over-time"><span class="header-section-number">6.0.2</span> Shannon diversity over time</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb16-2"><a href="#cb16-2"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb16-3"><a href="#cb16-3"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> transfer, <span class="at">y =</span> H)) <span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb16-5"><a href="#cb16-5"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> replicate)) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a>  <span class="fu">facet_grid</span>(measure_env_short <span class="sc">~</span> home_env_short)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_diversity_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="pielous-evenness-over-time" class="level3" data-number="6.0.3">
+<h3 data-number="6.0.3" class="anchored" data-anchor-id="pielous-evenness-over-time"><span class="header-section-number">6.0.3</span> Pielou’s evenness over time</h3>
+<p>This is basically the same as Shannon diversity</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb17-3"><a href="#cb17-3"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> transfer, <span class="at">y =</span> J)) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb17-5"><a href="#cb17-5"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> replicate)) <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a>  <span class="fu">facet_grid</span>(measure_env_short <span class="sc">~</span> home_env_short)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_diversity_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="model-relationship-between-alpha-diversity-and-experimental-treatments" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Model relationship between alpha diversity and experimental treatments</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="fu">library</span>(xtable)</span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="fu">library</span>(Hmisc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'Hmisc'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:xtable':
+
+    label, label&lt;-</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:dplyr':
+
+    src, summarize</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    format.pval, units</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="fu">library</span>(easystats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code># Attaching packages: easystats 0.7.3 (red = needs update)
+✖ bayestestR  0.14.0   ✖ correlation 0.8.5 
+✖ datawizard  0.12.3   ✖ effectsize  0.8.9 
+✖ insight     0.20.4   ✖ modelbased  0.8.8 
+✖ performance 0.12.3   ✖ parameters  0.22.2
+✖ report      0.5.9    ✖ see         0.9.0 
+
+Restart the R-Session and update packages with `easystats::easystats_update()`.</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>alph_div_fct <span class="ot">&lt;-</span> alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3"></a>  <span class="fu">mutate</span>(<span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short), </span>
+<span id="cb25-4"><a href="#cb25-4"></a>         <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short),</span>
+<span id="cb25-5"><a href="#cb25-5"></a>         <span class="at">transfer =</span> <span class="fu">factor</span>(transfer))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="species-richness-1" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="species-richness-1"><span class="header-section-number">7.1</span> Species richness</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>modS <span class="ot">&lt;-</span> <span class="fu">lm</span>(S <span class="sc">~</span> measure_env_short <span class="sc">*</span> home_env_short <span class="sc">*</span> transfer, <span class="at">data =</span> alph_div_fct)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="visual-check-model-assumptions" class="level3" data-number="7.1.1">
+<h3 data-number="7.1.1" class="anchored" data-anchor-id="visual-check-model-assumptions"><span class="header-section-number">7.1.1</span> Visual check model assumptions</h3>
+<p><a href="https://easystats.github.io/performance/articles/check_model.html">See here</a></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>performance<span class="sc">::</span><span class="fu">check_model</span>(modS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_diversity_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="contrast-analysis" class="level3" data-number="7.1.2">
+<h3 data-number="7.1.2" class="anchored" data-anchor-id="contrast-analysis"><span class="header-section-number">7.1.2</span> Contrast analysis</h3>
+<p>On average about 3 fewer species detected in the streptomycin treatments compared to without streptomycin</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Level1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Level2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Difference"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["CI_low"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["CI_high"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["t"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["p"],"name":[9],"type":["dbl"],"align":["right"]}],"data":[{"1":"Meas: B","2":"Meas: BS","3":"2.999959","4":"2.62267","5":"3.377247","6":"0.1898506","7":"88","8":"15.80168","9":"1.970625e-27"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>The evolutionary history has an important effect here but it seems to be about the same size no matter which home environment is being compared. First we look at differences between the measurement envs for different home environment categories. The analysis shows that the difference in richness between the two experimental conditions is greatest for the Home: R2A community, followed by the ancestral community then the Home: BS community. But again pretty much always there are about ~ 3 fewer species detected in the presence of streptomycin.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>, <span class="at">by =</span> <span class="st">"home_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Level1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Level2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["home_env_short"],"name":[3],"type":["fct"],"align":["left"]},{"label":["Difference"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["CI_low"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["CI_high"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["t"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["p"],"name":[10],"type":["dbl"],"align":["right"]}],"data":[{"1":"Meas: B","2":"Meas: BS","3":"Home: Anc","4":"2.887678","5":"2.241337","6":"3.534018","7":"0.3252371","8":"88","9":"8.878686","10":"7.295826e-14"},{"1":"Meas: B","2":"Meas: BS","3":"Home: B","4":"3.919563","5":"3.262539","6":"4.576588","7":"0.3306132","8":"88","9":"11.855433","10":"6.209022e-20"},{"1":"Meas: B","2":"Meas: BS","3":"Home: BS","4":"2.192635","5":"1.535610","6":"2.849659","7":"0.3306132","8":"88","9":"6.632023","10":"2.583680e-09"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Next we investigate the difference in richness between home environments pairs for the different measurement environments. We consider first the measurement environment of R2A. In the R2A measurement environment the ancestral community and the home: B community had the same richness, the ancestral community had 0.85 more species detected than the home: BS community, while the home B community had on average 1.5 more species detected than the home BS community. For the measurement environment containing streptomycin there were no significnat differences in total species richness between the different evolutionary history categories.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"home_env_short"</span>, <span class="at">by =</span> <span class="st">"measure_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb32-2"><a href="#cb32-2"></a>  <span class="fu">arrange</span>(measure_env_short)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Level1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Level2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["measure_env_short"],"name":[3],"type":["fct"],"align":["left"]},{"label":["Difference"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["CI_low"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["CI_high"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["t"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["p"],"name":[10],"type":["dbl"],"align":["right"]}],"data":[{"1":"Home: Anc","2":"Home: B","3":"Meas: B","4":"-0.6135848","5":"-1.40735976","6":"0.1801902","7":"0.3252371","8":"88","9":"-1.8865771","10":"1.875443e-01"},{"1":"Home: Anc","2":"Home: BS","3":"Meas: B","4":"0.8463033","5":"0.05252835","6":"1.6400783","7":"0.3252371","8":"88","9":"2.6021122","10":"3.261078e-02"},{"1":"Home: B","2":"Home: BS","3":"Meas: B","4":"1.4598881","5":"0.66611312","6":"2.2536631","7":"0.3252371","8":"88","9":"4.4886893","10":"6.483668e-05"},{"1":"Home: Anc","2":"Home: B","3":"Meas: BS","4":"0.4183006","5":"-0.38859551","6":"1.2251967","7":"0.3306132","8":"88","9":"1.2652264","10":"6.273905e-01"},{"1":"Home: Anc","2":"Home: BS","3":"Meas: BS","4":"0.1512603","5":"-0.65563580","6":"0.9581564","7":"0.3306132","8":"88","9":"0.4575144","10":"1.000000e+00"},{"1":"Home: B","2":"Home: BS","3":"Meas: BS","4":"-0.2670403","5":"-1.08684757","6":"0.5527670","7":"0.3359034","8":"88","9":"-0.7949913","10":"1.000000e+00"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>This doesn’t change when doing contrast analysis by different home environments</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"home_env_short"</span>, <span class="at">by =</span> <span class="st">"measure_env_short"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Level1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Level2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["measure_env_short"],"name":[3],"type":["fct"],"align":["left"]},{"label":["Difference"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["CI_low"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["CI_high"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["t"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["p"],"name":[10],"type":["dbl"],"align":["right"]}],"data":[{"1":"Home: Anc","2":"Home: B","3":"Meas: B","4":"-0.6135848","5":"-1.40735976","6":"0.1801902","7":"0.3252371","8":"88","9":"-1.8865771","10":"6.251478e-02"},{"1":"Home: Anc","2":"Home: B","3":"Meas: BS","4":"0.4183006","5":"-0.38859551","6":"1.2251967","7":"0.3306132","8":"88","9":"1.2652264","10":"6.273905e-01"},{"1":"Home: Anc","2":"Home: BS","3":"Meas: B","4":"0.8463033","5":"0.05252835","6":"1.6400783","7":"0.3252371","8":"88","9":"2.6021122","10":"2.174052e-02"},{"1":"Home: Anc","2":"Home: BS","3":"Meas: BS","4":"0.1512603","5":"-0.65563580","6":"0.9581564","7":"0.3306132","8":"88","9":"0.4575144","10":"8.575150e-01"},{"1":"Home: B","2":"Home: BS","3":"Meas: B","4":"1.4598881","5":"0.66611312","6":"2.2536631","7":"0.3252371","8":"88","9":"4.4886893","10":"6.483668e-05"},{"1":"Home: B","2":"Home: BS","3":"Meas: BS","4":"-0.2670403","5":"-1.08684757","6":"0.5527670","7":"0.3359034","8":"88","9":"-0.7949913","10":"8.575150e-01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a><span class="fu">report_text</span>(modS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a><span class="fu">report_table</span>(modS) <span class="sc">%&gt;%</span> <span class="fu">xtable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="shannon-diversity-1" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="shannon-diversity-1"><span class="header-section-number">7.2</span> Shannon diversity</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>modH <span class="ot">&lt;-</span> <span class="fu">lm</span>(H <span class="sc">~</span> measure_env_short <span class="sc">*</span> home_env_short <span class="sc">*</span> transfer, <span class="at">data =</span> alph_div_fct)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="visual-check-model-assumptions-1" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="visual-check-model-assumptions-1"><span class="header-section-number">7.2.1</span> Visual check model assumptions</h3>
+<p><a href="https://easystats.github.io/performance/articles/check_model.html">See here</a></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>performance<span class="sc">::</span><span class="fu">check_model</span>(modH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_diversity_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="contrast-analysis-1" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="contrast-analysis-1"><span class="header-section-number">7.2.2</span> Contrast analysis</h3>
+<p>On average Shannon diversity is about 0.15 units lower in the streptomycin treatments compared to without streptomycin</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modH, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Level1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Level2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Difference"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["CI_low"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["CI_high"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["t"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["p"],"name":[9],"type":["dbl"],"align":["right"]}],"data":[{"1":"Meas: B","2":"Meas: BS","3":"0.1495005","4":"0.1176981","5":"0.1813028","6":"0.01600287","7":"88","8":"9.342105","9":"8.104156e-15"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>The evolutionary history has an important effect here. First we look at differences between the measurement envs for different home environment categories. The analysis shows that the difference in evenness between the two experimental conditions is greatest for the Ancestral community, followed by the Home: R2A community. Difference is not significant for the Home: BS community.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modH, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>, <span class="at">by =</span> <span class="st">"home_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Level1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Level2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["home_env_short"],"name":[3],"type":["fct"],"align":["left"]},{"label":["Difference"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["CI_low"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["CI_high"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["t"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["p"],"name":[10],"type":["dbl"],"align":["right"]}],"data":[{"1":"Meas: B","2":"Meas: BS","3":"Home: Anc","4":"0.24094427","5":"0.18646302","6":"0.2954255","7":"0.02741484","8":"88","9":"8.788825","10":"1.116941e-13"},{"1":"Meas: B","2":"Meas: BS","3":"Home: B","4":"0.16270531","5":"0.10732349","6":"0.2180871","7":"0.02786801","8":"88","9":"5.838425","10":"8.661002e-08"},{"1":"Meas: B","2":"Meas: BS","3":"Home: BS","4":"0.04485183","5":"-0.01052999","6":"0.1002337","7":"0.02786801","8":"88","9":"1.609438","10":"1.111024e-01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Next we investigate the evenness for different home environments for the different measurement environments. We consider first the measurement environment of R2A. The evenness of the communities with a shared evolutionary history was always higher than the ancestral community in the R2A conditions. However, the evenness of the two different histories were not significantly different. In the measurement environment with streptomycin again the evenness of the two communities with shared evolutionary history was always significantly higher than the ancestral community. Additionally, there was a significant difference between the two home environments (R2A, R2A + strep) in response to the R2A + strep treatment with the evenness of the community with an evolutionary history of growing in Strep being significantly higher than the community with an evolutionary history of not growing in strep.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modH, <span class="at">contrast =</span> <span class="st">"home_env_short"</span>, <span class="at">by =</span> <span class="st">"measure_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb44-2"><a href="#cb44-2"></a>  <span class="fu">arrange</span>(measure_env_short)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["Level1"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Level2"],"name":[2],"type":["chr"],"align":["left"]},{"label":["measure_env_short"],"name":[3],"type":["fct"],"align":["left"]},{"label":["Difference"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["CI_low"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["CI_high"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["t"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["p"],"name":[10],"type":["dbl"],"align":["right"]}],"data":[{"1":"Home: Anc","2":"Home: B","3":"Meas: B","4":"-0.12159650","5":"-0.1885053","6":"-0.054687707","7":"0.02741484","8":"88","9":"-4.435425","10":"7.939700e-05"},{"1":"Home: Anc","2":"Home: BS","3":"Meas: B","4":"-0.18720299","5":"-0.2541118","6":"-0.120294200","7":"0.02741484","8":"88","9":"-6.828526","10":"3.179190e-09"},{"1":"Home: B","2":"Home: BS","3":"Meas: B","4":"-0.06560649","5":"-0.1325153","6":"0.001302297","7":"0.02741484","8":"88","9":"-2.393101","10":"5.649685e-02"},{"1":"Home: Anc","2":"Home: B","3":"Meas: BS","4":"-0.19983546","5":"-0.2678502","6":"-0.131820660","7":"0.02786801","8":"88","9":"-7.170782","10":"6.625124e-10"},{"1":"Home: Anc","2":"Home: BS","3":"Meas: BS","4":"-0.38329542","5":"-0.4513102","6":"-0.315280628","7":"0.02786801","8":"88","9":"-13.753956","10":"3.652833e-23"},{"1":"Home: B","2":"Home: BS","3":"Meas: BS","4":"-0.18345997","5":"-0.2525631","6":"-0.114356867","7":"0.02831393","8":"88","9":"-6.479495","10":"1.539918e-08"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a><span class="fu">report_text</span>(modH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a><span class="fu">report_table</span>(modH) <span class="sc">%&gt;%</span> <span class="fu">xtable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb48" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb48-1"><a href="#cb48-1"></a><span class="co">---</span></span>
+<span id="cb48-2"><a href="#cb48-2"></a><span class="an">title:</span><span class="co"> "Diversity metrics for species abundance data"</span></span>
+<span id="cb48-3"><a href="#cb48-3"></a><span class="an">subtitle:</span><span class="co"> "Cmmunity composition workflow"</span></span>
+<span id="cb48-4"><a href="#cb48-4"></a><span class="an">author:</span><span class="co"> "Shane Hogle"</span></span>
+<span id="cb48-5"><a href="#cb48-5"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb48-6"><a href="#cb48-6"></a><span class="an">abstract:</span><span class="co"> "This notebook examines how simple diversity metrics relate to variables in the experiment."</span></span>
+<span id="cb48-7"><a href="#cb48-7"></a><span class="co">---</span></span>
+<span id="cb48-8"><a href="#cb48-8"></a></span>
+<span id="cb48-9"><a href="#cb48-9"></a><span class="fu"># Setup</span></span>
+<span id="cb48-10"><a href="#cb48-10"></a></span>
+<span id="cb48-11"><a href="#cb48-11"></a>Loads required libraries and sets global variables</span>
+<span id="cb48-12"><a href="#cb48-12"></a></span>
+<span id="cb48-15"><a href="#cb48-15"></a><span class="in">```{r}</span></span>
+<span id="cb48-16"><a href="#cb48-16"></a><span class="co">#| output: false</span></span>
+<span id="cb48-17"><a href="#cb48-17"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb48-18"><a href="#cb48-18"></a><span class="fu">library</span>(here)</span>
+<span id="cb48-19"><a href="#cb48-19"></a><span class="fu">library</span>(fs)</span>
+<span id="cb48-20"><a href="#cb48-20"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb48-21"><a href="#cb48-21"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"utils_generic.R"</span>))</span>
+<span id="cb48-22"><a href="#cb48-22"></a><span class="in">```</span></span>
+<span id="cb48-23"><a href="#cb48-23"></a></span>
+<span id="cb48-24"><a href="#cb48-24"></a><span class="fu"># Read</span></span>
+<span id="cb48-25"><a href="#cb48-25"></a></span>
+<span id="cb48-26"><a href="#cb48-26"></a>Read species abundance data (16S v3 amplicon counts) and do some light formatting of metadata </span>
+<span id="cb48-27"><a href="#cb48-27"></a></span>
+<span id="cb48-30"><a href="#cb48-30"></a><span class="in">```{r}</span></span>
+<span id="cb48-31"><a href="#cb48-31"></a><span class="co">#| output: false</span></span>
+<span id="cb48-32"><a href="#cb48-32"></a><span class="co">#| warning: false</span></span>
+<span id="cb48-33"><a href="#cb48-33"></a>sptable <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_sp, <span class="st">"species_counts_md.tsv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-34"><a href="#cb48-34"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">transfer =</span> day<span class="sc">/</span><span class="dv">7</span>)</span>
+<span id="cb48-35"><a href="#cb48-35"></a></span>
+<span id="cb48-36"><a href="#cb48-36"></a>counts_f <span class="ot">&lt;-</span> sptable <span class="sc">%&gt;%</span> </span>
+<span id="cb48-37"><a href="#cb48-37"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-38"><a href="#cb48-38"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">f=</span>count_correct<span class="sc">/</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-39"><a href="#cb48-39"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-40"><a href="#cb48-40"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">measure_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(measure_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Meas: B"</span>,</span>
+<span id="cb48-41"><a href="#cb48-41"></a>                                       measure_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Meas: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-42"><a href="#cb48-42"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">home_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb48-43"><a href="#cb48-43"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"anc"</span> <span class="sc">~</span> <span class="st">"Home: Anc"</span>,</span>
+<span id="cb48-44"><a href="#cb48-44"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Home: B"</span>,</span>
+<span id="cb48-45"><a href="#cb48-45"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Home: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-46"><a href="#cb48-46"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-47"><a href="#cb48-47"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb48-48"><a href="#cb48-48"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb48-49"><a href="#cb48-49"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb48-50"><a href="#cb48-50"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb48-51"><a href="#cb48-51"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span>
+<span id="cb48-52"><a href="#cb48-52"></a><span class="in">```</span></span>
+<span id="cb48-53"><a href="#cb48-53"></a></span>
+<span id="cb48-54"><a href="#cb48-54"></a><span class="fu"># Formatting</span></span>
+<span id="cb48-55"><a href="#cb48-55"></a></span>
+<span id="cb48-56"><a href="#cb48-56"></a>Some light formatting to subset data into distint tibbles for later plotting</span>
+<span id="cb48-57"><a href="#cb48-57"></a></span>
+<span id="cb48-60"><a href="#cb48-60"></a><span class="in">```{r}</span></span>
+<span id="cb48-61"><a href="#cb48-61"></a><span class="co">#| output: false</span></span>
+<span id="cb48-62"><a href="#cb48-62"></a><span class="co">#| warning: false</span></span>
+<span id="cb48-63"><a href="#cb48-63"></a><span class="co"># these are communities of a (supposedly) known composition. Can be used with metacal</span></span>
+<span id="cb48-64"><a href="#cb48-64"></a>pos_ctrl_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb48-65"><a href="#cb48-65"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>))</span>
+<span id="cb48-66"><a href="#cb48-66"></a></span>
+<span id="cb48-67"><a href="#cb48-67"></a><span class="co"># these are samples taken directly from YSK and represent the composition of the communities used to start the experiment</span></span>
+<span id="cb48-68"><a href="#cb48-68"></a>t0_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb48-69"><a href="#cb48-69"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-70"><a href="#cb48-70"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(day <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb48-71"><a href="#cb48-71"></a></span>
+<span id="cb48-72"><a href="#cb48-72"></a><span class="co"># only samples from the experiment</span></span>
+<span id="cb48-73"><a href="#cb48-73"></a>counts_f_experiment <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(counts_f, pos_ctrl_samples) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-74"><a href="#cb48-74"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(., t0_samples) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-75"><a href="#cb48-75"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-76"><a href="#cb48-76"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb48-77"><a href="#cb48-77"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb48-78"><a href="#cb48-78"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb48-79"><a href="#cb48-79"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb48-80"><a href="#cb48-80"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span>
+<span id="cb48-81"><a href="#cb48-81"></a><span class="in">```</span></span>
+<span id="cb48-82"><a href="#cb48-82"></a></span>
+<span id="cb48-83"><a href="#cb48-83"></a><span class="fu"># Inspect data</span></span>
+<span id="cb48-84"><a href="#cb48-84"></a></span>
+<span id="cb48-85"><a href="#cb48-85"></a>Now we want to calculate richness (number of species found) and also the probability of observing each species. This can easily be done in vegan using rarefaction. Note that there is <span class="co">[</span><span class="ot">often confusion</span><span class="co">](https://doi.org/10.1128/msphere.00354-23)</span> about rarefaction and rarerying. rarerying only subsamples the data one time giving a point estimate of richness. Rarefaction subsamples the data hundreds/thousands of times to get a distribution of how often each species was sampled. It is argued that the whole "waste not want not" paper suffered from this confusion and used rarefying instead of rarefaction to generate their results.</span>
+<span id="cb48-86"><a href="#cb48-86"></a></span>
+<span id="cb48-87"><a href="#cb48-87"></a>Examine the distribution of total read counts per sample</span>
+<span id="cb48-88"><a href="#cb48-88"></a></span>
+<span id="cb48-91"><a href="#cb48-91"></a><span class="in">```{r}</span></span>
+<span id="cb48-92"><a href="#cb48-92"></a>counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb48-93"><a href="#cb48-93"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-94"><a href="#cb48-94"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-95"><a href="#cb48-95"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">max =</span> <span class="fu">max</span>(t),</span>
+<span id="cb48-96"><a href="#cb48-96"></a>            <span class="at">min =</span> <span class="fu">min</span>(t),</span>
+<span id="cb48-97"><a href="#cb48-97"></a>            <span class="at">mean =</span> <span class="fu">mean</span>(t),</span>
+<span id="cb48-98"><a href="#cb48-98"></a>            <span class="at">stdev =</span> <span class="fu">sd</span>(t))</span>
+<span id="cb48-99"><a href="#cb48-99"></a><span class="in">```</span></span>
+<span id="cb48-100"><a href="#cb48-100"></a></span>
+<span id="cb48-101"><a href="#cb48-101"></a>Let's filter out the low read sample</span>
+<span id="cb48-102"><a href="#cb48-102"></a></span>
+<span id="cb48-105"><a href="#cb48-105"></a><span class="in">```{r}</span></span>
+<span id="cb48-106"><a href="#cb48-106"></a>counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb48-107"><a href="#cb48-107"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-108"><a href="#cb48-108"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-109"><a href="#cb48-109"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(t)</span>
+<span id="cb48-110"><a href="#cb48-110"></a><span class="in">```</span></span>
+<span id="cb48-111"><a href="#cb48-111"></a></span>
+<span id="cb48-112"><a href="#cb48-112"></a>Lets say we need to have at least 1000 reads per sample</span>
+<span id="cb48-113"><a href="#cb48-113"></a></span>
+<span id="cb48-116"><a href="#cb48-116"></a><span class="in">```{r}</span></span>
+<span id="cb48-117"><a href="#cb48-117"></a>minreads <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb48-118"><a href="#cb48-118"></a></span>
+<span id="cb48-119"><a href="#cb48-119"></a>low_counts <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb48-120"><a href="#cb48-120"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-121"><a href="#cb48-121"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-122"><a href="#cb48-122"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(t <span class="sc">&lt;=</span> minreads) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-123"><a href="#cb48-123"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(sample)</span>
+<span id="cb48-124"><a href="#cb48-124"></a></span>
+<span id="cb48-125"><a href="#cb48-125"></a>counts_filt <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb48-126"><a href="#cb48-126"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>(sample <span class="sc">%in%</span> low_counts))</span>
+<span id="cb48-127"><a href="#cb48-127"></a><span class="in">```</span></span>
+<span id="cb48-128"><a href="#cb48-128"></a></span>
+<span id="cb48-131"><a href="#cb48-131"></a><span class="in">```{r}</span></span>
+<span id="cb48-132"><a href="#cb48-132"></a>counts_filt <span class="sc">%&gt;%</span> </span>
+<span id="cb48-133"><a href="#cb48-133"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(count_correct <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-134"><a href="#cb48-134"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-135"><a href="#cb48-135"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">nsp =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-136"><a href="#cb48-136"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">max_sp =</span> <span class="fu">max</span>(nsp),</span>
+<span id="cb48-137"><a href="#cb48-137"></a>            <span class="at">min_sp =</span> <span class="fu">min</span>(nsp),</span>
+<span id="cb48-138"><a href="#cb48-138"></a>            <span class="at">mn_sp =</span> <span class="fu">mean</span>(nsp))</span>
+<span id="cb48-139"><a href="#cb48-139"></a><span class="in">```</span></span>
+<span id="cb48-140"><a href="#cb48-140"></a></span>
+<span id="cb48-143"><a href="#cb48-143"></a><span class="in">```{r}</span></span>
+<span id="cb48-144"><a href="#cb48-144"></a>counts_filt_df <span class="ot">&lt;-</span> counts_filt <span class="sc">%&gt;%</span> </span>
+<span id="cb48-145"><a href="#cb48-145"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, strainID, count_correct) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-146"><a href="#cb48-146"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from =</span> <span class="st">"strainID"</span>, <span class="at">values_from =</span> <span class="st">"count_correct"</span>, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-147"><a href="#cb48-147"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-148"><a href="#cb48-148"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb48-149"><a href="#cb48-149"></a><span class="in">```</span></span>
+<span id="cb48-150"><a href="#cb48-150"></a></span>
+<span id="cb48-151"><a href="#cb48-151"></a><span class="fu"># Calculate diversity</span></span>
+<span id="cb48-152"><a href="#cb48-152"></a></span>
+<span id="cb48-153"><a href="#cb48-153"></a><span class="fu">## Shannon diversity</span></span>
+<span id="cb48-154"><a href="#cb48-154"></a></span>
+<span id="cb48-157"><a href="#cb48-157"></a><span class="in">```{r}</span></span>
+<span id="cb48-158"><a href="#cb48-158"></a>h <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">H =</span> vegan<span class="sc">::</span><span class="fu">diversity</span>(counts_filt_df, <span class="at">index =</span> <span class="st">"shannon"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-159"><a href="#cb48-159"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) </span>
+<span id="cb48-160"><a href="#cb48-160"></a><span class="in">```</span></span>
+<span id="cb48-161"><a href="#cb48-161"></a></span>
+<span id="cb48-162"><a href="#cb48-162"></a>Any correlation between shannon diversity and sequencing effort? No</span>
+<span id="cb48-163"><a href="#cb48-163"></a></span>
+<span id="cb48-166"><a href="#cb48-166"></a><span class="in">```{r}</span></span>
+<span id="cb48-167"><a href="#cb48-167"></a>counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb48-168"><a href="#cb48-168"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-169"><a href="#cb48-169"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">t=</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-170"><a href="#cb48-170"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-171"><a href="#cb48-171"></a>  <span class="fu">left_join</span>(h, <span class="at">by =</span> <span class="fu">join_by</span>(sample)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-172"><a href="#cb48-172"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-173"><a href="#cb48-173"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> H)) <span class="sc">+</span></span>
+<span id="cb48-174"><a href="#cb48-174"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb48-175"><a href="#cb48-175"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Shannon diversity"</span>, <span class="at">x =</span> <span class="st">"Sequencing depth"</span>)</span>
+<span id="cb48-176"><a href="#cb48-176"></a><span class="in">```</span></span>
+<span id="cb48-177"><a href="#cb48-177"></a></span>
+<span id="cb48-178"><a href="#cb48-178"></a><span class="fu">## Species richness</span></span>
+<span id="cb48-179"><a href="#cb48-179"></a></span>
+<span id="cb48-182"><a href="#cb48-182"></a><span class="in">```{r}</span></span>
+<span id="cb48-183"><a href="#cb48-183"></a><span class="fu">set.seed</span>(<span class="dv">243578</span>)</span>
+<span id="cb48-184"><a href="#cb48-184"></a>minreads <span class="ot">&lt;-</span> <span class="dv">11906</span></span>
+<span id="cb48-185"><a href="#cb48-185"></a>richness <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rarefy</span>(counts_filt_df, minreads, <span class="at">se =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-186"><a href="#cb48-186"></a>  <span class="fu">t</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-187"><a href="#cb48-187"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-188"><a href="#cb48-188"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-189"><a href="#cb48-189"></a>  tibble<span class="sc">::</span><span class="fu">tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-190"><a href="#cb48-190"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(dplyr<span class="sc">::</span><span class="fu">distinct</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(counts_f_experiment, sample, replicate, measure_env_short, home_env_short, transfer)), </span>
+<span id="cb48-191"><a href="#cb48-191"></a>                   <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span>
+<span id="cb48-192"><a href="#cb48-192"></a><span class="in">```</span></span>
+<span id="cb48-193"><a href="#cb48-193"></a></span>
+<span id="cb48-194"><a href="#cb48-194"></a><span class="fu">## Evenness</span></span>
+<span id="cb48-195"><a href="#cb48-195"></a></span>
+<span id="cb48-196"><a href="#cb48-196"></a>Shannon’s Evenness (also called Pielou’s J) is calculated as a ratio of the Shannon index calculated from the real community (with S species and p1, p2i, p3....pi relative species abundances), and maximum Shannon index for the community with the same richness Hmax (i.e. with S species all having p1 = p2 = pi = 1/S). The value is 1 in case all species have the same relative abundances and decreases with increasing differences in species relative abundances in the community.</span>
+<span id="cb48-197"><a href="#cb48-197"></a></span>
+<span id="cb48-200"><a href="#cb48-200"></a><span class="in">```{r}</span></span>
+<span id="cb48-201"><a href="#cb48-201"></a>J <span class="ot">&lt;-</span> <span class="cf">function</span>(df, minreads){</span>
+<span id="cb48-202"><a href="#cb48-202"></a>  H <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">diversity</span>(counts_filt_df, <span class="at">index =</span> <span class="st">"shannon"</span>)</span>
+<span id="cb48-203"><a href="#cb48-203"></a>  S <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">specnumber</span>(df)</span>
+<span id="cb48-204"><a href="#cb48-204"></a>  H<span class="sc">/</span><span class="fu">log</span>(S)</span>
+<span id="cb48-205"><a href="#cb48-205"></a>}</span>
+<span id="cb48-206"><a href="#cb48-206"></a></span>
+<span id="cb48-207"><a href="#cb48-207"></a>j <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">J =</span> <span class="fu">J</span>(counts_filt_df, minreads)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-208"><a href="#cb48-208"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) </span>
+<span id="cb48-209"><a href="#cb48-209"></a><span class="in">```</span></span>
+<span id="cb48-210"><a href="#cb48-210"></a></span>
+<span id="cb48-211"><a href="#cb48-211"></a><span class="fu"># Examining relationship between alpha diversity and experimental conditions</span></span>
+<span id="cb48-212"><a href="#cb48-212"></a></span>
+<span id="cb48-215"><a href="#cb48-215"></a><span class="in">```{r}</span></span>
+<span id="cb48-216"><a href="#cb48-216"></a>alph_div <span class="ot">&lt;-</span> richness <span class="sc">%&gt;%</span> </span>
+<span id="cb48-217"><a href="#cb48-217"></a>  <span class="fu">left_join</span>(h, <span class="at">by =</span> <span class="fu">join_by</span>(sample)) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-218"><a href="#cb48-218"></a>  <span class="fu">left_join</span>(j, <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span>
+<span id="cb48-219"><a href="#cb48-219"></a><span class="in">```</span></span>
+<span id="cb48-220"><a href="#cb48-220"></a></span>
+<span id="cb48-221"><a href="#cb48-221"></a>What is the alpha diversity after the experimental evolution phase? also the ancestral species mixes?</span>
+<span id="cb48-222"><a href="#cb48-222"></a></span>
+<span id="cb48-225"><a href="#cb48-225"></a><span class="in">```{r}</span></span>
+<span id="cb48-226"><a href="#cb48-226"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb48-227"><a href="#cb48-227"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(replicate)) </span>
+<span id="cb48-228"><a href="#cb48-228"></a><span class="in">```</span></span>
+<span id="cb48-229"><a href="#cb48-229"></a>All species are present in these samples</span>
+<span id="cb48-230"><a href="#cb48-230"></a></span>
+<span id="cb48-231"><a href="#cb48-231"></a><span class="fu">### Species richness over time</span></span>
+<span id="cb48-232"><a href="#cb48-232"></a></span>
+<span id="cb48-235"><a href="#cb48-235"></a><span class="in">```{r}</span></span>
+<span id="cb48-236"><a href="#cb48-236"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb48-237"><a href="#cb48-237"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-238"><a href="#cb48-238"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> transfer, <span class="at">y =</span> S)) <span class="sc">+</span></span>
+<span id="cb48-239"><a href="#cb48-239"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb48-240"><a href="#cb48-240"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> replicate)) <span class="sc">+</span></span>
+<span id="cb48-241"><a href="#cb48-241"></a>  <span class="fu">facet_grid</span>(measure_env_short <span class="sc">~</span> home_env_short)</span>
+<span id="cb48-242"><a href="#cb48-242"></a><span class="in">```</span></span>
+<span id="cb48-243"><a href="#cb48-243"></a><span class="fu">### Shannon diversity over time</span></span>
+<span id="cb48-244"><a href="#cb48-244"></a></span>
+<span id="cb48-247"><a href="#cb48-247"></a><span class="in">```{r}</span></span>
+<span id="cb48-248"><a href="#cb48-248"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb48-249"><a href="#cb48-249"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-250"><a href="#cb48-250"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> transfer, <span class="at">y =</span> H)) <span class="sc">+</span></span>
+<span id="cb48-251"><a href="#cb48-251"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb48-252"><a href="#cb48-252"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> replicate)) <span class="sc">+</span></span>
+<span id="cb48-253"><a href="#cb48-253"></a>  <span class="fu">facet_grid</span>(measure_env_short <span class="sc">~</span> home_env_short)</span>
+<span id="cb48-254"><a href="#cb48-254"></a><span class="in">```</span></span>
+<span id="cb48-255"><a href="#cb48-255"></a></span>
+<span id="cb48-256"><a href="#cb48-256"></a><span class="fu">### Pielou's evenness over time</span></span>
+<span id="cb48-257"><a href="#cb48-257"></a></span>
+<span id="cb48-258"><a href="#cb48-258"></a>This is basically the same as Shannon diversity</span>
+<span id="cb48-261"><a href="#cb48-261"></a><span class="in">```{r}</span></span>
+<span id="cb48-262"><a href="#cb48-262"></a>alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb48-263"><a href="#cb48-263"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-264"><a href="#cb48-264"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> transfer, <span class="at">y =</span> J)) <span class="sc">+</span></span>
+<span id="cb48-265"><a href="#cb48-265"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb48-266"><a href="#cb48-266"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> replicate)) <span class="sc">+</span></span>
+<span id="cb48-267"><a href="#cb48-267"></a>  <span class="fu">facet_grid</span>(measure_env_short <span class="sc">~</span> home_env_short)</span>
+<span id="cb48-268"><a href="#cb48-268"></a><span class="in">```</span></span>
+<span id="cb48-269"><a href="#cb48-269"></a></span>
+<span id="cb48-270"><a href="#cb48-270"></a><span class="fu"># Model relationship between alpha diversity and experimental treatments</span></span>
+<span id="cb48-271"><a href="#cb48-271"></a></span>
+<span id="cb48-274"><a href="#cb48-274"></a><span class="in">```{r}</span></span>
+<span id="cb48-275"><a href="#cb48-275"></a><span class="fu">library</span>(xtable)</span>
+<span id="cb48-276"><a href="#cb48-276"></a><span class="fu">library</span>(Hmisc)</span>
+<span id="cb48-277"><a href="#cb48-277"></a><span class="fu">library</span>(easystats)</span>
+<span id="cb48-278"><a href="#cb48-278"></a><span class="in">```</span></span>
+<span id="cb48-279"><a href="#cb48-279"></a></span>
+<span id="cb48-282"><a href="#cb48-282"></a><span class="in">```{r}</span></span>
+<span id="cb48-283"><a href="#cb48-283"></a>alph_div_fct <span class="ot">&lt;-</span> alph_div <span class="sc">%&gt;%</span> </span>
+<span id="cb48-284"><a href="#cb48-284"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb48-285"><a href="#cb48-285"></a>  <span class="fu">mutate</span>(<span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short), </span>
+<span id="cb48-286"><a href="#cb48-286"></a>         <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short),</span>
+<span id="cb48-287"><a href="#cb48-287"></a>         <span class="at">transfer =</span> <span class="fu">factor</span>(transfer))</span>
+<span id="cb48-288"><a href="#cb48-288"></a><span class="in">```</span></span>
+<span id="cb48-289"><a href="#cb48-289"></a></span>
+<span id="cb48-290"><a href="#cb48-290"></a><span class="fu">## Species richness</span></span>
+<span id="cb48-291"><a href="#cb48-291"></a></span>
+<span id="cb48-294"><a href="#cb48-294"></a><span class="in">```{r}</span></span>
+<span id="cb48-295"><a href="#cb48-295"></a>modS <span class="ot">&lt;-</span> <span class="fu">lm</span>(S <span class="sc">~</span> measure_env_short <span class="sc">*</span> home_env_short <span class="sc">*</span> transfer, <span class="at">data =</span> alph_div_fct)</span>
+<span id="cb48-296"><a href="#cb48-296"></a><span class="in">```</span></span>
+<span id="cb48-297"><a href="#cb48-297"></a></span>
+<span id="cb48-298"><a href="#cb48-298"></a><span class="fu">### Visual check model assumptions</span></span>
+<span id="cb48-299"><a href="#cb48-299"></a></span>
+<span id="cb48-300"><a href="#cb48-300"></a><span class="co">[</span><span class="ot">See here</span><span class="co">](https://easystats.github.io/performance/articles/check_model.html)</span></span>
+<span id="cb48-301"><a href="#cb48-301"></a></span>
+<span id="cb48-304"><a href="#cb48-304"></a><span class="in">```{r}</span></span>
+<span id="cb48-305"><a href="#cb48-305"></a><span class="co">#| fig.width: 7</span></span>
+<span id="cb48-306"><a href="#cb48-306"></a><span class="co">#| fig.height: 9</span></span>
+<span id="cb48-307"><a href="#cb48-307"></a>performance<span class="sc">::</span><span class="fu">check_model</span>(modS)</span>
+<span id="cb48-308"><a href="#cb48-308"></a><span class="in">```</span></span>
+<span id="cb48-309"><a href="#cb48-309"></a></span>
+<span id="cb48-310"><a href="#cb48-310"></a><span class="fu">### Contrast analysis </span></span>
+<span id="cb48-311"><a href="#cb48-311"></a></span>
+<span id="cb48-312"><a href="#cb48-312"></a>On average about 3 fewer species detected in the streptomycin treatments compared to without streptomycin</span>
+<span id="cb48-313"><a href="#cb48-313"></a></span>
+<span id="cb48-316"><a href="#cb48-316"></a><span class="in">```{r}</span></span>
+<span id="cb48-317"><a href="#cb48-317"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>)</span>
+<span id="cb48-318"><a href="#cb48-318"></a><span class="in">```</span></span>
+<span id="cb48-319"><a href="#cb48-319"></a></span>
+<span id="cb48-320"><a href="#cb48-320"></a>The evolutionary history has an important effect here but it seems to be about the same size no matter which home environment is being compared. First we look at differences between the measurement envs for different home environment categories. The analysis shows that the difference in richness between the two experimental conditions is greatest for the Home: R2A community, followed by the ancestral community then the Home: BS community. But again pretty much always there are about ~ 3 fewer species detected in the presence of streptomycin.</span>
+<span id="cb48-321"><a href="#cb48-321"></a></span>
+<span id="cb48-324"><a href="#cb48-324"></a><span class="in">```{r}</span></span>
+<span id="cb48-325"><a href="#cb48-325"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>, <span class="at">by =</span> <span class="st">"home_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>)</span>
+<span id="cb48-326"><a href="#cb48-326"></a><span class="in">```</span></span>
+<span id="cb48-327"><a href="#cb48-327"></a></span>
+<span id="cb48-328"><a href="#cb48-328"></a>Next we investigate the difference in richness between home environments pairs for the different measurement environments. We consider first the measurement environment of R2A. In the R2A measurement environment the ancestral community and the home: B community had the same richness, the ancestral community had 0.85 more species detected than the home: BS community, while the home B community had on average 1.5 more species detected than the home BS community. For the measurement environment containing streptomycin there were no significnat differences in total species richness between the different evolutionary history categories.</span>
+<span id="cb48-329"><a href="#cb48-329"></a></span>
+<span id="cb48-332"><a href="#cb48-332"></a><span class="in">```{r}</span></span>
+<span id="cb48-333"><a href="#cb48-333"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"home_env_short"</span>, <span class="at">by =</span> <span class="st">"measure_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-334"><a href="#cb48-334"></a>  <span class="fu">arrange</span>(measure_env_short)</span>
+<span id="cb48-335"><a href="#cb48-335"></a><span class="in">```</span></span>
+<span id="cb48-336"><a href="#cb48-336"></a></span>
+<span id="cb48-337"><a href="#cb48-337"></a></span>
+<span id="cb48-338"><a href="#cb48-338"></a>This doesn't change when doing contrast analysis by different home environments</span>
+<span id="cb48-339"><a href="#cb48-339"></a></span>
+<span id="cb48-342"><a href="#cb48-342"></a><span class="in">```{r}</span></span>
+<span id="cb48-343"><a href="#cb48-343"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modS, <span class="at">contrast =</span> <span class="st">"home_env_short"</span>, <span class="at">by =</span> <span class="st">"measure_env_short"</span>)</span>
+<span id="cb48-344"><a href="#cb48-344"></a><span class="in">```</span></span>
+<span id="cb48-345"><a href="#cb48-345"></a></span>
+<span id="cb48-348"><a href="#cb48-348"></a><span class="in">```{r}</span></span>
+<span id="cb48-349"><a href="#cb48-349"></a><span class="co">#| eval: false</span></span>
+<span id="cb48-350"><a href="#cb48-350"></a><span class="fu">report_text</span>(modS)</span>
+<span id="cb48-351"><a href="#cb48-351"></a><span class="in">```</span></span>
+<span id="cb48-352"><a href="#cb48-352"></a></span>
+<span id="cb48-355"><a href="#cb48-355"></a><span class="in">```{r}</span></span>
+<span id="cb48-356"><a href="#cb48-356"></a><span class="co">#| eval: false</span></span>
+<span id="cb48-357"><a href="#cb48-357"></a><span class="fu">report_table</span>(modS) <span class="sc">%&gt;%</span> <span class="fu">xtable</span>()</span>
+<span id="cb48-358"><a href="#cb48-358"></a><span class="in">```</span></span>
+<span id="cb48-359"><a href="#cb48-359"></a></span>
+<span id="cb48-360"><a href="#cb48-360"></a><span class="fu">## Shannon diversity</span></span>
+<span id="cb48-361"><a href="#cb48-361"></a></span>
+<span id="cb48-364"><a href="#cb48-364"></a><span class="in">```{r}</span></span>
+<span id="cb48-365"><a href="#cb48-365"></a>modH <span class="ot">&lt;-</span> <span class="fu">lm</span>(H <span class="sc">~</span> measure_env_short <span class="sc">*</span> home_env_short <span class="sc">*</span> transfer, <span class="at">data =</span> alph_div_fct)</span>
+<span id="cb48-366"><a href="#cb48-366"></a><span class="in">```</span></span>
+<span id="cb48-367"><a href="#cb48-367"></a></span>
+<span id="cb48-368"><a href="#cb48-368"></a><span class="fu">### Visual check model assumptions</span></span>
+<span id="cb48-369"><a href="#cb48-369"></a></span>
+<span id="cb48-370"><a href="#cb48-370"></a><span class="co">[</span><span class="ot">See here</span><span class="co">](https://easystats.github.io/performance/articles/check_model.html)</span></span>
+<span id="cb48-371"><a href="#cb48-371"></a></span>
+<span id="cb48-374"><a href="#cb48-374"></a><span class="in">```{r}</span></span>
+<span id="cb48-375"><a href="#cb48-375"></a><span class="co">#| fig.width: 7</span></span>
+<span id="cb48-376"><a href="#cb48-376"></a><span class="co">#| fig.height: 9</span></span>
+<span id="cb48-377"><a href="#cb48-377"></a>performance<span class="sc">::</span><span class="fu">check_model</span>(modH)</span>
+<span id="cb48-378"><a href="#cb48-378"></a><span class="in">```</span></span>
+<span id="cb48-379"><a href="#cb48-379"></a></span>
+<span id="cb48-380"><a href="#cb48-380"></a><span class="fu">### Contrast analysis </span></span>
+<span id="cb48-381"><a href="#cb48-381"></a></span>
+<span id="cb48-382"><a href="#cb48-382"></a>On average Shannon diversity is about 0.15 units lower in the streptomycin treatments compared to without streptomycin</span>
+<span id="cb48-383"><a href="#cb48-383"></a></span>
+<span id="cb48-386"><a href="#cb48-386"></a><span class="in">```{r}</span></span>
+<span id="cb48-387"><a href="#cb48-387"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modH, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>)</span>
+<span id="cb48-388"><a href="#cb48-388"></a><span class="in">```</span></span>
+<span id="cb48-389"><a href="#cb48-389"></a></span>
+<span id="cb48-390"><a href="#cb48-390"></a>The evolutionary history has an important effect here. First we look at differences between the measurement envs for different home environment categories. The analysis shows that the difference in evenness between the two experimental conditions is greatest for the Ancestral community, followed by the Home: R2A community. Difference is not significant for the Home: BS community. </span>
+<span id="cb48-391"><a href="#cb48-391"></a></span>
+<span id="cb48-394"><a href="#cb48-394"></a><span class="in">```{r}</span></span>
+<span id="cb48-395"><a href="#cb48-395"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modH, <span class="at">contrast =</span> <span class="st">"measure_env_short"</span>, <span class="at">by =</span> <span class="st">"home_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>)</span>
+<span id="cb48-396"><a href="#cb48-396"></a><span class="in">```</span></span>
+<span id="cb48-397"><a href="#cb48-397"></a></span>
+<span id="cb48-398"><a href="#cb48-398"></a>Next we investigate the evenness for different home environments for the different measurement environments. We consider first the measurement environment of R2A. The evenness of the communities with a shared evolutionary history was always higher than the ancestral community in the R2A conditions. However, the evenness of the two different histories were not significantly different. In the measurement environment with streptomycin again the evenness of the two communities with shared evolutionary history was always significantly higher than the ancestral community. Additionally, there was a significant difference between the two home environments (R2A, R2A + strep) in response to the R2A + strep treatment with the evenness of the community with an evolutionary history of growing in Strep being significantly higher than the community with an evolutionary history of not growing in strep. </span>
+<span id="cb48-399"><a href="#cb48-399"></a></span>
+<span id="cb48-402"><a href="#cb48-402"></a><span class="in">```{r}</span></span>
+<span id="cb48-403"><a href="#cb48-403"></a>modelbased<span class="sc">::</span><span class="fu">estimate_contrasts</span>(modH, <span class="at">contrast =</span> <span class="st">"home_env_short"</span>, <span class="at">by =</span> <span class="st">"measure_env_short"</span>, <span class="at">p_adjust =</span> <span class="st">"bonferroni"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-404"><a href="#cb48-404"></a>  <span class="fu">arrange</span>(measure_env_short)</span>
+<span id="cb48-405"><a href="#cb48-405"></a><span class="in">```</span></span>
+<span id="cb48-406"><a href="#cb48-406"></a></span>
+<span id="cb48-409"><a href="#cb48-409"></a><span class="in">```{r}</span></span>
+<span id="cb48-410"><a href="#cb48-410"></a><span class="co">#| eval: false</span></span>
+<span id="cb48-411"><a href="#cb48-411"></a><span class="fu">report_text</span>(modH)</span>
+<span id="cb48-412"><a href="#cb48-412"></a><span class="in">```</span></span>
+<span id="cb48-413"><a href="#cb48-413"></a></span>
+<span id="cb48-416"><a href="#cb48-416"></a><span class="in">```{r}</span></span>
+<span id="cb48-417"><a href="#cb48-417"></a><span class="co">#| eval: false</span></span>
+<span id="cb48-418"><a href="#cb48-418"></a><span class="fu">report_table</span>(modH) <span class="sc">%&gt;%</span> <span class="fu">xtable</span>()</span>
+<span id="cb48-419"><a href="#cb48-419"></a><span class="in">```</span></span>
+<span id="cb48-420"><a href="#cb48-420"></a></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

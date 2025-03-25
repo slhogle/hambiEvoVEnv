@@ -9,12 +9,12 @@
 ### Published record
 
 **A shared history shapes community response to the environment.**\
-Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. *XYZ* (2024/5) [doi:]()
+Smolander N, Silvennoinen A, Lindqvist M, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. *XYZ* (2025) [doi:]()
 
 ### Preprint
 
 **A shared history shapes community response to the environment.**\
-Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. *BioRxiv* (2024/5) [doi:]()
+Smolander N, Silvennoinen A, Lindqvist M, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. *BioRxiv* (2025) [doi:]()
 
 ## Availability
 

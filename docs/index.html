@@ -2,16 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.553">
+<meta name="generator" content="quarto-1.6.42">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Shane L Hogle">
 <meta name="author" content="Niina Smolander">
-<meta name="dcterms.date" content="2024-11-03">
+<meta name="dcterms.date" content="2025-03-25">
 <meta name="keywords" content="Microbiology, Ecology, Evolution, Antimicrobial resistance (AMR)">
 
-<title>hambiYSKpleiotropy - Data analysis for the project hambiEvoVEnv</title>
+<title>Data analysis for the project hambiEvoVEnv – hambiEvoVEnv</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -37,7 +37,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -93,10 +93,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-1f23bf93a17969024013c136d185e5ce.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -127,7 +127,7 @@ div.csl-indent {
 <link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
 <script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -165,15 +165,15 @@ window.Quarto = {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">
-      hambiYSKpleiotropy
+      hambiEvoVEnv
       </li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
-      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -185,7 +185,7 @@ window.Quarto = {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">hambiYSKpleiotropy</a> 
+      <a href="./">hambiEvoVEnv</a> 
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -197,9 +197,9 @@ window.Quarto = {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">1. Community densities workflow (STR)</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Community densities workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
@@ -207,16 +207,16 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./R/strep_only/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) Process and plot densities</span></a>
+ <span class="menu-text">1) Process and plot densities</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
- <span class="menu-text">2. Community composition workflow (STR)</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Community composition workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
@@ -224,28 +224,40 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) Amplicon data wrangling</span></a>
+ <span class="menu-text">1) Amplicon data wrangling</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/strep_only/communities/amplicon_sp_counts/02_composition_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">ii) Community composition</span></a>
+  <a href="./R/strep_only/communities/amplicon_sp_counts/02_composition_plotting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2) Community composition barplot</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./R/strep_only/communities/machine_learning_pipelines/01_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">iii) Machine learning the home environment</span></a>
+  <a href="./R/strep_only/communities/amplicon_sp_counts/03_ordination_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">3) Community ordination</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_only/communities/amplicon_sp_counts/04_diversity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">4) Community diversity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./R/strep_only/communities/amplicon_sp_counts/05_JSD_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">5) Community JSD divergences</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
- <span class="menu-text">3. Clones workflow (STR)</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Clones workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
@@ -253,94 +265,19 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) Inspect/Smooth curves</span></a>
+ <span class="menu-text">1) Inspect/Smooth curves</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">ii) Summarize curves</span></a>
+ <span class="menu-text">2) Summarize curves</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./R/strep_only/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">iii) Analysis and plot</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
- <span class="menu-text">1A. Community densities workflow (Predator and STR)</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./R/strep_predator/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) Process and plot densities</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
- <span class="menu-text">2A. Community composition workflow (Predator and STR)</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./R/strep_predator/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) Amplicon data wrangling</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./R/strep_predator/communities/amplicon_sp_counts/02_composition_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">ii) Community composition</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./R/strep_predator/communities/machine_learning_pipelines/01_machine_learn_home_env.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">iii) Machine learning the home environment</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
- <span class="menu-text">3A. Clones workflow (Predator and STR)</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./R/strep_predator/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">i) Inspect/Smooth curves</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./R/strep_predator/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">ii) Summarize curves</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./R/strep_predator/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">iii) Analysis and plot</span></a>
+ <span class="menu-text">3) Analysis and plot</span></a>
   </div>
 </li>
       </ul>
@@ -412,7 +349,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 3, 2024</p>
+      <p class="date">March 25, 2025</p>
     </div>
   </div>
   
@@ -452,7 +389,7 @@ Smolander N, Silvennoinen A, Tamminen M, Hiltunen T, Hogle SL<sup>◇</sup>. <em
 <h2 data-number="3" class="anchored" data-anchor-id="experiment-overview"><span class="header-section-number">3</span> Experiment overview</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figs/strep_only/exp_design.png" class="img-fluid figure-img"></p>
+<p><img src="figs/strep_only/exp_design_v4.png" class="img-fluid figure-img"></p>
 <figcaption>Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.</figcaption>
 </figure>
 </div>
@@ -533,18 +470,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -576,7 +502,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
   const viewSource = window.document.getElementById('quarto-view-source') ||
                      window.document.getElementById('quarto-code-tools-source');
   if (viewSource) {
@@ -635,7 +581,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
@@ -732,7 +678,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {
@@ -1016,7 +961,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-56"><a href="#cb2-56"></a></span>
 <span id="cb2-57"><a href="#cb2-57"></a><span class="fu">## Experiment overview</span></span>
 <span id="cb2-58"><a href="#cb2-58"></a></span>
-<span id="cb2-59"><a href="#cb2-59"></a><span class="al">![Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.](figs/strep_only/exp_design.png)</span></span>
+<span id="cb2-59"><a href="#cb2-59"></a><span class="al">![Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.](figs/strep_only/exp_design_v4.png)</span></span>
 <span id="cb2-60"><a href="#cb2-60"></a></span>
 <span id="cb2-61"><a href="#cb2-61"></a>We first serially propagated a bacterial community, starting from clones of 23 soil and aquatic species <span class="co">[</span><span class="ot">@hogle2024</span><span class="co">]</span>, for 406 days in two different conditions: a low-carbon, complex growth medium with and without the antibiotic streptomycin. We refer to these as “evolved” communities. We isolated 32 clones from each evovlved microcosm and phenotyped them both home environments to determine mean community fitness in each environment. We then reciprocally transplanted each of these evolved communities into the other’s home environment, with a clonal ancestor community serving as a reference. We allowed the experimental communities to grow for a further 84 days, measuring community composition at three different points and sequencing community genomes from the end of the experiment, which allowed us to track the fate of mutations from the evolved communities in their new environments.</span>
 <span id="cb2-62"><a href="#cb2-62"></a></span>
@@ -1093,7 +1038,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb2-135"><a href="#cb2-135"></a></span>
 <span id="cb2-136"><a href="#cb2-136"></a>fs<span class="sc">::</span><span class="fu">dir_create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"figs"</span>, <span class="st">"strep_predator"</span>), <span class="at">recurse =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb2-137"><a href="#cb2-137"></a><span class="in">```</span></span>
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

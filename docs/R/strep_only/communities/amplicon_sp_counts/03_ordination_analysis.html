@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Shane Hogle">
+<meta name="dcterms.date" content="2025-03-25">
+
+<title>Ordination of species abundance data – hambiEvoVEnv</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../../">
+<script src="../../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../site_libs/bootstrap/bootstrap-1f23bf93a17969024013c136d185e5ce.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="../../../../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../../../../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html">Community composition workflow</a></li><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/03_ordination_analysis.html">3) Community ordination</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../../../">hambiEvoVEnv</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Community densities workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/cell_density/01_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1) Process and plot densities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Community composition workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1) Amplicon data wrangling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/02_composition_plotting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2) Community composition barplot</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/03_ordination_analysis.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">3) Community ordination</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/04_diversity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">4) Community diversity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/communities/amplicon_sp_counts/05_JSD_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">5) Community JSD divergences</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Clones workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/01_growth_curve_qc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1) Inspect/Smooth curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/02_growthrate_auc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2) Summarize curves</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../R/strep_only/monocultures/clone_phenotyping/03_growth_summary_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">3) Analysis and plot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="header-section-number">1</span> Setup</a></li>
+  <li><a href="#read" id="toc-read" class="nav-link" data-scroll-target="#read"><span class="header-section-number">2</span> Read</a></li>
+  <li><a href="#formatting" id="toc-formatting" class="nav-link" data-scroll-target="#formatting"><span class="header-section-number">3</span> Formatting</a></li>
+  <li><a href="#data-transformation" id="toc-data-transformation" class="nav-link" data-scroll-target="#data-transformation"><span class="header-section-number">4</span> Data transformation</a></li>
+  <li><a href="#constrain-ordination---redundancy-analysis-rda" id="toc-constrain-ordination---redundancy-analysis-rda" class="nav-link" data-scroll-target="#constrain-ordination---redundancy-analysis-rda"><span class="header-section-number">5</span> Constrain ordination - Redundancy analysis (RDA)</a>
+  <ul class="collapse">
+  <li><a href="#explained-variation" id="toc-explained-variation" class="nav-link" data-scroll-target="#explained-variation"><span class="header-section-number">5.1</span> Explained variation</a></li>
+  <li><a href="#variance-partitioning" id="toc-variance-partitioning" class="nav-link" data-scroll-target="#variance-partitioning"><span class="header-section-number">5.2</span> Variance partitioning</a></li>
+  <li><a href="#plot-ordination" id="toc-plot-ordination" class="nav-link" data-scroll-target="#plot-ordination"><span class="header-section-number">5.3</span> Plot ordination</a>
+  <ul class="collapse">
+  <li><a href="#ordination-plotting-function" id="toc-ordination-plotting-function" class="nav-link" data-scroll-target="#ordination-plotting-function"><span class="header-section-number">5.3.1</span> Ordination plotting function</a></li>
+  <li><a href="#rda-plot" id="toc-rda-plot" class="nav-link" data-scroll-target="#rda-plot"><span class="header-section-number">5.3.2</span> RDA plot</a></li>
+  <li><a href="#pca-plot" id="toc-pca-plot" class="nav-link" data-scroll-target="#pca-plot"><span class="header-section-number">5.3.3</span> PCA plot</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#tsne-dimensionality-reduction" id="toc-tsne-dimensionality-reduction" class="nav-link" data-scroll-target="#tsne-dimensionality-reduction"><span class="header-section-number">6</span> tSNE dimensionality reduction</a>
+  <ul class="collapse">
+  <li><a href="#plot-tsne" id="toc-plot-tsne" class="nav-link" data-scroll-target="#plot-tsne"><span class="header-section-number">6.1</span> Plot tSNE</a>
+  <ul class="collapse">
+  <li><a href="#save-tsne-plot" id="toc-save-tsne-plot" class="nav-link" data-scroll-target="#save-tsne-plot"><span class="header-section-number">6.1.1</span> Save tSNE plot</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/01_format_rbec_tab.html">Community composition workflow</a></li><li class="breadcrumb-item"><a href="../../../../R/strep_only/communities/amplicon_sp_counts/03_ordination_analysis.html">3) Community ordination</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Ordination of species abundance data</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">Community composition workflow</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Shane Hogle </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 25, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    This notebook conducts ordination of CLR transformed count data using PCA, Redundancy Analysis (RDA), and tSNE
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="setup" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Setup</h1>
+<p>Loads required libraries and sets global variables</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">library</span>(fs)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">library</span>(scales)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="fu">library</span>(Rtsne)</span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"utils_generic.R"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="read" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Read</h1>
+<p>Read species abundance data (16S v3 amplicon counts) and do some light formatting of metadata</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>sptable <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_sp, <span class="st">"species_counts_md.tsv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-2"><a href="#cb2-2"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">transfer =</span> day<span class="sc">/</span><span class="dv">7</span>)</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a>counts_f <span class="ot">&lt;-</span> sptable <span class="sc">%&gt;%</span> </span>
+<span id="cb2-5"><a href="#cb2-5"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">f=</span>count_correct<span class="sc">/</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-7"><a href="#cb2-7"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb2-8"><a href="#cb2-8"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">measure_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(measure_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Meas: B"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9"></a>                                       measure_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Meas: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-10"><a href="#cb2-10"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">home_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb2-11"><a href="#cb2-11"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"anc"</span> <span class="sc">~</span> <span class="st">"Home: Anc"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Home: B"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Home: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-14"><a href="#cb2-14"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb2-16"><a href="#cb2-16"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb2-17"><a href="#cb2-17"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb2-18"><a href="#cb2-18"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb2-19"><a href="#cb2-19"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="formatting" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Formatting</h1>
+<p>Some light formatting to subset data into distint tibbles for later plotting</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># these are communities of a (supposedly) known composition. Can be used with metacal</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>pos_ctrl_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>))</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="co"># these are samples taken directly from YSK and represent the composition of the communities used to start the experiment</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>t0_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb3-7"><a href="#cb3-7"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-8"><a href="#cb3-8"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(day <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb3-9"><a href="#cb3-9"></a></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="co"># only samples from the experiment</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a>counts_f_experiment <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(counts_f, pos_ctrl_samples, </span>
+<span id="cb3-12"><a href="#cb3-12"></a>                            <span class="at">by =</span> <span class="fu">join_by</span>(sample, strainID, genus, </span>
+<span id="cb3-13"><a href="#cb3-13"></a>                                         species, count, count_correct, </span>
+<span id="cb3-14"><a href="#cb3-14"></a>                                         replicate, day, measure_env, </span>
+<span id="cb3-15"><a href="#cb3-15"></a>                                         evolution_env, transfer, f, </span>
+<span id="cb3-16"><a href="#cb3-16"></a>                                         measure_env_short, home_env_short)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-17"><a href="#cb3-17"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(., t0_samples,</span>
+<span id="cb3-18"><a href="#cb3-18"></a>                   <span class="at">by =</span> <span class="fu">join_by</span>(sample, strainID, genus, species, count, </span>
+<span id="cb3-19"><a href="#cb3-19"></a>                                count_correct, replicate, day, measure_env, </span>
+<span id="cb3-20"><a href="#cb3-20"></a>                                evolution_env, transfer, f, measure_env_short, </span>
+<span id="cb3-21"><a href="#cb3-21"></a>                                home_env_short)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-22"><a href="#cb3-22"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb3-23"><a href="#cb3-23"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb3-24"><a href="#cb3-24"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb3-25"><a href="#cb3-25"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb3-26"><a href="#cb3-26"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb3-27"><a href="#cb3-27"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="data-transformation" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Data transformation</h1>
+<p>Some preliminary inspections of the number of samples with zeros. This is needed for zcompositions</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(strainID) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">n_samples =</span> <span class="fu">n</span>(),</span>
+<span id="cb4-4"><a href="#cb4-4"></a>            <span class="at">n_gt0 =</span> <span class="fu">sum</span>(count <span class="sc">&gt;</span> <span class="dv">0</span>),</span>
+<span id="cb4-5"><a href="#cb4-5"></a>            <span class="at">p_gt0 =</span> n_gt0 <span class="sc">/</span> n_samples) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-6"><a href="#cb4-6"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb4-7"><a href="#cb4-7"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(n_gt0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["strainID"],"name":[1],"type":["fct"],"align":["left"]},{"label":["n_samples"],"name":[2],"type":["int"],"align":["right"]},{"label":["n_gt0"],"name":[3],"type":["int"],"align":["right"]},{"label":["p_gt0"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"HAMBI_2792","2":"107","3":"0","4":"0.000000000"},{"1":"HAMBI_0097","2":"107","3":"1","4":"0.009345794"},{"1":"HAMBI_0262","2":"107","3":"2","4":"0.018691589"},{"1":"HAMBI_1988","2":"107","3":"6","4":"0.056074766"},{"1":"HAMBI_1299","2":"107","3":"25","4":"0.233644860"},{"1":"HAMBI_3237","2":"107","3":"29","4":"0.271028037"},{"1":"HAMBI_1279","2":"107","3":"30","4":"0.280373832"},{"1":"HAMBI_2159","2":"107","3":"67","4":"0.626168224"},{"1":"HAMBI_2443","2":"107","3":"83","4":"0.775700935"},{"1":"HAMBI_2494","2":"107","3":"84","4":"0.785046729"},{"1":"HAMBI_0006","2":"107","3":"95","4":"0.887850467"},{"1":"HAMBI_2164","2":"107","3":"99","4":"0.925233645"},{"1":"HAMBI_1972","2":"107","3":"103","4":"0.962616822"},{"1":"HAMBI_1292","2":"107","3":"106","4":"0.990654206"},{"1":"HAMBI_3031","2":"107","3":"106","4":"0.990654206"},{"1":"HAMBI_2160","2":"107","3":"106","4":"0.990654206"},{"1":"HAMBI_1287","2":"107","3":"107","4":"1.000000000"},{"1":"HAMBI_1977","2":"107","3":"107","4":"1.000000000"},{"1":"HAMBI_0403","2":"107","3":"107","4":"1.000000000"},{"1":"HAMBI_2659","2":"107","3":"107","4":"1.000000000"},{"1":"HAMBI_1896","2":"107","3":"107","4":"1.000000000"},{"1":"HAMBI_0105","2":"107","3":"107","4":"1.000000000"},{"1":"HAMBI_1842","2":"107","3":"107","4":"1.000000000"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Here we will use the <a href="https://en.wikipedia.org/wiki/Compositional_data#Center_log_ratio_transform">centered log-ratio transformation</a> for the species abundances. The centered log-ratio can be interpreted as the log-fold change of species i relative to the average microbe in a sample. The formula for the transformation is:</p>
+<p><span id="eq-clr"><span class="math display">\[
+\text{clr}(\mathbf x)= \left(log
+\frac{x_i}{g(\mathbf x)} \right)_{i=1,...,D} \qquad \text{with} \quad
+g(\mathbf x) = \left(\prod_{i=1}^Dx_i\right)^{1/D} =
+\exp\left(\frac{1}{D}\sum_{i=1}^D \log x_i\right)\text{,}
+\tag{1}\]</span></span></p>
+<p>We will use the implementation of centered log-ratio transform in the <code>compositions</code> package</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">set.seed</span>(<span class="dv">234781</span>)</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co"># exclude these species because they have too many zeros</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>lowstrainsv <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb5-5"><a href="#cb5-5"></a>  <span class="st">"HAMBI_0097"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>  <span class="st">"HAMBI_2792"</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8"></a></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="co"># make a species count matrix</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>count_mat <span class="ot">&lt;-</span> counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb5-11"><a href="#cb5-11"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>(strainID <span class="sc">%in%</span> lowstrainsv)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-12"><a href="#cb5-12"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, strainID, count) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-13"><a href="#cb5-13"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">count =</span> count <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-14"><a href="#cb5-14"></a>  <span class="co"># important to arrange by sample as this makes some later joins easier</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-16"><a href="#cb5-16"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from =</span> <span class="st">"strainID"</span>, <span class="at">values_from =</span> <span class="st">"count"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-17"><a href="#cb5-17"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-18"><a href="#cb5-18"></a>  <span class="fu">data.frame</span>()</span>
+<span id="cb5-19"><a href="#cb5-19"></a></span>
+<span id="cb5-20"><a href="#cb5-20"></a><span class="co"># calculate clr</span></span>
+<span id="cb5-21"><a href="#cb5-21"></a>clr_mat <span class="ot">&lt;-</span> compositions<span class="sc">::</span><span class="fu">clr</span>(count_mat)</span>
+<span id="cb5-22"><a href="#cb5-22"></a></span>
+<span id="cb5-23"><a href="#cb5-23"></a>env_mat <span class="ot">&lt;-</span> counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb5-24"><a href="#cb5-24"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, home_env_short, measure_env_short) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-25"><a href="#cb5-25"></a>  <span class="fu">distinct</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb5-26"><a href="#cb5-26"></a>  <span class="co"># important to arrange by sample as this makes some later joins easier</span></span>
+<span id="cb5-27"><a href="#cb5-27"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-28"><a href="#cb5-28"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-29"><a href="#cb5-29"></a>  <span class="fu">data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="constrain-ordination---redundancy-analysis-rda" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Constrain ordination - Redundancy analysis (RDA)</h1>
+<p><a href="https://www.davidzeleny.net/anadat-r/doku.php/en:rda_cca">See this useful resource</a></p>
+<blockquote class="blockquote">
+<p>Linear constrained ordination methods implicitly based on Euclidean (RDA) or Hellinger/chord/other (tb-RDA) distances. The calculation (detailed below) can be simply described as a set of (multiple) linear regression analyses, where species abundances (for each species in the species composition matrix separately) are regressed against (one or several) environmental variable(s). The result is that variation in species composition is decomposed into variation related to environmental variables (represented by constrained/canonical axes) and not related to environmental variables (unconstrained axes). The number of constrained axes is equal or lower than the number of quantitative explanatory variables; in the case of a qualitative/categorical variable, the number of constrained axes is equal to the number of categories in that variable minus one. Each canonical axis is a linear combination of all explanatory variables.</p>
+<p>The algorithm of RDA can be summarised as follows (figure 1 and figure 2). The matrix of species composition (sample x species) and the matrix of environmental variables (sample x env.variables, for simplicity containing only one env. variable in the illustration below) needs to be available.</p>
+<ol type="1">
+<li><p>Abundances of the first species (spe1) are regressed against environmental variable (env1) by linear regression (or by multiple regression if more env. variables are available), with spe1 as the dependent variable and env1 (and other env. variables if available) as explanatory.</p></li>
+<li><p>The values of species abundances fitted by the regression model (i.e.&nbsp;located on the regression line) are stored in the matrix of fitted values, while residuals of species abundances (the difference between observed abundances and fitted abundances) are stored in the matrix of residuals.</p></li>
+<li><p>The same is repeated for all species in a matrix of species composition. Resulting matrices of predicted values and residual values have the same size (no. of samples x no. of species) as the original matrix of species composition.</p></li>
+<li><p>The matrix of predicted values is used in PCA to extract constrained ordination axes, while the matrix of residual values is used in PCA to extract unconstrained axes.</p></li>
+<li><p>In the example on figure 2 with only one explanatory variable there is only one constrained ordination axis (the second, vertical one in the ordination diagram is the first unconstrained axis).</p></li>
+</ol>
+</blockquote>
+<p>Perform the RDA analysis</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb6-2"><a href="#cb6-2"></a></span>
+<span id="cb6-3"><a href="#cb6-3"></a>pca_ord_aitc <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat)</span>
+<span id="cb6-4"><a href="#cb6-4"></a>rda_ord_aitc <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short <span class="sc">+</span> measure_env_short, <span class="at">data =</span> env_mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Summary information of the RDA</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">summary</span>(rda_ord_aitc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+rda(formula = clr_mat ~ home_env_short + measure_env_short, data = env_mat) 
+
+Partitioning of variance:
+              Inertia Proportion
+Total           38.14     1.0000
+Constrained     23.39     0.6133
+Unconstrained   14.75     0.3867
+
+Eigenvalues, and their contribution to the variance 
+
+Importance of components:
+                         RDA1    RDA2    RDA3     PC1     PC2     PC3     PC4
+Eigenvalue            20.3041 2.11230 0.97722 3.72409 2.43855 1.61198 1.47178
+Proportion Explained   0.5323 0.05538 0.02562 0.09764 0.06393 0.04226 0.03859
+Cumulative Proportion  0.5323 0.58770 0.61332 0.71096 0.77489 0.81715 0.85574
+                          PC5     PC6     PC7     PC8     PC9     PC10     PC11
+Eigenvalue            1.22107 0.85688 0.69546 0.56983 0.42491 0.378216 0.337446
+Proportion Explained  0.03201 0.02247 0.01823 0.01494 0.01114 0.009916 0.008847
+Cumulative Proportion 0.88775 0.91021 0.92845 0.94339 0.95453 0.964443 0.973290
+                          PC12     PC13     PC14     PC15     PC16    PC17
+Eigenvalue            0.254564 0.224066 0.174233 0.136792 0.104395 0.05645
+Proportion Explained  0.006674 0.005874 0.004568 0.003586 0.002737 0.00148
+Cumulative Proportion 0.979964 0.985839 0.990407 0.993993 0.996730 0.99821
+                           PC18      PC19      PC20
+Eigenvalue            0.0323586 0.0236246 0.0122998
+Proportion Explained  0.0008484 0.0006194 0.0003225
+Cumulative Proportion 0.9990582 0.9996775 1.0000000
+
+Accumulated constrained eigenvalues
+Importance of components:
+                         RDA1    RDA2    RDA3
+Eigenvalue            20.3041 2.11230 0.97722
+Proportion Explained   0.8679 0.09029 0.04177
+Cumulative Proportion  0.8679 0.95823 1.00000</code></pre>
+</div>
+</div>
+<section id="explained-variation" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="explained-variation"><span class="header-section-number">5.1</span> Explained variation</h2>
+<p><a href="https://www.davidzeleny.net/anadat-r/doku.php/en:expl_var">See this useful resource</a></p>
+<blockquote class="blockquote">
+<p>Constrained ordination is a set of multivariate regression analyses, and as in ordinary least squared regression, the effect size is measured by R2, the coefficient of determination. R2 quantifies the variation in species composition explained by environmental variable(s), and can be calculated (if no covariables are included) as the sum of eigenvalues of all constrained axes divided by the total variation (sum of eigenvalues of all axes).</p>
+<p>The value of R2 in constrained ordination suffers from the same drawback as in ordinary regression, namely that it decreases with the number of samples in the dataset and increases with the number of explanatory variables, making the values incomparable between datasets of different size. The solution is to use adjusted R2. The absolute value of explained variation itself is not too informative on its own unless it is put into the context, for example by comparing it to the variation the same number of explanatory variables could possibly explain on the same species composition data. Even if the explanatory variables are in fact randomly generated, the R2 is non-zero and positive (in contrast to adjusted R2, which may be zero or even negative), and to decide whether the results are interpretable, it is useful to test their significance by Monte Carlo permutation test.</p>
+</blockquote>
+<p>Variation explained by RDAs and PCs</p>
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">data.frame</span>(<span class="at">value =</span> <span class="fu">c</span>(rda_ord_aitc<span class="sc">$</span>CCA<span class="sc">$</span>eig<span class="sc">/</span>rda_ord_aitc<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>, </span>
+<span id="cb9-2"><a href="#cb9-2"></a>                     rda_ord_aitc<span class="sc">$</span>CA<span class="sc">$</span>eig<span class="sc">/</span>rda_ord_aitc<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="fu">rownames_to_column</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="fu">mutate</span>(<span class="at">type =</span> <span class="fu">if_else</span>(<span class="fu">str_detect</span>(rowname, <span class="st">"RDA"</span>), <span class="st">"RDA"</span>, <span class="st">"PC"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">mutate</span>(<span class="at">rowname =</span> <span class="fu">fct_inorder</span>(rowname)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-6"><a href="#cb9-6"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb9-7"><a href="#cb9-7"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x =</span>value , <span class="at">y =</span> rowname, <span class="at">fill =</span> type)) <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">'% variation'</span>, <span class="at">y =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a>  <span class="fu">scale_y_discrete</span>(<span class="at">limits=</span>rev)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="fig-01" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_ordination_analysis_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Proportion of variation explained by each of the Principal Component axes (red) and the RDA axes (blue)
+</figcaption>
+</figure>
+</div>
+<p>There are n-1 RDA axis for each categorical variable in the constrained ordination. In our case, <code>measure_env_short</code> has 2 categories and <code>home_env_short</code> has 3 categories for a total of 3 RDA axes. Together the Measurement environment and the Home environment explain about 60% of the variance in species composition. Is this a significant amount of variance explained? To check we will follow the <a href="https://www.davidzeleny.net/anadat-r/doku.php/en:expl_var_examples">tutorial here.</a></p>
+<p>First let’s compare this amount of variance explained in the constrained ordination compares to the variation explained in an unconstrained analysis (i.e., just regular PCA). PCA can kind of be thought of generating latent uncorrelated variables that explain the most variance possible. So if we check the amount of variance explained by PC1 and PC2 we are kind of comparing the maximum amount of variance explained with “idealized” uncorrelated latent variables</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb10-2"><a href="#cb10-2"></a>PCA12 <span class="ot">&lt;-</span> <span class="fu">scores</span>(pca_ord_aitc, <span class="at">display =</span> <span class="st">'sites'</span>, <span class="at">choices =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb10-3"><a href="#cb10-3"></a>tbRDA_PCA12 <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat <span class="sc">~</span> PCA12)</span>
+<span id="cb10-4"><a href="#cb10-4"></a></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="fu">tibble</span>(<span class="st">"var_exp_rda"</span> <span class="ot">=</span> <span class="fu">round</span>(vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(rda_ord_aitc)<span class="sc">$</span>r.squared,<span class="dv">2</span>),</span>
+<span id="cb10-6"><a href="#cb10-6"></a>       <span class="st">"var_exp_pca12"</span> <span class="ot">=</span> <span class="fu">round</span>(vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(tbRDA_PCA12)<span class="sc">$</span>r.squared, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["var_exp_rda"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["var_exp_pca12"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.61","2":"0.7"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>So this analysis shows that 61% of the variance can be explained by 2 real variables while 70% of the variance could be explained by 2 idealized, uncorrelated latent variables. So this analysis shows that using the measurement and the home environemnts we are explaining something like 88 % of the maximum possible amount of variance explained in community composition.</p>
+<p>Now we test whether the amount of variance explained is higher than we would expect for just two random variables.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb11-2"><a href="#cb11-2"></a>randomize_rda <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<span id="cb11-3"><a href="#cb11-3"></a>  <span class="co"># reshuffle the rows with environmental variabels</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a>  env_mat_rand <span class="ot">&lt;-</span> env_mat[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(env_mat)),] </span>
+<span id="cb11-5"><a href="#cb11-5"></a>  rda_ord_aitc_rand <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short <span class="sc">+</span> measure_env_short, <span class="at">data =</span> env_mat_rand)</span>
+<span id="cb11-6"><a href="#cb11-6"></a>  vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(rda_ord_aitc_rand)<span class="sc">$</span>r.squared</span>
+<span id="cb11-7"><a href="#cb11-7"></a>}</span>
+<span id="cb11-8"><a href="#cb11-8"></a></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="co"># run the simulation 999 times</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a>sim_r2 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">999</span>, <span class="fu">randomize_rda</span>(), <span class="at">simplify =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>So using the variables definitely is better than what we see after 999 Monte Carlo randomization permutations</p>
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(sim_r2)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(rda_ord_aitc)<span class="sc">$</span>r.squared, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a>  <span class="fu">xlab</span>(<span class="st">"Permuted R2 values"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="fig-02" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_ordination_analysis_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Distribution of 999 randomly permuted (rows in environmental dataframe shuffled) R2 values from RDA analysis <code>vegan::rda(clr_mat ~ home_env_short + measure_env_short, data = env_mat_rand)</code>
+</figcaption>
+</figure>
+</div>
+<p>And the result is clearly statistically significant</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="fu">anova</span>(rda_ord_aitc, <span class="at">permutations =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"3","2":"23.39363","3":"54.45668","4":"0.001","_rn_":"Model"},{"1":"103","2":"14.74900","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">anova</span>(rda_ord_aitc, <span class="at">by =</span> <span class="st">'axis'</span>, <span class="at">permutations =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"20.3041140","3":"141.794304","4":"0.001","_rn_":"RDA1"},{"1":"1","2":"2.1123021","3":"14.751316","4":"0.001","_rn_":"RDA2"},{"1":"1","2":"0.9772188","3":"6.824433","4":"0.001","_rn_":"RDA3"},{"1":"103","2":"14.7489968","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">anova</span>(rda_ord_aitc, <span class="at">by =</span> <span class="st">'margin'</span>, <span class="at">permutations =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"2","2":"3.305503","3":"11.54203","4":"0.001","_rn_":"home_env_short"},{"1":"1","2":"20.049353","3":"140.01518","4":"0.001","_rn_":"measure_env_short"},{"1":"103","2":"14.748997","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="variance-partitioning" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="variance-partitioning"><span class="header-section-number">5.2</span> Variance partitioning</h2>
+<p><a href="https://www.davidzeleny.net/anadat-r/doku.php/en:varpart">See this useful resource</a></p>
+<blockquote class="blockquote">
+<p>In case we have two or more explanatory variables, one may be interested in variation in species composition explained by each of them. If some of these explanatory variables are correlated, one must expect that variation explained by the first or the other variable cannot be separated - it will be shared.</p>
+<p>The way how to approach this problem is variation partitioning, when variation explained by each variable (or set of variables) independently is partitioned into variation attributable purely to given environmental variable, and shared variation attributable to two or more variables.</p>
+</blockquote>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb16-2"><a href="#cb16-2"></a>varp <span class="ot">&lt;-</span> <span class="fu">varpart</span>(clr_mat, <span class="sc">~</span> home_env_short, <span class="sc">~</span> measure_env_short, <span class="at">data =</span> env_mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ul>
+<li><p>[a] = variation explained by variable 1 (conditional (or partial) effect of variable 1, i.e.&nbsp;variation this variable would explain if putting variable 2 as covariable)</p></li>
+<li><p>[c] = variation explained by variable 2</p></li>
+<li><p>[b] = shared variation explained by both variables (cannot be decided to which of them should be attributed, and is a result of correlation between both variables)</p></li>
+<li><p>[a+b] = variation explained by variable 1 (independent simple (or marginal) effect of variable 1, i.e.&nbsp;variation this variable would explain if it is as the only explanatory variable in the model)</p></li>
+<li><p>[b+c] = variation explained by variable 2</p></li>
+<li><p>[d] = unexplained variation</p></li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>varp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Partition of variance in RDA 
+
+Call: varpart(Y = clr_mat, X = ~home_env_short, ~measure_env_short,
+data = env_mat)
+
+Explanatory tables:
+X1:  ~home_env_short
+X2:  ~measure_env_short 
+
+No. of explanatory tables: 2 
+Total variation (SS): 4043.1 
+            Variance: 38.143 
+No. of observations: 107 
+
+Partition table:
+                     Df R.squared Adj.R.squared Testable
+[a+c] = X1            2   0.08768       0.07013     TRUE
+[b+c] = X2            1   0.52666       0.52215     TRUE
+[a+b+c] = X1+X2       3   0.61332       0.60206     TRUE
+Individual fractions                                    
+[a] = X1|X2           2                 0.07991     TRUE
+[b] = X2|X1           1                 0.53192     TRUE
+[c]                   0                -0.00977    FALSE
+[d] = Residuals                         0.39794    FALSE
+---
+Use function 'rda' to test significance of fractions of interest</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Now, when we know both simple and conditional effect of each variables, we may want to know whether these variances are significant, and hence worth of interpreting. Results from varpart contain the column testable with logical values indicating whether given fraction is testable or not. To test each of them, we will need the models defined above, and the function anova, which (if applied on single object resulting from rda or cca method, returns Monte Carlo permutation test of the predictor effect). For this, we need to first define also partial ordination models with one variable as exlanatory and the other as covariable (Condition)</p>
+</blockquote>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="co"># fraction [a+c] = X1 (home_env_short)</span></span>
+<span id="cb19-3"><a href="#cb19-3"></a>rda_ord_aitc_home <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short, <span class="at">data =</span> env_mat)</span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="co"># fraction [b+c] = X2 (measure_env_short)</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a>rda_ord_aitc_meas <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> measure_env_short, <span class="at">data =</span> env_mat)</span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="co"># fraction [a] = home_env_short conditional upon measure_env_short</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a>rda_ord_aitc_home_meas <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short <span class="sc">+</span> <span class="fu">Condition</span> (measure_env_short), <span class="at">data =</span> env_mat)</span>
+<span id="cb19-8"><a href="#cb19-8"></a><span class="co"># fraction [c] = measure_env_short conditional upon home_env_short</span></span>
+<span id="cb19-9"><a href="#cb19-9"></a>rda_ord_aitc_meas_home <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> measure_env_short <span class="sc">+</span> <span class="fu">Condition</span> (home_env_short), <span class="at">data =</span> env_mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>[a+b+c] = X1+X2</strong></p>
+<p>The global model (fractions [a+b+c])</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="fu">anova</span>(rda_ord_aitc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"3","2":"23.39363","3":"54.45668","4":"0.001","_rn_":"Model"},{"1":"103","2":"14.74900","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p><strong>[a+c] = X1</strong></p>
+<p>Simple (marginal) effect of home env (fraction [a+c])</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">anova</span>(rda_ord_aitc_home)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"2","2":"3.344282","3":"4.997439","4":"0.002","_rn_":"Model"},{"1":"104","2":"34.798350","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p><strong>[b+c] = X2</strong></p>
+<p>Simple (marginal) effect of measurement env (fraction [b+c])</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="fu">anova</span>(rda_ord_aitc_meas)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"20.08813","3":"116.827","4":"0.001","_rn_":"Model"},{"1":"105","2":"18.05450","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Conditional (partial) effect of home environment (fraction [a]):</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="fu">anova</span>(rda_ord_aitc_home_meas)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"2","2":"3.305503","3":"11.54203","4":"0.001","_rn_":"Model"},{"1":"103","2":"14.748997","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>Conditional (partial) effect of measurement environment (fraction [b]):</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="fu">anova</span>(rda_ord_aitc_meas_home)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Variance"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"20.04935","3":"140.0152","4":"0.001","_rn_":"Model"},{"1":"103","2":"14.74900","3":"NA","4":"NA","_rn_":"Residual"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>From these results, we can see that all simple (marginal) and conditional (partial) effects of both predictors are significant at P &lt; 0.001.</p>
+</section>
+<section id="plot-ordination" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="plot-ordination"><span class="header-section-number">5.3</span> Plot ordination</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>env_dat2 <span class="ot">&lt;-</span> counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, home_env_short, measure_env_short, replicate, transfer) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3"></a>  <span class="fu">distinct</span>()</span>
+<span id="cb25-4"><a href="#cb25-4"></a></span>
+<span id="cb25-5"><a href="#cb25-5"></a>rda_wa <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(rda_ord_aitc<span class="sc">$</span>CCA<span class="sc">$</span>wa) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-6"><a href="#cb25-6"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-7"><a href="#cb25-7"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(env_dat2, <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span>
+<span id="cb25-8"><a href="#cb25-8"></a></span>
+<span id="cb25-9"><a href="#cb25-9"></a>pca_u <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(pca_ord_aitc<span class="sc">$</span>CA<span class="sc">$</span>u) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-10"><a href="#cb25-10"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-11"><a href="#cb25-11"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(env_dat2, <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="ordination-plotting-function" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="ordination-plotting-function"><span class="header-section-number">5.3.1</span> Ordination plotting function</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>p_ord <span class="ot">&lt;-</span> <span class="cf">function</span>(ord_df, axis_1, axis_2, colorvar, shapevar, colors, <span class="at">ellipse =</span> <span class="cn">FALSE</span>, <span class="at">coord_lim =</span> <span class="cn">FALSE</span>, <span class="at">ylim =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="cn">NULL</span>){</span>
+<span id="cb26-2"><a href="#cb26-2"></a>  <span class="co"># in case it is not a factor already</span></span>
+<span id="cb26-3"><a href="#cb26-3"></a>  a <span class="ot">&lt;-</span>  <span class="fu">mutate</span>(ord_df, <span class="at">transfer =</span> <span class="fu">factor</span>(transfer)) </span>
+<span id="cb26-4"><a href="#cb26-4"></a>  </span>
+<span id="cb26-5"><a href="#cb26-5"></a>  p <span class="ot">&lt;-</span>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="at">data =</span> a, <span class="fu">aes</span>(<span class="at">x =</span> {{ axis_1 }}, <span class="at">y =</span> {{ axis_2 }}))</span>
+<span id="cb26-6"><a href="#cb26-6"></a> </span>
+<span id="cb26-7"><a href="#cb26-7"></a>  p <span class="sc">+</span> <span class="fu">list</span>(</span>
+<span id="cb26-8"><a href="#cb26-8"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">fill =</span> {{ colorvar }}, <span class="at">shape =</span> {{ shapevar }}), </span>
+<span id="cb26-9"><a href="#cb26-9"></a>                      <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">2</span>), </span>
+<span id="cb26-10"><a href="#cb26-10"></a>    <span class="cf">if</span> (ellipse <span class="sc">==</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-11"><a href="#cb26-11"></a>      ggplot2<span class="sc">::</span><span class="fu">stat_ellipse</span>(<span class="fu">aes</span>(<span class="at">color =</span> {{ colorvar }})),</span>
+<span id="cb26-12"><a href="#cb26-12"></a>    <span class="cf">if</span> (coord_lim <span class="sc">==</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-13"><a href="#cb26-13"></a>      ggplot2<span class="sc">::</span><span class="fu">coord_fixed</span>(<span class="at">ylim =</span> ylim, <span class="at">xlim =</span> xlim),</span>
+<span id="cb26-14"><a href="#cb26-14"></a>    <span class="cf">if</span> (coord_lim <span class="sc">==</span> <span class="cn">FALSE</span>)</span>
+<span id="cb26-15"><a href="#cb26-15"></a>      ggplot2<span class="sc">::</span><span class="fu">coord_fixed</span>(),</span>
+<span id="cb26-16"><a href="#cb26-16"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">x =</span> ggplot2<span class="sc">::</span><span class="fu">enquo</span>(axis_1), </span>
+<span id="cb26-17"><a href="#cb26-17"></a>                  <span class="at">y =</span> ggplot2<span class="sc">::</span><span class="fu">enquo</span>(axis_2), <span class="at">shape =</span> <span class="st">"Transfer"</span>),</span>
+<span id="cb26-18"><a href="#cb26-18"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_fill_manual</span>(<span class="at">values =</span> colors),</span>
+<span id="cb26-19"><a href="#cb26-19"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> colors, <span class="at">guide =</span> <span class="st">'none'</span>),</span>
+<span id="cb26-20"><a href="#cb26-20"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">21</span>, <span class="dv">22</span>, <span class="dv">24</span>)),</span>
+<span id="cb26-21"><a href="#cb26-21"></a>    ggplot2<span class="sc">::</span><span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">shape =</span> <span class="dv">21</span>))),</span>
+<span id="cb26-22"><a href="#cb26-22"></a>    ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>(),</span>
+<span id="cb26-23"><a href="#cb26-23"></a>    ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
+<span id="cb26-24"><a href="#cb26-24"></a>      <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb26-25"><a href="#cb26-25"></a>      <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb26-26"><a href="#cb26-26"></a>      <span class="at">panel.background =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb26-27"><a href="#cb26-27"></a>      <span class="at">strip.placement =</span> <span class="st">'outside'</span>,</span>
+<span id="cb26-28"><a href="#cb26-28"></a>      <span class="at">strip.background =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb26-29"><a href="#cb26-29"></a>  )) </span>
+<span id="cb26-30"><a href="#cb26-30"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="rda-plot" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="rda-plot"><span class="header-section-number">5.3.2</span> RDA plot</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(rda_wa, RDA1, RDA2, </span>
+<span id="cb27-2"><a href="#cb27-2"></a>      <span class="at">colorvar =</span> measure_env_short, </span>
+<span id="cb27-3"><a href="#cb27-3"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb27-4"><a href="#cb27-4"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb27-5"><a href="#cb27-5"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb27-6"><a href="#cb27-6"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-7"><a href="#cb27-7"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.2</span>, <span class="fl">0.3</span>)) <span class="sc">+</span></span>
+<span id="cb27-8"><a href="#cb27-8"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Measurement</span><span class="sc">\n</span><span class="st">conditions"</span>)</span>
+<span id="cb27-9"><a href="#cb27-9"></a></span>
+<span id="cb27-10"><a href="#cb27-10"></a>p2 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(rda_wa, RDA3, RDA2, </span>
+<span id="cb27-11"><a href="#cb27-11"></a>      <span class="at">colorvar =</span> home_env_short, </span>
+<span id="cb27-12"><a href="#cb27-12"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb27-13"><a href="#cb27-13"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#DC267F"</span>, <span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb27-14"><a href="#cb27-14"></a>      <span class="at">ellipse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-15"><a href="#cb27-15"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-16"><a href="#cb27-16"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.2</span>, <span class="fl">0.3</span>)) <span class="sc">+</span></span>
+<span id="cb27-17"><a href="#cb27-17"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Evolution</span><span class="sc">\n</span><span class="st">conditions"</span>)</span>
+<span id="cb27-18"><a href="#cb27-18"></a></span>
+<span id="cb27-19"><a href="#cb27-19"></a>prda <span class="ot">&lt;-</span> p1 <span class="sc">+</span> p2 <span class="sc">+</span></span>
+<span id="cb27-20"><a href="#cb27-20"></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb27-21"><a href="#cb27-21"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">'A'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>prda</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="fig-03" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_ordination_analysis_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol type="A">
+<li>Projection of experimental samples and environmental variables along the first two RDA axes (RDA1 = 53% variation explained, RDA2 = 5.5% variation explained). Point shape represents the transfer and color depicts the conditions of the measurement environment - B = bacterial community alone, BS = bacterial community + streptomycin. B) Projection of experimental samples and environmental variables along RDA2 (5.5% variation explained) and RDA3 (2.6% variation explained). Point shape represents the transfer and color depicts the conditions of the evolution environment - Anc = Ancestral bacteria/no evolution, B = bacterial community alone, BS = bacterial community + streptomycin</li>
+</ol>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+<section id="save-rda-plot" class="level4" data-number="5.3.2.1">
+<h4 data-number="5.3.2.1" class="anchored" data-anchor-id="save-rda-plot"><span class="header-section-number">5.3.2.1</span> Save RDA plot</h4>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
+<span id="cb29-2"><a href="#cb29-2"></a>  here<span class="sc">::</span><span class="fu">here</span>(figs, <span class="st">"community_composition_rda.svg"</span>),</span>
+<span id="cb29-3"><a href="#cb29-3"></a>  prda,</span>
+<span id="cb29-4"><a href="#cb29-4"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb29-5"><a href="#cb29-5"></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb29-6"><a href="#cb29-6"></a>  <span class="at">units =</span> <span class="st">"in"</span>,</span>
+<span id="cb29-7"><a href="#cb29-7"></a>  <span class="at">device =</span> <span class="st">"svg"</span></span>
+<span id="cb29-8"><a href="#cb29-8"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="pca-plot" class="level3" data-number="5.3.3">
+<h3 data-number="5.3.3" class="anchored" data-anchor-id="pca-plot"><span class="header-section-number">5.3.3</span> PCA plot</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>p3 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(pca_u, PC1, PC2, </span>
+<span id="cb30-2"><a href="#cb30-2"></a>      <span class="at">colorvar =</span> measure_env_short, </span>
+<span id="cb30-3"><a href="#cb30-3"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb30-4"><a href="#cb30-4"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb30-5"><a href="#cb30-5"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb30-6"><a href="#cb30-6"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb30-7"><a href="#cb30-7"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.225</span>, <span class="fl">0.225</span>)) <span class="sc">+</span></span>
+<span id="cb30-8"><a href="#cb30-8"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Measure</span><span class="sc">\n</span><span class="st">environment"</span>)</span>
+<span id="cb30-9"><a href="#cb30-9"></a></span>
+<span id="cb30-10"><a href="#cb30-10"></a>p4 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(pca_u, PC3, PC2, </span>
+<span id="cb30-11"><a href="#cb30-11"></a>      <span class="at">colorvar =</span> home_env_short, </span>
+<span id="cb30-12"><a href="#cb30-12"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb30-13"><a href="#cb30-13"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#DC267F"</span>, <span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb30-14"><a href="#cb30-14"></a>      <span class="at">ellipse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb30-15"><a href="#cb30-15"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb30-16"><a href="#cb30-16"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.225</span>, <span class="fl">0.225</span>)) <span class="sc">+</span></span>
+<span id="cb30-17"><a href="#cb30-17"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Home</span><span class="sc">\n</span><span class="st">environment"</span>)</span>
+<span id="cb30-18"><a href="#cb30-18"></a></span>
+<span id="cb30-19"><a href="#cb30-19"></a>ppca <span class="ot">&lt;-</span> p3 <span class="sc">+</span> p4 <span class="sc">+</span></span>
+<span id="cb30-20"><a href="#cb30-20"></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb30-21"><a href="#cb30-21"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">'A'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>ppca</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="fig-04" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_ordination_analysis_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: As in <a href="#fig-03" class="quarto-xref">Figure&nbsp;3</a>, except here the principal components are plotted. PC1 = 60%, PC2 = 9.4%, PC3 = 6.7% variation explained. The ordination layouts are almost identical so the environmental variables we chose in the RDA likely correspond strongly to PCs.
+</figcaption>
+</figure>
+</div>
+<section id="save-pca-plot" class="level4" data-number="5.3.3.1">
+<h4 data-number="5.3.3.1" class="anchored" data-anchor-id="save-pca-plot"><span class="header-section-number">5.3.3.1</span> Save PCA plot</h4>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
+<span id="cb32-2"><a href="#cb32-2"></a>  here<span class="sc">::</span><span class="fu">here</span>(figs, <span class="st">"community_composition_pca.svg"</span>),</span>
+<span id="cb32-3"><a href="#cb32-3"></a>  ppca,</span>
+<span id="cb32-4"><a href="#cb32-4"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb32-5"><a href="#cb32-5"></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb32-6"><a href="#cb32-6"></a>  <span class="at">units =</span> <span class="st">"in"</span>,</span>
+<span id="cb32-7"><a href="#cb32-7"></a>  <span class="at">device =</span> <span class="st">"svg"</span></span>
+<span id="cb32-8"><a href="#cb32-8"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+</section>
+</section>
+<section id="tsne-dimensionality-reduction" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> tSNE dimensionality reduction</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a><span class="fu">set.seed</span>(<span class="dv">24578</span>)</span>
+<span id="cb33-2"><a href="#cb33-2"></a>mymat_tsne <span class="ot">&lt;-</span> Rtsne<span class="sc">::</span><span class="fu">Rtsne</span>(<span class="fu">as.matrix</span>(clr_mat), <span class="at">perplexity =</span> <span class="dv">30</span>, <span class="at">dims =</span> <span class="dv">2</span>)</span>
+<span id="cb33-3"><a href="#cb33-3"></a></span>
+<span id="cb33-4"><a href="#cb33-4"></a>mydf_tsne <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(mymat_tsne<span class="sc">$</span>Y) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-5"><a href="#cb33-5"></a>  <span class="fu">cbind</span>(dplyr<span class="sc">::</span><span class="fu">distinct</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(counts_f_experiment, sample, replicate, transfer, measure_env_short, home_env_short))) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-6"><a href="#cb33-6"></a>  <span class="fu">mutate</span>(<span class="at">transfer =</span> <span class="fu">factor</span>(transfer)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="plot-tsne" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="plot-tsne"><span class="header-section-number">6.1</span> Plot tSNE</h2>
+<p>Call the plotting function, make the patchwork layout, and save in raster and vector format</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(mydf_tsne, X1, X2, </span>
+<span id="cb34-2"><a href="#cb34-2"></a>      <span class="at">colorvar =</span> measure_env_short, </span>
+<span id="cb34-3"><a href="#cb34-3"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb34-4"><a href="#cb34-4"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb34-5"><a href="#cb34-5"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb34-6"><a href="#cb34-6"></a>      <span class="at">coord_lim =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb34-7"><a href="#cb34-7"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Measure</span><span class="sc">\n</span><span class="st">environment"</span>, </span>
+<span id="cb34-8"><a href="#cb34-8"></a>                <span class="at">x =</span> <span class="st">"tSNE dimension 1"</span>, </span>
+<span id="cb34-9"><a href="#cb34-9"></a>                <span class="at">y =</span> <span class="st">"tSNE dimension 2"</span>)</span>
+<span id="cb34-10"><a href="#cb34-10"></a></span>
+<span id="cb34-11"><a href="#cb34-11"></a>ph <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(mydf_tsne, X1, X2, </span>
+<span id="cb34-12"><a href="#cb34-12"></a>      <span class="at">colorvar =</span> home_env_short, </span>
+<span id="cb34-13"><a href="#cb34-13"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb34-14"><a href="#cb34-14"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#DC267F"</span>, <span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb34-15"><a href="#cb34-15"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb34-16"><a href="#cb34-16"></a>      <span class="at">coord_lim =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb34-17"><a href="#cb34-17"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Home</span><span class="sc">\n</span><span class="st">environment"</span>, </span>
+<span id="cb34-18"><a href="#cb34-18"></a>                <span class="at">x =</span> <span class="st">"tSNE dimension 1"</span>, </span>
+<span id="cb34-19"><a href="#cb34-19"></a>                <span class="at">y =</span> <span class="st">"tSNE dimension 2"</span>)</span>
+<span id="cb34-20"><a href="#cb34-20"></a></span>
+<span id="cb34-21"><a href="#cb34-21"></a>pt <span class="ot">&lt;-</span> pm <span class="sc">+</span> ph <span class="sc">+</span></span>
+<span id="cb34-22"><a href="#cb34-22"></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb34-23"><a href="#cb34-23"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">'A'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="fig-02" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_ordination_analysis_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Dimensional reduction of bacterial community composition using t-SNE. Each point represents a replicate microcosm sampled at serial transfers 4, 8, and 12 (grid columns). In <strong>A)</strong> point colors depict the experimental measurement condition from the transplantation experiment. In <strong>B)</strong> point colors depict the evolutionary history of the inoculating communities (“home environment”).
+</figcaption>
+</figure>
+</div>
+<section id="save-tsne-plot" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="save-tsne-plot"><span class="header-section-number">6.1.1</span> Save tSNE plot</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Show/hide code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
+<span id="cb35-2"><a href="#cb35-2"></a>  here<span class="sc">::</span><span class="fu">here</span>(figs, <span class="st">"community_composition_tsne.svg"</span>),</span>
+<span id="cb35-3"><a href="#cb35-3"></a>  pt,</span>
+<span id="cb35-4"><a href="#cb35-4"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb35-5"><a href="#cb35-5"></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb35-6"><a href="#cb35-6"></a>  <span class="at">units =</span> <span class="st">"in"</span>,</span>
+<span id="cb35-7"><a href="#cb35-7"></a>  <span class="at">device =</span> <span class="st">"svg"</span></span>
+<span id="cb35-8"><a href="#cb35-8"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb36" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb36-1"><a href="#cb36-1"></a><span class="co">---</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="an">title:</span><span class="co"> "Ordination of species abundance data"</span></span>
+<span id="cb36-3"><a href="#cb36-3"></a><span class="an">subtitle:</span><span class="co"> "Community composition workflow"</span></span>
+<span id="cb36-4"><a href="#cb36-4"></a><span class="an">author:</span><span class="co"> "Shane Hogle"</span></span>
+<span id="cb36-5"><a href="#cb36-5"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb36-6"><a href="#cb36-6"></a><span class="an">abstract:</span><span class="co"> "This notebook conducts ordination of CLR transformed count data using PCA, Redundancy Analysis (RDA), and tSNE"</span></span>
+<span id="cb36-7"><a href="#cb36-7"></a><span class="co">---</span></span>
+<span id="cb36-8"><a href="#cb36-8"></a></span>
+<span id="cb36-9"><a href="#cb36-9"></a><span class="fu"># Setup</span></span>
+<span id="cb36-10"><a href="#cb36-10"></a></span>
+<span id="cb36-11"><a href="#cb36-11"></a>Loads required libraries and sets global variables</span>
+<span id="cb36-12"><a href="#cb36-12"></a></span>
+<span id="cb36-15"><a href="#cb36-15"></a><span class="in">```{r}</span></span>
+<span id="cb36-16"><a href="#cb36-16"></a><span class="co">#| output: false</span></span>
+<span id="cb36-17"><a href="#cb36-17"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb36-18"><a href="#cb36-18"></a><span class="fu">library</span>(here)</span>
+<span id="cb36-19"><a href="#cb36-19"></a><span class="fu">library</span>(fs)</span>
+<span id="cb36-20"><a href="#cb36-20"></a><span class="fu">library</span>(scales)</span>
+<span id="cb36-21"><a href="#cb36-21"></a><span class="fu">library</span>(Rtsne)</span>
+<span id="cb36-22"><a href="#cb36-22"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb36-23"><a href="#cb36-23"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb36-24"><a href="#cb36-24"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"R"</span>, <span class="st">"utils_generic.R"</span>))</span>
+<span id="cb36-25"><a href="#cb36-25"></a><span class="in">```</span></span>
+<span id="cb36-26"><a href="#cb36-26"></a></span>
+<span id="cb36-27"><a href="#cb36-27"></a><span class="fu"># Read</span></span>
+<span id="cb36-28"><a href="#cb36-28"></a></span>
+<span id="cb36-29"><a href="#cb36-29"></a>Read species abundance data (16S v3 amplicon counts) and do some light formatting of metadata </span>
+<span id="cb36-30"><a href="#cb36-30"></a></span>
+<span id="cb36-33"><a href="#cb36-33"></a><span class="in">```{r}</span></span>
+<span id="cb36-34"><a href="#cb36-34"></a><span class="co">#| output: false</span></span>
+<span id="cb36-35"><a href="#cb36-35"></a><span class="co">#| warning: false</span></span>
+<span id="cb36-36"><a href="#cb36-36"></a>sptable <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(here<span class="sc">::</span><span class="fu">here</span>(data_sp, <span class="st">"species_counts_md.tsv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-37"><a href="#cb36-37"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">transfer =</span> day<span class="sc">/</span><span class="dv">7</span>)</span>
+<span id="cb36-38"><a href="#cb36-38"></a></span>
+<span id="cb36-39"><a href="#cb36-39"></a>counts_f <span class="ot">&lt;-</span> sptable <span class="sc">%&gt;%</span> </span>
+<span id="cb36-40"><a href="#cb36-40"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-41"><a href="#cb36-41"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">f=</span>count_correct<span class="sc">/</span><span class="fu">sum</span>(count_correct)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-42"><a href="#cb36-42"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb36-43"><a href="#cb36-43"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">measure_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(measure_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Meas: B"</span>,</span>
+<span id="cb36-44"><a href="#cb36-44"></a>                                       measure_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Meas: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-45"><a href="#cb36-45"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">home_env_short =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb36-46"><a href="#cb36-46"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"anc"</span> <span class="sc">~</span> <span class="st">"Home: Anc"</span>,</span>
+<span id="cb36-47"><a href="#cb36-47"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact"</span> <span class="sc">~</span> <span class="st">"Home: B"</span>,</span>
+<span id="cb36-48"><a href="#cb36-48"></a>                                    evolution_env <span class="sc">==</span> <span class="st">"bact_strep"</span> <span class="sc">~</span> <span class="st">"Home: BS"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-49"><a href="#cb36-49"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-50"><a href="#cb36-50"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb36-51"><a href="#cb36-51"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb36-52"><a href="#cb36-52"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb36-53"><a href="#cb36-53"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb36-54"><a href="#cb36-54"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span>
+<span id="cb36-55"><a href="#cb36-55"></a><span class="in">```</span></span>
+<span id="cb36-56"><a href="#cb36-56"></a></span>
+<span id="cb36-57"><a href="#cb36-57"></a><span class="fu"># Formatting</span></span>
+<span id="cb36-58"><a href="#cb36-58"></a></span>
+<span id="cb36-59"><a href="#cb36-59"></a>Some light formatting to subset data into distint tibbles for later plotting</span>
+<span id="cb36-60"><a href="#cb36-60"></a></span>
+<span id="cb36-63"><a href="#cb36-63"></a><span class="in">```{r}</span></span>
+<span id="cb36-64"><a href="#cb36-64"></a><span class="co">#| output: false</span></span>
+<span id="cb36-65"><a href="#cb36-65"></a><span class="co">#| warning: false</span></span>
+<span id="cb36-66"><a href="#cb36-66"></a><span class="co"># these are communities of a (supposedly) known composition. Can be used with metacal</span></span>
+<span id="cb36-67"><a href="#cb36-67"></a>pos_ctrl_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb36-68"><a href="#cb36-68"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>))</span>
+<span id="cb36-69"><a href="#cb36-69"></a></span>
+<span id="cb36-70"><a href="#cb36-70"></a><span class="co"># these are samples taken directly from YSK and represent the composition of the communities used to start the experiment</span></span>
+<span id="cb36-71"><a href="#cb36-71"></a>t0_samples <span class="ot">&lt;-</span> counts_f <span class="sc">%&gt;%</span> </span>
+<span id="cb36-72"><a href="#cb36-72"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(sample, <span class="st">"pos_ctrl"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-73"><a href="#cb36-73"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(day <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb36-74"><a href="#cb36-74"></a></span>
+<span id="cb36-75"><a href="#cb36-75"></a><span class="co"># only samples from the experiment</span></span>
+<span id="cb36-76"><a href="#cb36-76"></a>counts_f_experiment <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">anti_join</span>(counts_f, pos_ctrl_samples, </span>
+<span id="cb36-77"><a href="#cb36-77"></a>                            <span class="at">by =</span> <span class="fu">join_by</span>(sample, strainID, genus, </span>
+<span id="cb36-78"><a href="#cb36-78"></a>                                         species, count, count_correct, </span>
+<span id="cb36-79"><a href="#cb36-79"></a>                                         replicate, day, measure_env, </span>
+<span id="cb36-80"><a href="#cb36-80"></a>                                         evolution_env, transfer, f, </span>
+<span id="cb36-81"><a href="#cb36-81"></a>                                         measure_env_short, home_env_short)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-82"><a href="#cb36-82"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(., t0_samples,</span>
+<span id="cb36-83"><a href="#cb36-83"></a>                   <span class="at">by =</span> <span class="fu">join_by</span>(sample, strainID, genus, species, count, </span>
+<span id="cb36-84"><a href="#cb36-84"></a>                                count_correct, replicate, day, measure_env, </span>
+<span id="cb36-85"><a href="#cb36-85"></a>                                evolution_env, transfer, f, measure_env_short, </span>
+<span id="cb36-86"><a href="#cb36-86"></a>                                home_env_short)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-87"><a href="#cb36-87"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb36-88"><a href="#cb36-88"></a>    <span class="at">measure_env_short =</span> <span class="fu">factor</span>(measure_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Meas: B"</span>, <span class="st">"Meas: BS"</span>)),</span>
+<span id="cb36-89"><a href="#cb36-89"></a>    <span class="at">home_env_short =</span> <span class="fu">factor</span>(home_env_short, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Home: Anc"</span>, <span class="st">"Home: B"</span>, <span class="st">"Home: BS"</span>)),</span>
+<span id="cb36-90"><a href="#cb36-90"></a>         <span class="at">day =</span> <span class="fu">factor</span>(day),</span>
+<span id="cb36-91"><a href="#cb36-91"></a>         <span class="at">replicate =</span> <span class="fu">factor</span>(replicate),</span>
+<span id="cb36-92"><a href="#cb36-92"></a>         <span class="at">strainID =</span> <span class="fu">factor</span>(strainID, <span class="at">levels =</span> <span class="fu">names</span>(hambi_colors)))</span>
+<span id="cb36-93"><a href="#cb36-93"></a><span class="in">```</span></span>
+<span id="cb36-94"><a href="#cb36-94"></a></span>
+<span id="cb36-95"><a href="#cb36-95"></a><span class="fu"># Data transformation</span></span>
+<span id="cb36-96"><a href="#cb36-96"></a></span>
+<span id="cb36-97"><a href="#cb36-97"></a>Some preliminary inspections of the number of samples with zeros. This is needed for zcompositions</span>
+<span id="cb36-98"><a href="#cb36-98"></a></span>
+<span id="cb36-101"><a href="#cb36-101"></a><span class="in">```{r}</span></span>
+<span id="cb36-102"><a href="#cb36-102"></a>counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb36-103"><a href="#cb36-103"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(strainID) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-104"><a href="#cb36-104"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">n_samples =</span> <span class="fu">n</span>(),</span>
+<span id="cb36-105"><a href="#cb36-105"></a>            <span class="at">n_gt0 =</span> <span class="fu">sum</span>(count <span class="sc">&gt;</span> <span class="dv">0</span>),</span>
+<span id="cb36-106"><a href="#cb36-106"></a>            <span class="at">p_gt0 =</span> n_gt0 <span class="sc">/</span> n_samples) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-107"><a href="#cb36-107"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb36-108"><a href="#cb36-108"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(n_gt0)</span>
+<span id="cb36-109"><a href="#cb36-109"></a><span class="in">```</span></span>
+<span id="cb36-110"><a href="#cb36-110"></a></span>
+<span id="cb36-111"><a href="#cb36-111"></a>Here we will use the <span class="co">[</span><span class="ot">centered log-ratio transformation</span><span class="co">](https://en.wikipedia.org/wiki/Compositional_data#Center_log_ratio_transform)</span> for the species abundances. The centered log-ratio can be interpreted as the log-fold change of species i relative to the average microbe in a sample. The formula for the transformation is:</span>
+<span id="cb36-112"><a href="#cb36-112"></a></span>
+<span id="cb36-113"><a href="#cb36-113"></a>$$</span>
+<span id="cb36-114"><a href="#cb36-114"></a>\text{clr}(\mathbf x)= \left(log</span>
+<span id="cb36-115"><a href="#cb36-115"></a>\frac{x_i}{g(\mathbf x)} \right)_{i=1,...,D} \qquad \text{with} \quad</span>
+<span id="cb36-116"><a href="#cb36-116"></a>g(\mathbf x) = \left(\prod_{i=1}^Dx_i\right)^{1/D} =</span>
+<span id="cb36-117"><a href="#cb36-117"></a>\exp\left(\frac{1}{D}\sum_{i=1}^D \log x_i\right)\text{,}</span>
+<span id="cb36-118"><a href="#cb36-118"></a>$$ {#eq-clr}</span>
+<span id="cb36-119"><a href="#cb36-119"></a></span>
+<span id="cb36-120"><a href="#cb36-120"></a>We will use the implementation of centered log-ratio transform in the <span class="in">`compositions`</span> package</span>
+<span id="cb36-121"><a href="#cb36-121"></a></span>
+<span id="cb36-124"><a href="#cb36-124"></a><span class="in">```{r}</span></span>
+<span id="cb36-125"><a href="#cb36-125"></a><span class="fu">set.seed</span>(<span class="dv">234781</span>)</span>
+<span id="cb36-126"><a href="#cb36-126"></a></span>
+<span id="cb36-127"><a href="#cb36-127"></a><span class="co"># exclude these species because they have too many zeros</span></span>
+<span id="cb36-128"><a href="#cb36-128"></a>lowstrainsv <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb36-129"><a href="#cb36-129"></a>  <span class="st">"HAMBI_0097"</span>,</span>
+<span id="cb36-130"><a href="#cb36-130"></a>  <span class="st">"HAMBI_2792"</span></span>
+<span id="cb36-131"><a href="#cb36-131"></a>)</span>
+<span id="cb36-132"><a href="#cb36-132"></a></span>
+<span id="cb36-133"><a href="#cb36-133"></a><span class="co"># make a species count matrix</span></span>
+<span id="cb36-134"><a href="#cb36-134"></a>count_mat <span class="ot">&lt;-</span> counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb36-135"><a href="#cb36-135"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>(strainID <span class="sc">%in%</span> lowstrainsv)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-136"><a href="#cb36-136"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, strainID, count) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-137"><a href="#cb36-137"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">count =</span> count <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-138"><a href="#cb36-138"></a>  <span class="co"># important to arrange by sample as this makes some later joins easier</span></span>
+<span id="cb36-139"><a href="#cb36-139"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-140"><a href="#cb36-140"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from =</span> <span class="st">"strainID"</span>, <span class="at">values_from =</span> <span class="st">"count"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-141"><a href="#cb36-141"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-142"><a href="#cb36-142"></a>  <span class="fu">data.frame</span>()</span>
+<span id="cb36-143"><a href="#cb36-143"></a></span>
+<span id="cb36-144"><a href="#cb36-144"></a><span class="co"># calculate clr</span></span>
+<span id="cb36-145"><a href="#cb36-145"></a>clr_mat <span class="ot">&lt;-</span> compositions<span class="sc">::</span><span class="fu">clr</span>(count_mat)</span>
+<span id="cb36-146"><a href="#cb36-146"></a></span>
+<span id="cb36-147"><a href="#cb36-147"></a>env_mat <span class="ot">&lt;-</span> counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb36-148"><a href="#cb36-148"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, home_env_short, measure_env_short) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-149"><a href="#cb36-149"></a>  <span class="fu">distinct</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb36-150"><a href="#cb36-150"></a>  <span class="co"># important to arrange by sample as this makes some later joins easier</span></span>
+<span id="cb36-151"><a href="#cb36-151"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(sample) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-152"><a href="#cb36-152"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-153"><a href="#cb36-153"></a>  <span class="fu">data.frame</span>()</span>
+<span id="cb36-154"><a href="#cb36-154"></a><span class="in">```</span></span>
+<span id="cb36-155"><a href="#cb36-155"></a></span>
+<span id="cb36-156"><a href="#cb36-156"></a></span>
+<span id="cb36-157"><a href="#cb36-157"></a><span class="fu"># Constrain ordination - Redundancy analysis (RDA)</span></span>
+<span id="cb36-158"><a href="#cb36-158"></a></span>
+<span id="cb36-159"><a href="#cb36-159"></a><span class="co">[</span><span class="ot">See this useful resource</span><span class="co">](https://www.davidzeleny.net/anadat-r/doku.php/en:rda_cca)</span></span>
+<span id="cb36-160"><a href="#cb36-160"></a></span>
+<span id="cb36-161"><a href="#cb36-161"></a><span class="at">&gt; Linear constrained ordination methods implicitly based on Euclidean (RDA) or Hellinger/chord/other (tb-RDA) distances. The calculation (detailed below) can be simply described as a set of (multiple) linear regression analyses, where species abundances (for each species in the species composition matrix separately) are regressed against (one or several) environmental variable(s). The result is that variation in species composition is decomposed into variation related to environmental variables (represented by constrained/canonical axes) and not related to environmental variables (unconstrained axes). The number of constrained axes is equal or lower than the number of quantitative explanatory variables; in the case of a qualitative/categorical variable, the number of constrained axes is equal to the number of categories in that variable minus one. Each canonical axis is a linear combination of all explanatory variables.</span></span>
+<span id="cb36-162"><a href="#cb36-162"></a><span class="at">&gt;</span></span>
+<span id="cb36-163"><a href="#cb36-163"></a><span class="at">&gt; The algorithm of RDA can be summarised as follows (figure 1 and figure 2). The matrix of species composition (sample x species) and the matrix of environmental variables (sample x env.variables, for simplicity containing only one env. variable in the illustration below) needs to be available.</span></span>
+<span id="cb36-164"><a href="#cb36-164"></a><span class="at">&gt;</span></span>
+<span id="cb36-165"><a href="#cb36-165"></a><span class="at">&gt; 1. Abundances of the first species (spe1) are regressed against environmental variable (env1) by linear regression (or by multiple regression if more env. variables are available), with spe1 as the dependent variable and env1 (and other env. variables if available) as explanatory.</span></span>
+<span id="cb36-166"><a href="#cb36-166"></a><span class="at">&gt;</span></span>
+<span id="cb36-167"><a href="#cb36-167"></a><span class="at">&gt;2. The values of species abundances fitted by the regression model (i.e. located on the regression line) are stored in the matrix of fitted values, while residuals of species abundances (the difference between observed abundances and fitted abundances) are stored in the matrix of residuals.</span></span>
+<span id="cb36-168"><a href="#cb36-168"></a><span class="at">&gt;</span></span>
+<span id="cb36-169"><a href="#cb36-169"></a><span class="at">&gt;3. The same is repeated for all species in a matrix of species composition. Resulting matrices of predicted values and residual values have the same size (no. of samples x no. of species) as the original matrix of species composition.</span></span>
+<span id="cb36-170"><a href="#cb36-170"></a><span class="at">&gt;</span></span>
+<span id="cb36-171"><a href="#cb36-171"></a><span class="at">&gt;4. The matrix of predicted values is used in PCA to extract constrained ordination axes, while the matrix of residual values is used in PCA to extract unconstrained axes.</span></span>
+<span id="cb36-172"><a href="#cb36-172"></a><span class="at">&gt;</span></span>
+<span id="cb36-173"><a href="#cb36-173"></a><span class="at">&gt;5. In the example on figure 2 with only one explanatory variable there is only one constrained ordination axis (the second, vertical one in the ordination diagram is the first unconstrained axis).</span></span>
+<span id="cb36-174"><a href="#cb36-174"></a></span>
+<span id="cb36-175"><a href="#cb36-175"></a>Perform the RDA analysis</span>
+<span id="cb36-176"><a href="#cb36-176"></a></span>
+<span id="cb36-179"><a href="#cb36-179"></a><span class="in">```{r}</span></span>
+<span id="cb36-180"><a href="#cb36-180"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb36-181"><a href="#cb36-181"></a></span>
+<span id="cb36-182"><a href="#cb36-182"></a>pca_ord_aitc <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat)</span>
+<span id="cb36-183"><a href="#cb36-183"></a>rda_ord_aitc <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short <span class="sc">+</span> measure_env_short, <span class="at">data =</span> env_mat)</span>
+<span id="cb36-184"><a href="#cb36-184"></a><span class="in">```</span></span>
+<span id="cb36-185"><a href="#cb36-185"></a></span>
+<span id="cb36-186"><a href="#cb36-186"></a>Summary information of the RDA</span>
+<span id="cb36-187"><a href="#cb36-187"></a></span>
+<span id="cb36-190"><a href="#cb36-190"></a><span class="in">```{r}</span></span>
+<span id="cb36-191"><a href="#cb36-191"></a><span class="fu">summary</span>(rda_ord_aitc)</span>
+<span id="cb36-192"><a href="#cb36-192"></a><span class="in">```</span></span>
+<span id="cb36-193"><a href="#cb36-193"></a></span>
+<span id="cb36-194"><a href="#cb36-194"></a><span class="fu">## Explained variation</span></span>
+<span id="cb36-195"><a href="#cb36-195"></a></span>
+<span id="cb36-196"><a href="#cb36-196"></a><span class="co">[</span><span class="ot">See this useful resource</span><span class="co">](https://www.davidzeleny.net/anadat-r/doku.php/en:expl_var)</span></span>
+<span id="cb36-197"><a href="#cb36-197"></a></span>
+<span id="cb36-198"><a href="#cb36-198"></a><span class="at">&gt; Constrained ordination is a set of multivariate regression analyses, and as in ordinary least squared regression, the effect size is measured by R2, the coefficient of determination. R2 quantifies the variation in species composition explained by environmental variable(s), and can be calculated (if no covariables are included) as the sum of eigenvalues of all constrained axes divided by the total variation (sum of eigenvalues of all axes).</span></span>
+<span id="cb36-199"><a href="#cb36-199"></a><span class="at">&gt; </span></span>
+<span id="cb36-200"><a href="#cb36-200"></a><span class="at">&gt; The value of R2 in constrained ordination suffers from the same drawback as in ordinary regression, namely that it decreases with the number of samples in the dataset and increases with the number of explanatory variables, making the values incomparable between datasets of different size. The solution is to use adjusted R2. The absolute value of explained variation itself is not too informative on its own unless it is put into the context, for example by comparing it to the variation the same number of explanatory variables could possibly explain on the same species composition data. Even if the explanatory variables are in fact randomly generated, the R2 is non-zero and positive (in contrast to adjusted R2, which may be zero or even negative), and to decide whether the results are interpretable, it is useful to test their significance by Monte Carlo permutation test.</span></span>
+<span id="cb36-201"><a href="#cb36-201"></a></span>
+<span id="cb36-202"><a href="#cb36-202"></a>Variation explained by RDAs and PCs</span>
+<span id="cb36-203"><a href="#cb36-203"></a></span>
+<span id="cb36-204"><a href="#cb36-204"></a>::: {#fig-01}</span>
+<span id="cb36-207"><a href="#cb36-207"></a><span class="in">```{r}</span></span>
+<span id="cb36-208"><a href="#cb36-208"></a><span class="fu">data.frame</span>(<span class="at">value =</span> <span class="fu">c</span>(rda_ord_aitc<span class="sc">$</span>CCA<span class="sc">$</span>eig<span class="sc">/</span>rda_ord_aitc<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>, </span>
+<span id="cb36-209"><a href="#cb36-209"></a>                     rda_ord_aitc<span class="sc">$</span>CA<span class="sc">$</span>eig<span class="sc">/</span>rda_ord_aitc<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-210"><a href="#cb36-210"></a>  <span class="fu">rownames_to_column</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb36-211"><a href="#cb36-211"></a>  <span class="fu">mutate</span>(<span class="at">type =</span> <span class="fu">if_else</span>(<span class="fu">str_detect</span>(rowname, <span class="st">"RDA"</span>), <span class="st">"RDA"</span>, <span class="st">"PC"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-212"><a href="#cb36-212"></a>  <span class="fu">mutate</span>(<span class="at">rowname =</span> <span class="fu">fct_inorder</span>(rowname)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-213"><a href="#cb36-213"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb36-214"><a href="#cb36-214"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">x =</span>value , <span class="at">y =</span> rowname, <span class="at">fill =</span> type)) <span class="sc">+</span></span>
+<span id="cb36-215"><a href="#cb36-215"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">'% variation'</span>, <span class="at">y =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb36-216"><a href="#cb36-216"></a>  <span class="fu">scale_y_discrete</span>(<span class="at">limits=</span>rev)</span>
+<span id="cb36-217"><a href="#cb36-217"></a><span class="in">```</span></span>
+<span id="cb36-218"><a href="#cb36-218"></a>Proportion of variation explained by each of the Principal Component axes (red) and the RDA axes (blue)</span>
+<span id="cb36-219"><a href="#cb36-219"></a>:::</span>
+<span id="cb36-220"><a href="#cb36-220"></a></span>
+<span id="cb36-221"><a href="#cb36-221"></a>There are n-1 RDA axis for each categorical variable in the constrained ordination. In our case, <span class="in">`measure_env_short`</span> has 2 categories and <span class="in">`home_env_short`</span> has 3 categories for a total of 3 RDA axes. Together the Measurement environment and the Home environment explain about 60% of the variance in species composition. Is this a significant amount of variance explained? To check we will follow the <span class="co">[</span><span class="ot">tutorial here.</span><span class="co">](https://www.davidzeleny.net/anadat-r/doku.php/en:expl_var_examples)</span></span>
+<span id="cb36-222"><a href="#cb36-222"></a></span>
+<span id="cb36-223"><a href="#cb36-223"></a>First let's compare this amount of variance explained in the constrained ordination compares to the variation explained in an unconstrained analysis (i.e., just regular PCA). PCA can kind of be thought of generating latent uncorrelated variables that explain the most variance possible. So if we check the amount of variance explained by PC1 and PC2 we are kind of comparing the maximum amount of variance explained with "idealized" uncorrelated latent variables</span>
+<span id="cb36-224"><a href="#cb36-224"></a></span>
+<span id="cb36-227"><a href="#cb36-227"></a><span class="in">```{r}</span></span>
+<span id="cb36-228"><a href="#cb36-228"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb36-229"><a href="#cb36-229"></a>PCA12 <span class="ot">&lt;-</span> <span class="fu">scores</span>(pca_ord_aitc, <span class="at">display =</span> <span class="st">'sites'</span>, <span class="at">choices =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb36-230"><a href="#cb36-230"></a>tbRDA_PCA12 <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat <span class="sc">~</span> PCA12)</span>
+<span id="cb36-231"><a href="#cb36-231"></a></span>
+<span id="cb36-232"><a href="#cb36-232"></a><span class="fu">tibble</span>(<span class="st">"var_exp_rda"</span> <span class="ot">=</span> <span class="fu">round</span>(vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(rda_ord_aitc)<span class="sc">$</span>r.squared,<span class="dv">2</span>),</span>
+<span id="cb36-233"><a href="#cb36-233"></a>       <span class="st">"var_exp_pca12"</span> <span class="ot">=</span> <span class="fu">round</span>(vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(tbRDA_PCA12)<span class="sc">$</span>r.squared, <span class="dv">2</span>))</span>
+<span id="cb36-234"><a href="#cb36-234"></a><span class="in">```</span></span>
+<span id="cb36-235"><a href="#cb36-235"></a>So this analysis shows that 61% of the variance can be explained by 2 real variables while 70% of the variance could be explained by 2 idealized, uncorrelated latent variables. So this analysis shows that using the measurement and the home environemnts we are explaining something like <span class="in">`{r} round(vegan::RsquareAdj(rda_ord_aitc)$r.squared/vegan::RsquareAdj(tbRDA_PCA12)$r.squared, 2)*100`</span> % of the maximum possible amount of variance explained in community composition.</span>
+<span id="cb36-236"><a href="#cb36-236"></a></span>
+<span id="cb36-237"><a href="#cb36-237"></a>Now we test whether the amount of variance explained is higher than we would expect for just two random variables.</span>
+<span id="cb36-238"><a href="#cb36-238"></a></span>
+<span id="cb36-241"><a href="#cb36-241"></a><span class="in">```{r}</span></span>
+<span id="cb36-242"><a href="#cb36-242"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb36-243"><a href="#cb36-243"></a>randomize_rda <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<span id="cb36-244"><a href="#cb36-244"></a>  <span class="co"># reshuffle the rows with environmental variabels</span></span>
+<span id="cb36-245"><a href="#cb36-245"></a>  env_mat_rand <span class="ot">&lt;-</span> env_mat[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(env_mat)),] </span>
+<span id="cb36-246"><a href="#cb36-246"></a>  rda_ord_aitc_rand <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short <span class="sc">+</span> measure_env_short, <span class="at">data =</span> env_mat_rand)</span>
+<span id="cb36-247"><a href="#cb36-247"></a>  vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(rda_ord_aitc_rand)<span class="sc">$</span>r.squared</span>
+<span id="cb36-248"><a href="#cb36-248"></a>}</span>
+<span id="cb36-249"><a href="#cb36-249"></a></span>
+<span id="cb36-250"><a href="#cb36-250"></a><span class="co"># run the simulation 999 times</span></span>
+<span id="cb36-251"><a href="#cb36-251"></a>sim_r2 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">999</span>, <span class="fu">randomize_rda</span>(), <span class="at">simplify =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb36-252"><a href="#cb36-252"></a><span class="in">```</span></span>
+<span id="cb36-253"><a href="#cb36-253"></a></span>
+<span id="cb36-254"><a href="#cb36-254"></a>So using the variables definitely is better than what we see after 999 Monte Carlo randomization permutations</span>
+<span id="cb36-255"><a href="#cb36-255"></a></span>
+<span id="cb36-256"><a href="#cb36-256"></a>::: {#fig-02}</span>
+<span id="cb36-259"><a href="#cb36-259"></a><span class="in">```{r}</span></span>
+<span id="cb36-260"><a href="#cb36-260"></a><span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(sim_r2)) <span class="sc">+</span></span>
+<span id="cb36-261"><a href="#cb36-261"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span></span>
+<span id="cb36-262"><a href="#cb36-262"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> vegan<span class="sc">::</span><span class="fu">RsquareAdj</span>(rda_ord_aitc)<span class="sc">$</span>r.squared, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb36-263"><a href="#cb36-263"></a>  <span class="fu">xlab</span>(<span class="st">"Permuted R2 values"</span>)</span>
+<span id="cb36-264"><a href="#cb36-264"></a><span class="in">```</span></span>
+<span id="cb36-265"><a href="#cb36-265"></a>Distribution of 999 randomly permuted (rows in environmental dataframe shuffled) R2 values from RDA analysis <span class="in">`vegan::rda(clr_mat ~ home_env_short + measure_env_short, data = env_mat_rand)`</span></span>
+<span id="cb36-266"><a href="#cb36-266"></a>:::</span>
+<span id="cb36-267"><a href="#cb36-267"></a></span>
+<span id="cb36-268"><a href="#cb36-268"></a>And the result is clearly statistically significant</span>
+<span id="cb36-269"><a href="#cb36-269"></a></span>
+<span id="cb36-272"><a href="#cb36-272"></a><span class="in">```{r}</span></span>
+<span id="cb36-273"><a href="#cb36-273"></a><span class="fu">anova</span>(rda_ord_aitc, <span class="at">permutations =</span> <span class="dv">999</span>)</span>
+<span id="cb36-274"><a href="#cb36-274"></a><span class="in">```</span></span>
+<span id="cb36-275"><a href="#cb36-275"></a></span>
+<span id="cb36-278"><a href="#cb36-278"></a><span class="in">```{r}</span></span>
+<span id="cb36-279"><a href="#cb36-279"></a><span class="fu">anova</span>(rda_ord_aitc, <span class="at">by =</span> <span class="st">'axis'</span>, <span class="at">permutations =</span> <span class="dv">999</span>)</span>
+<span id="cb36-280"><a href="#cb36-280"></a><span class="in">```</span></span>
+<span id="cb36-281"><a href="#cb36-281"></a></span>
+<span id="cb36-284"><a href="#cb36-284"></a><span class="in">```{r}</span></span>
+<span id="cb36-285"><a href="#cb36-285"></a><span class="fu">anova</span>(rda_ord_aitc, <span class="at">by =</span> <span class="st">'margin'</span>, <span class="at">permutations =</span> <span class="dv">999</span>)</span>
+<span id="cb36-286"><a href="#cb36-286"></a><span class="in">```</span></span>
+<span id="cb36-287"><a href="#cb36-287"></a></span>
+<span id="cb36-288"><a href="#cb36-288"></a><span class="fu">## Variance partitioning</span></span>
+<span id="cb36-289"><a href="#cb36-289"></a></span>
+<span id="cb36-290"><a href="#cb36-290"></a><span class="co">[</span><span class="ot">See this useful resource</span><span class="co">](https://www.davidzeleny.net/anadat-r/doku.php/en:varpart)</span></span>
+<span id="cb36-291"><a href="#cb36-291"></a></span>
+<span id="cb36-292"><a href="#cb36-292"></a><span class="at">&gt; In case we have two or more explanatory variables, one may be interested in variation in species composition explained by each of them. If some of these explanatory variables are correlated, one must expect that variation explained by the first or the other variable cannot be separated - it will be shared.</span></span>
+<span id="cb36-293"><a href="#cb36-293"></a><span class="at">&gt; </span></span>
+<span id="cb36-294"><a href="#cb36-294"></a><span class="at">&gt; The way how to approach this problem is variation partitioning, when variation explained by each variable (or set of variables) independently is partitioned into variation attributable purely to given environmental variable, and shared variation attributable to two or more variables.</span></span>
+<span id="cb36-295"><a href="#cb36-295"></a></span>
+<span id="cb36-298"><a href="#cb36-298"></a><span class="in">```{r}</span></span>
+<span id="cb36-299"><a href="#cb36-299"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb36-300"><a href="#cb36-300"></a>varp <span class="ot">&lt;-</span> <span class="fu">varpart</span>(clr_mat, <span class="sc">~</span> home_env_short, <span class="sc">~</span> measure_env_short, <span class="at">data =</span> env_mat)</span>
+<span id="cb36-301"><a href="#cb36-301"></a><span class="in">```</span></span>
+<span id="cb36-302"><a href="#cb36-302"></a></span>
+<span id="cb36-303"><a href="#cb36-303"></a><span class="ss">- </span><span class="co">[</span><span class="ot">a</span><span class="co">]</span> = variation explained by variable 1 (conditional (or partial) effect of variable 1, i.e. variation this variable would explain if putting variable 2 as covariable)</span>
+<span id="cb36-304"><a href="#cb36-304"></a></span>
+<span id="cb36-305"><a href="#cb36-305"></a><span class="ss">- </span><span class="co">[</span><span class="ot">c</span><span class="co">]</span> = variation explained by variable 2</span>
+<span id="cb36-306"><a href="#cb36-306"></a></span>
+<span id="cb36-307"><a href="#cb36-307"></a><span class="ss">- </span><span class="co">[</span><span class="ot">b</span><span class="co">]</span> = shared variation explained by both variables (cannot be decided to which of them should be attributed, and is a result of correlation between both variables)</span>
+<span id="cb36-308"><a href="#cb36-308"></a></span>
+<span id="cb36-309"><a href="#cb36-309"></a><span class="ss">- </span><span class="co">[</span><span class="ot">a+b</span><span class="co">]</span> = variation explained by variable 1 (independent simple (or marginal) effect of variable 1, i.e. variation this variable would explain if it is as the only explanatory variable in the model)</span>
+<span id="cb36-310"><a href="#cb36-310"></a></span>
+<span id="cb36-311"><a href="#cb36-311"></a><span class="ss">- </span><span class="co">[</span><span class="ot">b+c</span><span class="co">]</span> = variation explained by variable 2</span>
+<span id="cb36-312"><a href="#cb36-312"></a></span>
+<span id="cb36-313"><a href="#cb36-313"></a><span class="ss">- </span><span class="co">[</span><span class="ot">d</span><span class="co">]</span> = unexplained variation</span>
+<span id="cb36-314"><a href="#cb36-314"></a></span>
+<span id="cb36-317"><a href="#cb36-317"></a><span class="in">```{r}</span></span>
+<span id="cb36-318"><a href="#cb36-318"></a>varp</span>
+<span id="cb36-319"><a href="#cb36-319"></a><span class="in">```</span></span>
+<span id="cb36-320"><a href="#cb36-320"></a></span>
+<span id="cb36-321"><a href="#cb36-321"></a><span class="at">&gt; Now, when we know both simple and conditional effect of each variables, we may want to know whether these variances are significant, and hence worth of interpreting. Results from varpart contain the column testable with logical values indicating whether given fraction is testable or not. To test each of them, we will need the models defined above, and the function anova, which (if applied on single object resulting from rda or cca method, returns Monte Carlo permutation test of the predictor effect). For this, we need to first define also partial ordination models with one variable as exlanatory and the other as covariable (Condition)</span></span>
+<span id="cb36-322"><a href="#cb36-322"></a></span>
+<span id="cb36-325"><a href="#cb36-325"></a><span class="in">```{r}</span></span>
+<span id="cb36-326"><a href="#cb36-326"></a><span class="fu">set.seed</span>(<span class="dv">12353</span>)</span>
+<span id="cb36-327"><a href="#cb36-327"></a><span class="co"># fraction [a+c] = X1 (home_env_short)</span></span>
+<span id="cb36-328"><a href="#cb36-328"></a>rda_ord_aitc_home <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short, <span class="at">data =</span> env_mat)</span>
+<span id="cb36-329"><a href="#cb36-329"></a><span class="co"># fraction [b+c] = X2 (measure_env_short)</span></span>
+<span id="cb36-330"><a href="#cb36-330"></a>rda_ord_aitc_meas <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> measure_env_short, <span class="at">data =</span> env_mat)</span>
+<span id="cb36-331"><a href="#cb36-331"></a><span class="co"># fraction [a] = home_env_short conditional upon measure_env_short</span></span>
+<span id="cb36-332"><a href="#cb36-332"></a>rda_ord_aitc_home_meas <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> home_env_short <span class="sc">+</span> <span class="fu">Condition</span> (measure_env_short), <span class="at">data =</span> env_mat)</span>
+<span id="cb36-333"><a href="#cb36-333"></a><span class="co"># fraction [c] = measure_env_short conditional upon home_env_short</span></span>
+<span id="cb36-334"><a href="#cb36-334"></a>rda_ord_aitc_meas_home <span class="ot">&lt;-</span> <span class="fu">rda</span>(clr_mat <span class="sc">~</span> measure_env_short <span class="sc">+</span> <span class="fu">Condition</span> (home_env_short), <span class="at">data =</span> env_mat)</span>
+<span id="cb36-335"><a href="#cb36-335"></a><span class="in">```</span></span>
+<span id="cb36-336"><a href="#cb36-336"></a></span>
+<span id="cb36-337"><a href="#cb36-337"></a>**[a+b+c] = X1+X2**</span>
+<span id="cb36-338"><a href="#cb36-338"></a></span>
+<span id="cb36-339"><a href="#cb36-339"></a>The global model (fractions <span class="co">[</span><span class="ot">a+b+c</span><span class="co">]</span>)</span>
+<span id="cb36-340"><a href="#cb36-340"></a></span>
+<span id="cb36-343"><a href="#cb36-343"></a><span class="in">```{r}</span></span>
+<span id="cb36-344"><a href="#cb36-344"></a><span class="fu">anova</span>(rda_ord_aitc)</span>
+<span id="cb36-345"><a href="#cb36-345"></a><span class="in">```</span></span>
+<span id="cb36-346"><a href="#cb36-346"></a></span>
+<span id="cb36-347"><a href="#cb36-347"></a>**[a+c] = X1**</span>
+<span id="cb36-348"><a href="#cb36-348"></a></span>
+<span id="cb36-349"><a href="#cb36-349"></a>Simple (marginal) effect of home env (fraction <span class="co">[</span><span class="ot">a+c</span><span class="co">]</span>)</span>
+<span id="cb36-350"><a href="#cb36-350"></a></span>
+<span id="cb36-353"><a href="#cb36-353"></a><span class="in">```{r}</span></span>
+<span id="cb36-354"><a href="#cb36-354"></a><span class="fu">anova</span>(rda_ord_aitc_home)</span>
+<span id="cb36-355"><a href="#cb36-355"></a><span class="in">```</span></span>
+<span id="cb36-356"><a href="#cb36-356"></a></span>
+<span id="cb36-357"><a href="#cb36-357"></a>**[b+c] = X2**</span>
+<span id="cb36-358"><a href="#cb36-358"></a></span>
+<span id="cb36-359"><a href="#cb36-359"></a>Simple (marginal) effect of measurement env (fraction <span class="co">[</span><span class="ot">b+c</span><span class="co">]</span>)</span>
+<span id="cb36-360"><a href="#cb36-360"></a></span>
+<span id="cb36-363"><a href="#cb36-363"></a><span class="in">```{r}</span></span>
+<span id="cb36-364"><a href="#cb36-364"></a><span class="fu">anova</span>(rda_ord_aitc_meas)</span>
+<span id="cb36-365"><a href="#cb36-365"></a><span class="in">```</span></span>
+<span id="cb36-366"><a href="#cb36-366"></a></span>
+<span id="cb36-367"><a href="#cb36-367"></a>Conditional (partial) effect of home environment (fraction <span class="co">[</span><span class="ot">a</span><span class="co">]</span>):</span>
+<span id="cb36-368"><a href="#cb36-368"></a></span>
+<span id="cb36-371"><a href="#cb36-371"></a><span class="in">```{r}</span></span>
+<span id="cb36-372"><a href="#cb36-372"></a><span class="fu">anova</span>(rda_ord_aitc_home_meas)</span>
+<span id="cb36-373"><a href="#cb36-373"></a><span class="in">```</span></span>
+<span id="cb36-374"><a href="#cb36-374"></a></span>
+<span id="cb36-375"><a href="#cb36-375"></a>Conditional (partial) effect of measurement environment (fraction <span class="co">[</span><span class="ot">b</span><span class="co">]</span>):</span>
+<span id="cb36-376"><a href="#cb36-376"></a></span>
+<span id="cb36-379"><a href="#cb36-379"></a><span class="in">```{r}</span></span>
+<span id="cb36-380"><a href="#cb36-380"></a><span class="fu">anova</span>(rda_ord_aitc_meas_home)</span>
+<span id="cb36-381"><a href="#cb36-381"></a><span class="in">```</span></span>
+<span id="cb36-382"><a href="#cb36-382"></a></span>
+<span id="cb36-383"><a href="#cb36-383"></a>From these results, we can see that all simple (marginal) and conditional (partial) effects of both predictors are significant at P &lt; 0.001.</span>
+<span id="cb36-384"><a href="#cb36-384"></a></span>
+<span id="cb36-385"><a href="#cb36-385"></a><span class="fu">## Plot ordination</span></span>
+<span id="cb36-386"><a href="#cb36-386"></a></span>
+<span id="cb36-389"><a href="#cb36-389"></a><span class="in">```{r}</span></span>
+<span id="cb36-390"><a href="#cb36-390"></a>env_dat2 <span class="ot">&lt;-</span> counts_f_experiment <span class="sc">%&gt;%</span> </span>
+<span id="cb36-391"><a href="#cb36-391"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample, home_env_short, measure_env_short, replicate, transfer) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-392"><a href="#cb36-392"></a>  <span class="fu">distinct</span>()</span>
+<span id="cb36-393"><a href="#cb36-393"></a></span>
+<span id="cb36-394"><a href="#cb36-394"></a>rda_wa <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(rda_ord_aitc<span class="sc">$</span>CCA<span class="sc">$</span>wa) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-395"><a href="#cb36-395"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-396"><a href="#cb36-396"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(env_dat2, <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span>
+<span id="cb36-397"><a href="#cb36-397"></a></span>
+<span id="cb36-398"><a href="#cb36-398"></a>pca_u <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(pca_ord_aitc<span class="sc">$</span>CA<span class="sc">$</span>u) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-399"><a href="#cb36-399"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-400"><a href="#cb36-400"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(env_dat2, <span class="at">by =</span> <span class="fu">join_by</span>(sample))</span>
+<span id="cb36-401"><a href="#cb36-401"></a><span class="in">```</span></span>
+<span id="cb36-402"><a href="#cb36-402"></a></span>
+<span id="cb36-403"><a href="#cb36-403"></a><span class="fu">### Ordination plotting function</span></span>
+<span id="cb36-404"><a href="#cb36-404"></a></span>
+<span id="cb36-407"><a href="#cb36-407"></a><span class="in">```{r}</span></span>
+<span id="cb36-408"><a href="#cb36-408"></a>p_ord <span class="ot">&lt;-</span> <span class="cf">function</span>(ord_df, axis_1, axis_2, colorvar, shapevar, colors, <span class="at">ellipse =</span> <span class="cn">FALSE</span>, <span class="at">coord_lim =</span> <span class="cn">FALSE</span>, <span class="at">ylim =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="cn">NULL</span>){</span>
+<span id="cb36-409"><a href="#cb36-409"></a>  <span class="co"># in case it is not a factor already</span></span>
+<span id="cb36-410"><a href="#cb36-410"></a>  a <span class="ot">&lt;-</span>  <span class="fu">mutate</span>(ord_df, <span class="at">transfer =</span> <span class="fu">factor</span>(transfer)) </span>
+<span id="cb36-411"><a href="#cb36-411"></a>  </span>
+<span id="cb36-412"><a href="#cb36-412"></a>  p <span class="ot">&lt;-</span>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="at">data =</span> a, <span class="fu">aes</span>(<span class="at">x =</span> {{ axis_1 }}, <span class="at">y =</span> {{ axis_2 }}))</span>
+<span id="cb36-413"><a href="#cb36-413"></a> </span>
+<span id="cb36-414"><a href="#cb36-414"></a>  p <span class="sc">+</span> <span class="fu">list</span>(</span>
+<span id="cb36-415"><a href="#cb36-415"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">fill =</span> {{ colorvar }}, <span class="at">shape =</span> {{ shapevar }}), </span>
+<span id="cb36-416"><a href="#cb36-416"></a>                      <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">2</span>), </span>
+<span id="cb36-417"><a href="#cb36-417"></a>    <span class="cf">if</span> (ellipse <span class="sc">==</span> <span class="cn">TRUE</span>)</span>
+<span id="cb36-418"><a href="#cb36-418"></a>      ggplot2<span class="sc">::</span><span class="fu">stat_ellipse</span>(<span class="fu">aes</span>(<span class="at">color =</span> {{ colorvar }})),</span>
+<span id="cb36-419"><a href="#cb36-419"></a>    <span class="cf">if</span> (coord_lim <span class="sc">==</span> <span class="cn">TRUE</span>)</span>
+<span id="cb36-420"><a href="#cb36-420"></a>      ggplot2<span class="sc">::</span><span class="fu">coord_fixed</span>(<span class="at">ylim =</span> ylim, <span class="at">xlim =</span> xlim),</span>
+<span id="cb36-421"><a href="#cb36-421"></a>    <span class="cf">if</span> (coord_lim <span class="sc">==</span> <span class="cn">FALSE</span>)</span>
+<span id="cb36-422"><a href="#cb36-422"></a>      ggplot2<span class="sc">::</span><span class="fu">coord_fixed</span>(),</span>
+<span id="cb36-423"><a href="#cb36-423"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">x =</span> ggplot2<span class="sc">::</span><span class="fu">enquo</span>(axis_1), </span>
+<span id="cb36-424"><a href="#cb36-424"></a>                  <span class="at">y =</span> ggplot2<span class="sc">::</span><span class="fu">enquo</span>(axis_2), <span class="at">shape =</span> <span class="st">"Transfer"</span>),</span>
+<span id="cb36-425"><a href="#cb36-425"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_fill_manual</span>(<span class="at">values =</span> colors),</span>
+<span id="cb36-426"><a href="#cb36-426"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> colors, <span class="at">guide =</span> <span class="st">'none'</span>),</span>
+<span id="cb36-427"><a href="#cb36-427"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">21</span>, <span class="dv">22</span>, <span class="dv">24</span>)),</span>
+<span id="cb36-428"><a href="#cb36-428"></a>    ggplot2<span class="sc">::</span><span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">shape =</span> <span class="dv">21</span>))),</span>
+<span id="cb36-429"><a href="#cb36-429"></a>    ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>(),</span>
+<span id="cb36-430"><a href="#cb36-430"></a>    ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
+<span id="cb36-431"><a href="#cb36-431"></a>      <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb36-432"><a href="#cb36-432"></a>      <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb36-433"><a href="#cb36-433"></a>      <span class="at">panel.background =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb36-434"><a href="#cb36-434"></a>      <span class="at">strip.placement =</span> <span class="st">'outside'</span>,</span>
+<span id="cb36-435"><a href="#cb36-435"></a>      <span class="at">strip.background =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb36-436"><a href="#cb36-436"></a>  )) </span>
+<span id="cb36-437"><a href="#cb36-437"></a>}</span>
+<span id="cb36-438"><a href="#cb36-438"></a><span class="in">```</span></span>
+<span id="cb36-439"><a href="#cb36-439"></a></span>
+<span id="cb36-440"><a href="#cb36-440"></a><span class="fu">### RDA plot</span></span>
+<span id="cb36-441"><a href="#cb36-441"></a></span>
+<span id="cb36-444"><a href="#cb36-444"></a><span class="in">```{r}</span></span>
+<span id="cb36-445"><a href="#cb36-445"></a>p1 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(rda_wa, RDA1, RDA2, </span>
+<span id="cb36-446"><a href="#cb36-446"></a>      <span class="at">colorvar =</span> measure_env_short, </span>
+<span id="cb36-447"><a href="#cb36-447"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb36-448"><a href="#cb36-448"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb36-449"><a href="#cb36-449"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb36-450"><a href="#cb36-450"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb36-451"><a href="#cb36-451"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.2</span>, <span class="fl">0.3</span>)) <span class="sc">+</span></span>
+<span id="cb36-452"><a href="#cb36-452"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Measurement</span><span class="sc">\n</span><span class="st">conditions"</span>)</span>
+<span id="cb36-453"><a href="#cb36-453"></a></span>
+<span id="cb36-454"><a href="#cb36-454"></a>p2 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(rda_wa, RDA3, RDA2, </span>
+<span id="cb36-455"><a href="#cb36-455"></a>      <span class="at">colorvar =</span> home_env_short, </span>
+<span id="cb36-456"><a href="#cb36-456"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb36-457"><a href="#cb36-457"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#DC267F"</span>, <span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb36-458"><a href="#cb36-458"></a>      <span class="at">ellipse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb36-459"><a href="#cb36-459"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb36-460"><a href="#cb36-460"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.2</span>, <span class="fl">0.3</span>)) <span class="sc">+</span></span>
+<span id="cb36-461"><a href="#cb36-461"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Evolution</span><span class="sc">\n</span><span class="st">conditions"</span>)</span>
+<span id="cb36-462"><a href="#cb36-462"></a></span>
+<span id="cb36-463"><a href="#cb36-463"></a>prda <span class="ot">&lt;-</span> p1 <span class="sc">+</span> p2 <span class="sc">+</span></span>
+<span id="cb36-464"><a href="#cb36-464"></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb36-465"><a href="#cb36-465"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">'A'</span>)</span>
+<span id="cb36-466"><a href="#cb36-466"></a><span class="in">```</span></span>
+<span id="cb36-467"><a href="#cb36-467"></a></span>
+<span id="cb36-468"><a href="#cb36-468"></a>::: {#fig-03}</span>
+<span id="cb36-471"><a href="#cb36-471"></a><span class="in">```{r}</span></span>
+<span id="cb36-472"><a href="#cb36-472"></a>prda</span>
+<span id="cb36-473"><a href="#cb36-473"></a><span class="in">```</span></span>
+<span id="cb36-474"><a href="#cb36-474"></a>A) Projection of experimental samples and environmental variables along the first two RDA axes (RDA1 = 53% variation explained, RDA2 = 5.5% variation explained). Point shape represents the transfer and color depicts the conditions of the measurement environment - B = bacterial community alone, BS = bacterial community + streptomycin. B) Projection of experimental samples and environmental variables along RDA2 (5.5% variation explained) and RDA3 (2.6% variation explained). Point shape represents the transfer and color depicts the conditions of the evolution environment - Anc = Ancestral bacteria/no evolution, B = bacterial community alone, BS = bacterial community + streptomycin</span>
+<span id="cb36-475"><a href="#cb36-475"></a>:::</span>
+<span id="cb36-476"><a href="#cb36-476"></a></span>
+<span id="cb36-477"><a href="#cb36-477"></a><span class="fu">#### Save RDA plot</span></span>
+<span id="cb36-478"><a href="#cb36-478"></a></span>
+<span id="cb36-481"><a href="#cb36-481"></a><span class="in">```{r}</span></span>
+<span id="cb36-482"><a href="#cb36-482"></a><span class="co">#| warning: false</span></span>
+<span id="cb36-483"><a href="#cb36-483"></a><span class="co">#| eval: false</span></span>
+<span id="cb36-484"><a href="#cb36-484"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
+<span id="cb36-485"><a href="#cb36-485"></a>  here<span class="sc">::</span><span class="fu">here</span>(figs, <span class="st">"community_composition_rda.svg"</span>),</span>
+<span id="cb36-486"><a href="#cb36-486"></a>  prda,</span>
+<span id="cb36-487"><a href="#cb36-487"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb36-488"><a href="#cb36-488"></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb36-489"><a href="#cb36-489"></a>  <span class="at">units =</span> <span class="st">"in"</span>,</span>
+<span id="cb36-490"><a href="#cb36-490"></a>  <span class="at">device =</span> <span class="st">"svg"</span></span>
+<span id="cb36-491"><a href="#cb36-491"></a>)</span>
+<span id="cb36-492"><a href="#cb36-492"></a><span class="in">```</span></span>
+<span id="cb36-493"><a href="#cb36-493"></a></span>
+<span id="cb36-494"><a href="#cb36-494"></a><span class="fu">### PCA plot</span></span>
+<span id="cb36-495"><a href="#cb36-495"></a></span>
+<span id="cb36-498"><a href="#cb36-498"></a><span class="in">```{r}</span></span>
+<span id="cb36-499"><a href="#cb36-499"></a>p3 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(pca_u, PC1, PC2, </span>
+<span id="cb36-500"><a href="#cb36-500"></a>      <span class="at">colorvar =</span> measure_env_short, </span>
+<span id="cb36-501"><a href="#cb36-501"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb36-502"><a href="#cb36-502"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb36-503"><a href="#cb36-503"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb36-504"><a href="#cb36-504"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb36-505"><a href="#cb36-505"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.225</span>, <span class="fl">0.225</span>)) <span class="sc">+</span></span>
+<span id="cb36-506"><a href="#cb36-506"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Measure</span><span class="sc">\n</span><span class="st">environment"</span>)</span>
+<span id="cb36-507"><a href="#cb36-507"></a></span>
+<span id="cb36-508"><a href="#cb36-508"></a>p4 <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(pca_u, PC3, PC2, </span>
+<span id="cb36-509"><a href="#cb36-509"></a>      <span class="at">colorvar =</span> home_env_short, </span>
+<span id="cb36-510"><a href="#cb36-510"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb36-511"><a href="#cb36-511"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#DC267F"</span>, <span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb36-512"><a href="#cb36-512"></a>      <span class="at">ellipse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb36-513"><a href="#cb36-513"></a>      <span class="at">coord_lim =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb36-514"><a href="#cb36-514"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.225</span>, <span class="fl">0.225</span>)) <span class="sc">+</span></span>
+<span id="cb36-515"><a href="#cb36-515"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Home</span><span class="sc">\n</span><span class="st">environment"</span>)</span>
+<span id="cb36-516"><a href="#cb36-516"></a></span>
+<span id="cb36-517"><a href="#cb36-517"></a>ppca <span class="ot">&lt;-</span> p3 <span class="sc">+</span> p4 <span class="sc">+</span></span>
+<span id="cb36-518"><a href="#cb36-518"></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb36-519"><a href="#cb36-519"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">'A'</span>)</span>
+<span id="cb36-520"><a href="#cb36-520"></a><span class="in">```</span></span>
+<span id="cb36-521"><a href="#cb36-521"></a></span>
+<span id="cb36-522"><a href="#cb36-522"></a>::: {#fig-04}</span>
+<span id="cb36-525"><a href="#cb36-525"></a><span class="in">```{r}</span></span>
+<span id="cb36-526"><a href="#cb36-526"></a>ppca</span>
+<span id="cb36-527"><a href="#cb36-527"></a><span class="in">```</span></span>
+<span id="cb36-528"><a href="#cb36-528"></a>As in @fig-03, except here the principal components are plotted. PC1 = 60%, PC2 = 9.4%, PC3 = 6.7% variation explained. The ordination layouts are almost identical so the environmental variables we chose in the RDA likely correspond strongly to PCs.</span>
+<span id="cb36-529"><a href="#cb36-529"></a>:::</span>
+<span id="cb36-530"><a href="#cb36-530"></a></span>
+<span id="cb36-531"><a href="#cb36-531"></a></span>
+<span id="cb36-532"><a href="#cb36-532"></a><span class="fu">#### Save PCA plot</span></span>
+<span id="cb36-533"><a href="#cb36-533"></a></span>
+<span id="cb36-536"><a href="#cb36-536"></a><span class="in">```{r}</span></span>
+<span id="cb36-537"><a href="#cb36-537"></a><span class="co">#| warning: false</span></span>
+<span id="cb36-538"><a href="#cb36-538"></a><span class="co">#| eval: false</span></span>
+<span id="cb36-539"><a href="#cb36-539"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
+<span id="cb36-540"><a href="#cb36-540"></a>  here<span class="sc">::</span><span class="fu">here</span>(figs, <span class="st">"community_composition_pca.svg"</span>),</span>
+<span id="cb36-541"><a href="#cb36-541"></a>  ppca,</span>
+<span id="cb36-542"><a href="#cb36-542"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb36-543"><a href="#cb36-543"></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb36-544"><a href="#cb36-544"></a>  <span class="at">units =</span> <span class="st">"in"</span>,</span>
+<span id="cb36-545"><a href="#cb36-545"></a>  <span class="at">device =</span> <span class="st">"svg"</span></span>
+<span id="cb36-546"><a href="#cb36-546"></a>)</span>
+<span id="cb36-547"><a href="#cb36-547"></a><span class="in">```</span></span>
+<span id="cb36-548"><a href="#cb36-548"></a></span>
+<span id="cb36-549"><a href="#cb36-549"></a><span class="fu"># tSNE dimensionality reduction</span></span>
+<span id="cb36-550"><a href="#cb36-550"></a></span>
+<span id="cb36-553"><a href="#cb36-553"></a><span class="in">```{r}</span></span>
+<span id="cb36-554"><a href="#cb36-554"></a><span class="fu">set.seed</span>(<span class="dv">24578</span>)</span>
+<span id="cb36-555"><a href="#cb36-555"></a>mymat_tsne <span class="ot">&lt;-</span> Rtsne<span class="sc">::</span><span class="fu">Rtsne</span>(<span class="fu">as.matrix</span>(clr_mat), <span class="at">perplexity =</span> <span class="dv">30</span>, <span class="at">dims =</span> <span class="dv">2</span>)</span>
+<span id="cb36-556"><a href="#cb36-556"></a></span>
+<span id="cb36-557"><a href="#cb36-557"></a>mydf_tsne <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(mymat_tsne<span class="sc">$</span>Y) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-558"><a href="#cb36-558"></a>  <span class="fu">cbind</span>(dplyr<span class="sc">::</span><span class="fu">distinct</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(counts_f_experiment, sample, replicate, transfer, measure_env_short, home_env_short))) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-559"><a href="#cb36-559"></a>  <span class="fu">mutate</span>(<span class="at">transfer =</span> <span class="fu">factor</span>(transfer)) </span>
+<span id="cb36-560"><a href="#cb36-560"></a><span class="in">```</span></span>
+<span id="cb36-561"><a href="#cb36-561"></a></span>
+<span id="cb36-562"><a href="#cb36-562"></a><span class="fu">## Plot tSNE</span></span>
+<span id="cb36-563"><a href="#cb36-563"></a></span>
+<span id="cb36-564"><a href="#cb36-564"></a>Call the plotting function, make the patchwork layout, and save in raster and vector format</span>
+<span id="cb36-565"><a href="#cb36-565"></a></span>
+<span id="cb36-568"><a href="#cb36-568"></a><span class="in">```{r}</span></span>
+<span id="cb36-569"><a href="#cb36-569"></a>pm <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(mydf_tsne, X1, X2, </span>
+<span id="cb36-570"><a href="#cb36-570"></a>      <span class="at">colorvar =</span> measure_env_short, </span>
+<span id="cb36-571"><a href="#cb36-571"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb36-572"><a href="#cb36-572"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb36-573"><a href="#cb36-573"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb36-574"><a href="#cb36-574"></a>      <span class="at">coord_lim =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb36-575"><a href="#cb36-575"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Measure</span><span class="sc">\n</span><span class="st">environment"</span>, </span>
+<span id="cb36-576"><a href="#cb36-576"></a>                <span class="at">x =</span> <span class="st">"tSNE dimension 1"</span>, </span>
+<span id="cb36-577"><a href="#cb36-577"></a>                <span class="at">y =</span> <span class="st">"tSNE dimension 2"</span>)</span>
+<span id="cb36-578"><a href="#cb36-578"></a></span>
+<span id="cb36-579"><a href="#cb36-579"></a>ph <span class="ot">&lt;-</span> <span class="fu">p_ord</span>(mydf_tsne, X1, X2, </span>
+<span id="cb36-580"><a href="#cb36-580"></a>      <span class="at">colorvar =</span> home_env_short, </span>
+<span id="cb36-581"><a href="#cb36-581"></a>      <span class="at">shapevar =</span> transfer, </span>
+<span id="cb36-582"><a href="#cb36-582"></a>      <span class="at">colors =</span> <span class="fu">c</span>(<span class="st">"#DC267F"</span>, <span class="st">"#648FFF"</span>, <span class="st">"#FFB000"</span>),</span>
+<span id="cb36-583"><a href="#cb36-583"></a>      <span class="at">ellipse =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb36-584"><a href="#cb36-584"></a>      <span class="at">coord_lim =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb36-585"><a href="#cb36-585"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Home</span><span class="sc">\n</span><span class="st">environment"</span>, </span>
+<span id="cb36-586"><a href="#cb36-586"></a>                <span class="at">x =</span> <span class="st">"tSNE dimension 1"</span>, </span>
+<span id="cb36-587"><a href="#cb36-587"></a>                <span class="at">y =</span> <span class="st">"tSNE dimension 2"</span>)</span>
+<span id="cb36-588"><a href="#cb36-588"></a></span>
+<span id="cb36-589"><a href="#cb36-589"></a>pt <span class="ot">&lt;-</span> pm <span class="sc">+</span> ph <span class="sc">+</span></span>
+<span id="cb36-590"><a href="#cb36-590"></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb36-591"><a href="#cb36-591"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">'A'</span>)</span>
+<span id="cb36-592"><a href="#cb36-592"></a><span class="in">```</span></span>
+<span id="cb36-593"><a href="#cb36-593"></a></span>
+<span id="cb36-594"><a href="#cb36-594"></a>::: {#fig-02}</span>
+<span id="cb36-597"><a href="#cb36-597"></a><span class="in">```{r}</span></span>
+<span id="cb36-598"><a href="#cb36-598"></a><span class="co">#| fig.width: 8</span></span>
+<span id="cb36-599"><a href="#cb36-599"></a><span class="co">#| fig.height: 6</span></span>
+<span id="cb36-600"><a href="#cb36-600"></a><span class="co">#| echo: false</span></span>
+<span id="cb36-601"><a href="#cb36-601"></a><span class="co">#| warning: false</span></span>
+<span id="cb36-602"><a href="#cb36-602"></a>pt</span>
+<span id="cb36-603"><a href="#cb36-603"></a><span class="in">```</span></span>
+<span id="cb36-604"><a href="#cb36-604"></a>Dimensional reduction of bacterial community composition using t-SNE. Each point represents a replicate microcosm sampled at serial transfers 4, 8, and 12 (grid columns). In **A)** point colors depict the experimental measurement condition from the transplantation experiment. In **B)** point colors depict the evolutionary history of the inoculating communities ("home environment").</span>
+<span id="cb36-605"><a href="#cb36-605"></a>:::</span>
+<span id="cb36-606"><a href="#cb36-606"></a></span>
+<span id="cb36-607"><a href="#cb36-607"></a><span class="fu">### Save tSNE plot</span></span>
+<span id="cb36-608"><a href="#cb36-608"></a></span>
+<span id="cb36-611"><a href="#cb36-611"></a><span class="in">```{r}</span></span>
+<span id="cb36-612"><a href="#cb36-612"></a><span class="co">#| warning: false</span></span>
+<span id="cb36-613"><a href="#cb36-613"></a><span class="co">#| eval: false</span></span>
+<span id="cb36-614"><a href="#cb36-614"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
+<span id="cb36-615"><a href="#cb36-615"></a>  here<span class="sc">::</span><span class="fu">here</span>(figs, <span class="st">"community_composition_tsne.svg"</span>),</span>
+<span id="cb36-616"><a href="#cb36-616"></a>  pt,</span>
+<span id="cb36-617"><a href="#cb36-617"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb36-618"><a href="#cb36-618"></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb36-619"><a href="#cb36-619"></a>  <span class="at">units =</span> <span class="st">"in"</span>,</span>
+<span id="cb36-620"><a href="#cb36-620"></a>  <span class="at">device =</span> <span class="st">"svg"</span></span>
+<span id="cb36-621"><a href="#cb36-621"></a>)</span>
+<span id="cb36-622"><a href="#cb36-622"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

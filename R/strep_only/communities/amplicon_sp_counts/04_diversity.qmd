@@ -1,0 +1,353 @@
+---
+title: "Diversity metrics for species abundance data"
+subtitle: "Cmmunity composition workflow"
+author: "Shane Hogle"
+date: today
+abstract: "This notebook examines how simple diversity metrics relate to variables in the experiment."
+---
+
+# Setup
+
+Loads required libraries and sets global variables
+
+```{r}
+#| output: false
+library(tidyverse)
+library(here)
+library(fs)
+library(vegan)
+source(here::here("R", "utils_generic.R"))
+```
+
+# Read
+
+Read species abundance data (16S v3 amplicon counts) and do some light formatting of metadata 
+
+```{r}
+#| output: false
+#| warning: false
+sptable <- readr::read_tsv(here::here(data_sp, "species_counts_md.tsv")) %>% 
+  dplyr::mutate(transfer = day/7)
+
+counts_f <- sptable %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::mutate(f=count_correct/sum(count_correct)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(measure_env_short = dplyr::case_when(measure_env == "bact" ~ "Meas: B",
+                                       measure_env == "bact_strep" ~ "Meas: BS")) %>% 
+  dplyr::mutate(home_env_short = dplyr::case_when(
+                                    evolution_env == "anc" ~ "Home: Anc",
+                                    evolution_env == "bact" ~ "Home: B",
+                                    evolution_env == "bact_strep" ~ "Home: BS")) %>% 
+  dplyr::mutate(
+    measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BS")),
+    home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+# Formatting
+
+Some light formatting to subset data into distint tibbles for later plotting
+
+```{r}
+#| output: false
+#| warning: false
+# these are communities of a (supposedly) known composition. Can be used with metacal
+pos_ctrl_samples <- counts_f %>% 
+  dplyr::filter(str_detect(sample, "pos_ctrl"))
+
+# these are samples taken directly from YSK and represent the composition of the communities used to start the experiment
+t0_samples <- counts_f %>% 
+  dplyr::filter(!str_detect(sample, "pos_ctrl")) %>% 
+  dplyr::filter(day == 0)
+
+# only samples from the experiment
+counts_f_experiment <- dplyr::anti_join(counts_f, pos_ctrl_samples) %>% 
+  dplyr::anti_join(., t0_samples) %>% 
+  dplyr::mutate(
+    measure_env_short = factor(measure_env_short, levels = c("Meas: B", "Meas: BS")),
+    home_env_short = factor(home_env_short, levels = c("Home: Anc", "Home: B", "Home: BS")),
+         day = factor(day),
+         replicate = factor(replicate),
+         strainID = factor(strainID, levels = names(hambi_colors)))
+```
+
+# Inspect data
+
+Now we want to calculate richness (number of species found) and also the probability of observing each species. This can easily be done in vegan using rarefaction. Note that there is [often confusion](https://doi.org/10.1128/msphere.00354-23) about rarefaction and rarerying. rarerying only subsamples the data one time giving a point estimate of richness. Rarefaction subsamples the data hundreds/thousands of times to get a distribution of how often each species was sampled. It is argued that the whole "waste not want not" paper suffered from this confusion and used rarefying instead of rarefaction to generate their results.
+
+Examine the distribution of total read counts per sample
+
+```{r}
+counts_f %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::summarize(t=sum(count_correct)) %>% 
+  dplyr::summarize(max = max(t),
+            min = min(t),
+            mean = mean(t),
+            stdev = sd(t))
+```
+
+Let's filter out the low read sample
+
+```{r}
+counts_f %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::summarize(t=sum(count_correct)) %>% 
+  dplyr::arrange(t)
+```
+
+Lets say we need to have at least 1000 reads per sample
+
+```{r}
+minreads <- 1000
+
+low_counts <- counts_f %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::summarize(t=sum(count_correct)) %>% 
+  dplyr::filter(t <= minreads) %>% 
+  dplyr::pull(sample)
+
+counts_filt <- counts_f %>% 
+  dplyr::filter(!(sample %in% low_counts))
+```
+
+```{r}
+counts_filt %>% 
+  dplyr::filter(count_correct > 0) %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::summarize(nsp = n()) %>% 
+  dplyr::summarize(max_sp = max(nsp),
+            min_sp = min(nsp),
+            mn_sp = mean(nsp))
+```
+
+```{r}
+counts_filt_df <- counts_filt %>% 
+  dplyr::select(sample, strainID, count_correct) %>% 
+  tidyr::pivot_wider(names_from = "strainID", values_from = "count_correct", values_fill = 0) %>% 
+  tibble::column_to_rownames(var = "sample") %>% 
+  as.data.frame()
+```
+
+# Calculate diversity
+
+## Shannon diversity
+
+```{r}
+h <- data.frame(H = vegan::diversity(counts_filt_df, index = "shannon")) %>% 
+  rownames_to_column(var = "sample") 
+```
+
+Any correlation between shannon diversity and sequencing effort? No
+
+```{r}
+counts_f %>% 
+  dplyr::group_by(sample) %>% 
+  dplyr::summarize(t=sum(count_correct)) %>% 
+  ungroup() %>% 
+  left_join(h, by = join_by(sample)) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = t, y = H)) +
+  geom_point() +
+  labs(y = "Shannon diversity", x = "Sequencing depth")
+```
+
+## Species richness
+
+```{r}
+set.seed(243578)
+minreads <- 11906
+richness <- vegan::rarefy(counts_filt_df, minreads, se = TRUE) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column(var = "sample") %>% 
+  tibble::tibble() %>% 
+  dplyr::left_join(dplyr::distinct(dplyr::select(counts_f_experiment, sample, replicate, measure_env_short, home_env_short, transfer)), 
+                   by = join_by(sample))
+```
+
+## Evenness
+
+Shannon’s Evenness (also called Pielou’s J) is calculated as a ratio of the Shannon index calculated from the real community (with S species and p1, p2i, p3....pi relative species abundances), and maximum Shannon index for the community with the same richness Hmax (i.e. with S species all having p1 = p2 = pi = 1/S). The value is 1 in case all species have the same relative abundances and decreases with increasing differences in species relative abundances in the community.
+
+```{r}
+J <- function(df, minreads){
+  H <- vegan::diversity(counts_filt_df, index = "shannon")
+  S <- vegan::specnumber(df)
+  H/log(S)
+}
+
+j <- data.frame(J = J(counts_filt_df, minreads)) %>% 
+  rownames_to_column(var = "sample") 
+```
+
+# Examining relationship between alpha diversity and experimental conditions
+
+```{r}
+alph_div <- richness %>% 
+  left_join(h, by = join_by(sample)) %>% 
+  left_join(j, by = join_by(sample))
+```
+
+What is the alpha diversity after the experimental evolution phase? also the ancestral species mixes?
+
+```{r}
+alph_div %>% 
+  filter(is.na(replicate)) 
+```
+All species are present in these samples
+
+### Species richness over time
+
+```{r}
+alph_div %>% 
+  drop_na() %>% 
+  ggplot(aes(x = transfer, y = S)) +
+  geom_point() + 
+  geom_line(aes(group = replicate)) +
+  facet_grid(measure_env_short ~ home_env_short)
+```
+### Shannon diversity over time
+
+```{r}
+alph_div %>% 
+  drop_na() %>% 
+  ggplot(aes(x = transfer, y = H)) +
+  geom_point() + 
+  geom_line(aes(group = replicate)) +
+  facet_grid(measure_env_short ~ home_env_short)
+```
+
+### Pielou's evenness over time
+
+This is basically the same as Shannon diversity
+```{r}
+alph_div %>% 
+  drop_na() %>% 
+  ggplot(aes(x = transfer, y = J)) +
+  geom_point() + 
+  geom_line(aes(group = replicate)) +
+  facet_grid(measure_env_short ~ home_env_short)
+```
+
+# Model relationship between alpha diversity and experimental treatments
+
+```{r}
+library(xtable)
+library(Hmisc)
+library(easystats)
+```
+
+```{r}
+alph_div_fct <- alph_div %>% 
+  drop_na() %>% 
+  mutate(measure_env_short = factor(measure_env_short), 
+         home_env_short = factor(home_env_short),
+         transfer = factor(transfer))
+```
+
+## Species richness
+
+```{r}
+modS <- lm(S ~ measure_env_short * home_env_short * transfer, data = alph_div_fct)
+```
+
+### Visual check model assumptions
+
+[See here](https://easystats.github.io/performance/articles/check_model.html)
+
+```{r}
+#| fig.width: 7
+#| fig.height: 9
+performance::check_model(modS)
+```
+
+### Contrast analysis 
+
+On average about 3 fewer species detected in the streptomycin treatments compared to without streptomycin
+
+```{r}
+modelbased::estimate_contrasts(modS, contrast = "measure_env_short")
+```
+
+The evolutionary history has an important effect here but it seems to be about the same size no matter which home environment is being compared. First we look at differences between the measurement envs for different home environment categories. The analysis shows that the difference in richness between the two experimental conditions is greatest for the Home: R2A community, followed by the ancestral community then the Home: BS community. But again pretty much always there are about ~ 3 fewer species detected in the presence of streptomycin.
+
+```{r}
+modelbased::estimate_contrasts(modS, contrast = "measure_env_short", by = "home_env_short", p_adjust = "bonferroni")
+```
+
+Next we investigate the difference in richness between home environments pairs for the different measurement environments. We consider first the measurement environment of R2A. In the R2A measurement environment the ancestral community and the home: B community had the same richness, the ancestral community had 0.85 more species detected than the home: BS community, while the home B community had on average 1.5 more species detected than the home BS community. For the measurement environment containing streptomycin there were no significnat differences in total species richness between the different evolutionary history categories.
+
+```{r}
+modelbased::estimate_contrasts(modS, contrast = "home_env_short", by = "measure_env_short", p_adjust = "bonferroni") %>% 
+  arrange(measure_env_short)
+```
+
+
+This doesn't change when doing contrast analysis by different home environments
+
+```{r}
+modelbased::estimate_contrasts(modS, contrast = "home_env_short", by = "measure_env_short")
+```
+
+```{r}
+#| eval: false
+report_text(modS)
+```
+
+```{r}
+#| eval: false
+report_table(modS) %>% xtable()
+```
+
+## Shannon diversity
+
+```{r}
+modH <- lm(H ~ measure_env_short * home_env_short * transfer, data = alph_div_fct)
+```
+
+### Visual check model assumptions
+
+[See here](https://easystats.github.io/performance/articles/check_model.html)
+
+```{r}
+#| fig.width: 7
+#| fig.height: 9
+performance::check_model(modH)
+```
+
+### Contrast analysis 
+
+On average Shannon diversity is about 0.15 units lower in the streptomycin treatments compared to without streptomycin
+
+```{r}
+modelbased::estimate_contrasts(modH, contrast = "measure_env_short")
+```
+
+The evolutionary history has an important effect here. First we look at differences between the measurement envs for different home environment categories. The analysis shows that the difference in evenness between the two experimental conditions is greatest for the Ancestral community, followed by the Home: R2A community. Difference is not significant for the Home: BS community. 
+
+```{r}
+modelbased::estimate_contrasts(modH, contrast = "measure_env_short", by = "home_env_short", p_adjust = "bonferroni")
+```
+
+Next we investigate the evenness for different home environments for the different measurement environments. We consider first the measurement environment of R2A. The evenness of the communities with a shared evolutionary history was always higher than the ancestral community in the R2A conditions. However, the evenness of the two different histories were not significantly different. In the measurement environment with streptomycin again the evenness of the two communities with shared evolutionary history was always significantly higher than the ancestral community. Additionally, there was a significant difference between the two home environments (R2A, R2A + strep) in response to the R2A + strep treatment with the evenness of the community with an evolutionary history of growing in Strep being significantly higher than the community with an evolutionary history of not growing in strep. 
+
+```{r}
+modelbased::estimate_contrasts(modH, contrast = "home_env_short", by = "measure_env_short", p_adjust = "bonferroni") %>% 
+  arrange(measure_env_short)
+```
+
+```{r}
+#| eval: false
+report_text(modH)
+```
+
+```{r}
+#| eval: false
+report_table(modH) %>% xtable()
+```
+
+

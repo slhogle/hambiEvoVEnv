@@ -56,7 +56,7 @@ We consider the material and information legacies embedded within a synthetic mi
 
 ## Experiment overview
 
-![Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.](figs/strep_only/exp_design.png)
+![Structure of the community evolution and transplantation experiments. Exp = experiment, MetaG = metagenomic.](figs/strep_only/exp_design_v4.png)
 
 We first serially propagated a bacterial community, starting from clones of 23 soil and aquatic species [@hogle2024], for 406 days in two different conditions: a low-carbon, complex growth medium with and without the antibiotic streptomycin. We refer to these as “evolved” communities. We isolated 32 clones from each evovlved microcosm and phenotyped them both home environments to determine mean community fitness in each environment. We then reciprocally transplanted each of these evolved communities into the other’s home environment, with a clonal ancestor community serving as a reference. We allowed the experimental communities to grow for a further 84 days, measuring community composition at three different points and sequencing community genomes from the end of the experiment, which allowed us to track the fate of mutations from the evolved communities in their new environments.
 
